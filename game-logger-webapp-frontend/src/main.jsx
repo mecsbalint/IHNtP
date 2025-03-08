@@ -2,12 +2,14 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import "./main.css";
+import CustomNavbar from './components/Navbar/CustomNavbar';
 
 
 const router = createBrowserRouter([
   {
     path: "/",//base/main path
-    // element: < />,
+    element: <CustomNavbar />,
     // errorElement: < />,
     children: [
       {
