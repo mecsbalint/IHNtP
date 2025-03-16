@@ -13,7 +13,6 @@ function HomePage() {
     return (
         <>
             <GameList games={games} />
-            <button className="btn btn-primary">Button</button>
         </>
     )
 }
