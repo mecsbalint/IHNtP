@@ -1,24 +1,29 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import "./main.css";
-import CustomNavbar from './components/Navbar/CustomNavbar';
-
+import Layout from './pages/Layout/Layout';
+import HomePage from './pages/HomePage';
+import UserWishlist from './pages/UserWishlist';
+import UserPlayedGames from './pages/UserPlayedGames';
 
 const router = createBrowserRouter([
   {
-    path: "/",//base/main path
-    element: <CustomNavbar />,
+    path: "/",
+    element: <Layout />,
     // errorElement: < />,
     children: [
       {
         path: "/",
-        // element: < />,
+        element: <HomePage />,
       },
       {
-        path: "/missing",
-        // element: < />
+        path: "/user/:user_name/wishlist",
+        element: <UserWishlist />
+      },
+      {
+        path: "/user/:user_name/played_games",
+        element: <UserPlayedGames />
       },
     ],
   },

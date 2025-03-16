@@ -1,9 +1,12 @@
+import { Link } from "react-router-dom";
 
 function CustomNavbar() {
     return (
-        <p className="text-6xl  underline">
-            Heló beló navbar vagyok
-        </p>
+        <nav>
+            <Link to='/'>IHNtP</Link>
+            <Link to='/user/:user_name/wishlist'>Wishlist</Link>
+            <Link to='/user/:user_name/played_games'>Played Games</Link>
+        </nav>
     )
 }
 

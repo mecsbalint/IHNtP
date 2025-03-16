@@ -27,7 +27,7 @@ public class GameController {
         return gameService.getGameById(id);
     }
 
-    @PostMapping("")
+    @PostMapping
     public boolean addGame(@RequestBody GameAddDto gameAddDto) {
         return gameService.addGame(gameAddDto);
     }
