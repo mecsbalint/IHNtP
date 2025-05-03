@@ -2,8 +2,6 @@ package com.mecsbalint.backend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.Fetch;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.LocalDate;
 import java.util.List;
