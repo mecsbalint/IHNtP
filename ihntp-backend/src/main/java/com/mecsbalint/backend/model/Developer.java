@@ -16,6 +16,6 @@ public class Developer {
     @Column(unique = true)
     private String name;
 
-    @ManyToMany
+    @ManyToMany(mappedBy = "developers")
     private List<Game> games;
 }
