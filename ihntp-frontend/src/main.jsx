@@ -17,14 +17,6 @@ const router = createBrowserRouter([
         path: "/",
         element: <HomePage />,
       },
-      {
-        path: "/user/:user_name/wishlist",
-        element: <UserWishlist />
-      },
-      {
-        path: "/user/:user_name/played_games",
-        element: <UserPlayedGames />
-      },
     ],
   },
 ]);
