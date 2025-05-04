@@ -303,7 +303,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/70/0000002342.1920x1080.jpg?t=1745368462"
         ));
 
-        tagRepository.saveAll(List.of(tag1, tag2, tag3, tag4, tag5, tag6, tag7, tag8, tag9, tag10, tag11, tag12));//12
+        tagRepository.saveAll(List.of(tag1, tag2, tag3, tag4, tag5, tag6, tag7, tag8, tag9, tag10, tag11, tag12));
         developerRepository.saveAll(List.of(dev1, dev2, dev3, dev4, dev5, dev6, dev7, dev8));
         publisherRepository.saveAll(List.of(pub1, pub2, pub3, pub4, pub5, pub6));
         gameRepository.saveAll(List.of(game1, game2, game3, game4, game5, game6, game7, game8, game9, game10));

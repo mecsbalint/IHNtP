@@ -4,8 +4,6 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import "./main.css";
 import Layout from './pages/Layout/Layout';
 import HomePage from './pages/HomePage';
-import UserWishlist from './pages/UserWishlist';
-import UserPlayedGames from './pages/UserPlayedGames';
 
 const router = createBrowserRouter([
   {
