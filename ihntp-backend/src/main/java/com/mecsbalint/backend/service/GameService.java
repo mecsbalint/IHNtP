@@ -1,7 +1,7 @@
 package com.mecsbalint.backend.service;
 
-import com.mecsbalint.backend.controller.dto.GameDto;
-import com.mecsbalint.backend.controller.dto.GameSummaryDto;
+import com.mecsbalint.backend.controller.dto.GameForGameProfileDto;
+import com.mecsbalint.backend.controller.dto.GameForListDto;
 import com.mecsbalint.backend.exception.GameNotFoundException;
 import com.mecsbalint.backend.model.Game;
 import com.mecsbalint.backend.repository.GameRepository;
@@ -19,15 +19,15 @@ public class GameService {
         this.gameRepository = gameRepository;
     }
 
-    public List<GameSummaryDto> getAllGamesSummary() {
+    public List<GameForListDto> getAllGamesSummary() {
         List<Game> gameEntities = gameRepository.findAll();
         return gameEntities.stream()
-                .map(GameSummaryDto::new)
+                .map(GameForListDto::new)
                 .toList();
     }
 
-    public GameDto getGameById(long id) {
+    public GameForGameProfileDto getGameById(long id) {
         Game gameEntity = gameRepository.getGameById(id).orElseThrow(() -> new GameNotFoundException("id", String.valueOf(id)));
-        return new GameDto(gameEntity);
+        return new GameForGameProfileDto(gameEntity);
     }
 }

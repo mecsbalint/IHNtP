@@ -1,7 +1,7 @@
 package com.mecsbalint.backend.controller;
 
-import com.mecsbalint.backend.controller.dto.GameDto;
-import com.mecsbalint.backend.controller.dto.GameSummaryDto;
+import com.mecsbalint.backend.controller.dto.GameForGameProfileDto;
+import com.mecsbalint.backend.controller.dto.GameForListDto;
 import com.mecsbalint.backend.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,12 +22,12 @@ public class GameController {
     }
 
     @GetMapping("/all")
-    public List<GameSummaryDto> getAllGamesSummary() {
+    public List<GameForListDto> getAllGamesSummary() {
         return gameService.getAllGamesSummary();
     }
 
     @GetMapping("/{id}")
-    public GameDto getGameById(@PathVariable long id) {
+    public GameForGameProfileDto getGameById(@PathVariable long id) {
         return gameService.getGameById(id);
     }
 }

@@ -6,7 +6,7 @@ function GameListElement({game}) {
 
     return (
         <li className="list-row">
-            <Link>
+            <Link to={`/game/${game.id}`}>
                 <div className="grid grid-cols-2 card card-side bg-base-100 shadow-sm">
                     <figure>
                         <img

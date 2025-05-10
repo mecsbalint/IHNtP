@@ -1,7 +1,7 @@
 package com.mecsbalint.backend.service;
 
-import com.mecsbalint.backend.controller.dto.GameDto;
-import com.mecsbalint.backend.controller.dto.GameSummaryDto;
+import com.mecsbalint.backend.controller.dto.GameForGameProfileDto;
+import com.mecsbalint.backend.controller.dto.GameForListDto;
 import com.mecsbalint.backend.exception.GameNotFoundException;
 import com.mecsbalint.backend.model.Game;
 import com.mecsbalint.backend.repository.GameRepository;
@@ -63,18 +63,18 @@ class GameServiceTest {
     public void getAllGamesSummary_threeGames_returnGameSummaryDtoList() {
         when(gameRepositoryMock.findAll()).thenReturn(getListOfGames());
 
-        GameSummaryDto actualGame1 = gameService.getAllGamesSummary().get(0);
+        GameForListDto actualGame1 = gameService.getAllGamesSummary().get(0);
 
-        assertEquals(GameSummaryDto.class, actualGame1.getClass());
+        assertEquals(GameForListDto.class, actualGame1.getClass());
     }
 
     @Test
     public void getGameById_existingId_ReturnGameDto() {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
 
-        GameDto actualGame = gameService.getGameById(1L);
+        GameForGameProfileDto actualGame = gameService.getGameById(1L);
 
-        assertEquals(GameDto.class, actualGame.getClass());
+        assertEquals(GameForGameProfileDto.class, actualGame.getClass());
     }
 
     @Test
