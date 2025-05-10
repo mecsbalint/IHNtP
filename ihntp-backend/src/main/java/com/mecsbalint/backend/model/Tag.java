@@ -16,6 +16,6 @@ public class Tag {
     @Column(unique = true)
     private String name;
 
-    @ManyToMany
+    @ManyToMany(mappedBy = "tags")
     private List<Game> games;
 }

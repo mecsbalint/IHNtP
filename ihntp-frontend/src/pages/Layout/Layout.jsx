@@ -1,13 +1,13 @@
 import { Outlet } from "react-router-dom";
-import CustomNavbar from "../../components/Navbar/CustomNavbar";
 
 function Layout() {
 
     return (
-        <>
-        <CustomNavbar />
-        <Outlet />
-        </>
+        <div className="bg-cover grid grid-cols-4 overflow-hidden place-items-stretch">
+            <div className="col-start-2 col-span-2 mt-10">
+                <Outlet />
+            </div>
+        </div>
     )
 }
 

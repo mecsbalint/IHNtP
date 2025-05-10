@@ -16,6 +16,6 @@ public class Publisher {
     @Column(unique = true)
     private String name;
 
-    @ManyToMany
+    @ManyToMany(mappedBy = "publishers")
     private List<Game> games;
 }

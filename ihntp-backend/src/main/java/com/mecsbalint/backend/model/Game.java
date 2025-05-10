@@ -2,7 +2,6 @@ package com.mecsbalint.backend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,12 +28,12 @@ public class Game {
     @ElementCollection
     private List<String> screenshots;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<Developer> developers;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<Publisher> publishers;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<Tag> tags;
 }
