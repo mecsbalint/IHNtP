@@ -1,6 +1,7 @@
 package com.mecsbalint.backend.controller;
 
 import com.mecsbalint.backend.exception.GameNotFoundException;
+import com.mecsbalint.backend.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -13,6 +14,13 @@ public class ControllerAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(GameNotFoundException.class)
     public String gameNotFoundExceptionHandler(GameNotFoundException exception) {
+        return exception.getMessage();
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(UserNotFoundException.class)
+    public String userNotFoundExceptionHandler(UserNotFoundException exception) {
         return exception.getMessage();
     }
 }

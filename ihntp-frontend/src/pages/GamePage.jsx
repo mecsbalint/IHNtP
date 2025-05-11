@@ -13,7 +13,7 @@ function GamePage() {
     }, [id])
 
     return (
-        <div className="place-items-center bg-blue-400 rounded-box p-10">
+        <div className="place-items-center bg-blue-400 rounded-b-box p-10 pt-5">
             {game && <GameProfile game={game}/>}
         </div>
     )
