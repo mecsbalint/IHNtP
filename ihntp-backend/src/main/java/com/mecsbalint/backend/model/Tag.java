@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -17,5 +18,5 @@ public class Tag {
     private String name;
 
     @ManyToMany(mappedBy = "tags")
-    private List<Game> games;
+    private Set<Game> games;
 }

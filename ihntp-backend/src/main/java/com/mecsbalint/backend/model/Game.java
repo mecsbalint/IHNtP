@@ -27,15 +27,20 @@ public class Game {
     private String headerImg;
 
     @ElementCollection
-    private List<String> screenshots;
+    private Set<String> screenshots;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    private List<Developer> developers;
+    private Set<Developer> developers;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    private List<Publisher> publishers;
+    private Set<Publisher> publishers;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    private List<Tag> tags;
+    private Set<Tag> tags;
 
+    @ManyToMany(mappedBy = "backlog")
+    private Set<UserEntity> backlogUser;
+
+    @ManyToMany(mappedBy = "wishlist")
+    private Set<UserEntity> wishlistUsers;
 }

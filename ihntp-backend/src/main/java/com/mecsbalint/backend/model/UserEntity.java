@@ -23,4 +23,10 @@ public class UserEntity {
     @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     private Set<UserRole> roles;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Game> wishlist;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Game> backlog;
 }

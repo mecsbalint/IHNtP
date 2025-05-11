@@ -4,8 +4,9 @@ import com.mecsbalint.backend.model.Game;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
-public record GameForGameProfileDto(long id, String name, LocalDate releaseDate, String descriptionLong, List<String> screenshots, List<DeveloperForGameDto> developers, List<PublisherForGameDto> publishers, List<TagForGameDto> tags) {
+public record GameForGameProfileDto(long id, String name, LocalDate releaseDate, String descriptionLong, Set<String> screenshots, List<DeveloperForGameDto> developers, List<PublisherForGameDto> publishers, List<TagForGameDto> tags) {
     public GameForGameProfileDto(Game gameEntity) {
         this(
                 gameEntity.getId(),
