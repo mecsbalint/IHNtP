@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -38,9 +37,9 @@ public class Game {
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Tag> tags;
 
-    @ManyToMany(mappedBy = "backlog")
-    private Set<UserEntity> backlogUser;
-
-    @ManyToMany(mappedBy = "wishlist")
-    private Set<UserEntity> wishlistUsers;
+//    @ManyToMany(mappedBy = "backlog")
+//    private Set<UserEntity> backlogUser;
+//
+//    @ManyToMany(mappedBy = "wishlist")
+//    private Set<UserEntity> wishlistUsers;
 }
