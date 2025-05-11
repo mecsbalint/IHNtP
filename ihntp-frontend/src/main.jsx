@@ -5,6 +5,7 @@ import "./main.css";
 import Layout from './pages/Layout/Layout';
 import HomePage from './pages/HomePage';
 import GamePage from './pages/GamePage';
+import RegistrationPage from './pages/RegistrationPage';
 
 const router = createBrowserRouter([
   {
@@ -19,6 +20,10 @@ const router = createBrowserRouter([
       {
         path: "/game/:id",
         element: <GamePage />
+      },
+      {
+        path: "/registration",
+        element: <RegistrationPage />
       }
     ],
   },
