@@ -38,6 +38,4 @@ public class Game {
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Tag> tags;
 
-    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<UserGame> userGames;
 }
