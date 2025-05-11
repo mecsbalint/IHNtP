@@ -31,10 +31,10 @@ public class UserService {
     private final JwtUtils jwtUtils;
 
     @Autowired
-    public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository, GameRepository gameRepository, GameRepository gameRepository1, AuthTokenFilter authTokenFilter, JwtUtils jwtUtils) {
+    public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository, GameRepository gameRepository, AuthTokenFilter authTokenFilter, JwtUtils jwtUtils) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
-        this.gameRepository = gameRepository1;
+        this.gameRepository = gameRepository;
         this.authTokenFilter = authTokenFilter;
         this.jwtUtils = jwtUtils;
     }
@@ -68,14 +68,7 @@ public class UserService {
     }
 
     public GameStatusDto getGameStatus(long gameId, HttpServletRequest request) {
-//        Game game = gameRepository.getGameById(gameId).orElseThrow(() -> new GameNotFoundException("id", String.valueOf(gameId)));
         UserEntity user = getUserFromRequest(request);
-
-//        It threw a ConcurrentModificationException when I tried the now commented code
-//        boolean wishlistStatus = user.getWishlist().stream()
-//                .anyMatch(gameToMatch -> gameToMatch.getId().equals(game.getId()));
-//        boolean backlogStatus = user.getBacklog().stream()
-//                .anyMatch(gameToMatch -> gameToMatch.getId().equals(game.getId()));
 
         Set<Long> backlogGameIds = user.getBacklog().stream().map(Game::getId).collect(Collectors.toSet());
         Set<Long> wishlistGameIds = user.getWishlist().stream().map(Game::getId).collect(Collectors.toSet());

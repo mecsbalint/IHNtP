@@ -1,12 +1,14 @@
 package com.mecsbalint.backend.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Set;
 
 @Entity
-@Data
+@Setter
+@Getter
 public class UserEntity {
 
     @Id

@@ -1,13 +1,15 @@
 package com.mecsbalint.backend.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.Set;
 
 @Entity
-@Data
+@Setter
+@Getter
 public class Game {
 
     @Id
@@ -36,10 +38,4 @@ public class Game {
 
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Tag> tags;
-
-//    @ManyToMany(mappedBy = "backlog")
-//    private Set<UserEntity> backlogUser;
-//
-//    @ManyToMany(mappedBy = "wishlist")
-//    private Set<UserEntity> wishlistUsers;
 }
