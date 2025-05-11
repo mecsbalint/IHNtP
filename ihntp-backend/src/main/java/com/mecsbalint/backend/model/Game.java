@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -36,4 +37,7 @@ public class Game {
 
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Tag> tags;
+
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserGame> userGames;
 }

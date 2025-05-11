@@ -39,10 +39,9 @@ public class UserService {
         return true;
     }
 
-    public String getUserName(String userEmail) {
+    public UserEntity getUserByEmail(String userEmail) {
         return userRepository
                 .findByEmail(userEmail)
-                .orElseThrow(() -> new UserNotFoundException(String.format("There is no User with this e-amil: %s", userEmail)))
-                .getName();
+                .orElseThrow(() -> new UserNotFoundException(String.format("There is no User with this e-amil: %s", userEmail)));
     }
 }

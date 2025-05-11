@@ -1,7 +1,12 @@
 /* eslint-disable react/prop-types */
+import { useState, useEffect } from "react";
 
 function GameProfile({game}) {
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+    useEffect(() => {
+        setIsLoggedIn(![null, "null"].includes(localStorage.getItem("ihntpJwt")));
+    }, []);
 
     return (
         <div className="card shadow-md bg-base-100">
@@ -53,7 +58,7 @@ function GameProfile({game}) {
                 <div>
                     <p>{game.descriptionLong}</p>
                 </div>
-                <div className="card-actions justify-end">
+                <div className={`card-actions justify-end ${isLoggedIn ? "" : "hidden"}`}>
                     <button className="btn bg-amber-400">Add to Wishlist</button>
                     <button className="btn btn-primary">Add to Backlog</button>
                 </div>

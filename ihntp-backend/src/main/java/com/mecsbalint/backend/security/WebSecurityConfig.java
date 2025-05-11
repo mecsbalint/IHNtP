@@ -69,7 +69,7 @@ public class WebSecurityConfig {
                                 .requestMatchers("api/registration/**").permitAll()
                                 .requestMatchers("api/login/**").permitAll()
                                 .requestMatchers("api/games/**").permitAll()
-//                                .requestMatchers("api/games/**").hasRole("USER")
+                                .requestMatchers("api/user/**").hasRole("USER")
                                 .requestMatchers("/error").permitAll()
                                 .anyRequest().authenticated()
 
