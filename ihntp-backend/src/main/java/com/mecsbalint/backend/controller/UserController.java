@@ -52,7 +52,8 @@ public class UserController {
 
         User userDetails = (User) authentication.getPrincipal();
         Set<String> roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
+        String userName = userService.getUserName(userLogin.email());
 
-        return ResponseEntity.ok(new JwtResponseDto(jwt, userDetails.getUsername(), roles));
+        return ResponseEntity.ok(new JwtResponseDto(jwt, userName, roles));
     }
 }

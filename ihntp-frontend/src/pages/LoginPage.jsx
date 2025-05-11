@@ -39,7 +39,8 @@ function LoginPage() {
             const responseBody = await response.json();
             localStorage.setItem("ihntpJwt", responseBody.jwt);
             localStorage.setItem("ihntpUsername", responseBody.name);
-            navigate("/")
+            navigate("/");
+            window.location.reload();
         }
     }
 
@@ -55,7 +56,7 @@ function LoginPage() {
                         passwordErrorMsg={passwordErrorMsg}                  
                     />  
                 </div>
-                <Link className="text text-secondary my-1" to="/registration">You doesn't have an account?</Link>
+                <Link className="text text-secondary my-1" to="/registration">Don't have an account?</Link>
             </fieldset>
         </div>
     )

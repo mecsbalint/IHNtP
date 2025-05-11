@@ -1,6 +1,7 @@
 package com.mecsbalint.backend.service;
 
 import com.mecsbalint.backend.controller.dto.UserRegistrationDto;
+import com.mecsbalint.backend.exception.UserNotFoundException;
 import com.mecsbalint.backend.model.UserRole;
 import com.mecsbalint.backend.model.UserEntity;
 import com.mecsbalint.backend.repository.UserRepository;
@@ -36,5 +37,12 @@ public class UserService {
         userRepository.save(user);
 
         return true;
+    }
+
+    public String getUserName(String userEmail) {
+        return userRepository
+                .findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException(String.format("There is no User with this e-amil: %s", userEmail)))
+                .getName();
     }
 }
