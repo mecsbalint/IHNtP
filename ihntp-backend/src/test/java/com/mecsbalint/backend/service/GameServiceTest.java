@@ -32,11 +32,6 @@ class GameServiceTest {
         gameService = new GameService(gameRepositoryMock);
     }
 
-    @AfterEach
-    public void resetMocks() {
-        reset(gameRepositoryMock);
-    }
-
     @Test
     public void getAllGamesSummary_noGames_returnEmptyList() {
         when(gameRepositoryMock.findAll()).thenReturn(List.of());
@@ -70,9 +65,10 @@ class GameServiceTest {
     public void getGameById_existingId_ReturnGameDto() {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
 
-        GameForGameProfileDto actualGame = gameService.getGameById(1L);
+        String expectedGameName = "Game One";
+        String actualGameName = gameService.getGameById(1L).name();
 
-        assertEquals(GameForGameProfileDto.class, actualGame.getClass());
+        assertEquals(expectedGameName, actualGameName);
     }
 
     @Test
