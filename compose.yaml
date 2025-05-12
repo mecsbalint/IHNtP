@@ -1,0 +1,38 @@
+services:
+
+  db:
+    image: 'postgres:latest'
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=compose-postgres
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U compose-postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+
+  backend:
+    build:
+      context: ./ihntp-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/compose-postgres
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - MECSBALINT_APP_JWTSECRET=${JWT_SECRET}
+      - MECSBALINT_APP_JWTEXPIRATIONMS=${JWT_EXPIRATION_MS}
+
+  frontend:
+    build: 
+      context: ./ihntp-frontend
+    depends_on:
+      - backend
+    ports:
+      - ${PORT_NUMBER}:80
