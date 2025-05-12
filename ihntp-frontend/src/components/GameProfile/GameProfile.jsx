@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
+import { useState, useEffect } from "react";
 
-function GameProfile({game}) {
-
+function GameProfile({game, isLoggedIn, inWishlist, inBacklog, onClickListButton}) {
 
     return (
         <div className="card shadow-md bg-base-100">
@@ -53,9 +53,12 @@ function GameProfile({game}) {
                 <div>
                     <p>{game.descriptionLong}</p>
                 </div>
-                <div className="card-actions justify-end">
-                    <button className="btn bg-amber-400">Add to Wishlist</button>
-                    <button className="btn btn-primary">Add to Backlog</button>
+                <div className={`card-actions justify-end ${isLoggedIn && inWishlist !== null && inBacklog !== null ? "" : "hidden"}`}>
+                    <button className={`btn btn-primary ${inBacklog ? "hidden" : ""}`} onClick={() => onClickListButton("PUT", "backlog")}>Add to Backlog</button>
+                    <button className={`btn btn-primary ${inBacklog ? "" : "hidden"}`} onClick={() => onClickListButton("DELETE", "backlog")}>Remove from Backlog</button>
+
+                    <button className={`btn bg-amber-400 ${inWishlist ? "hidden" : ""}`} onClick={() => onClickListButton("PUT", "wishlist")}>Add to Wishlist</button>
+                    <button className={`btn bg-amber-400 ${inWishlist ? "" : "hidden"}`} onClick={() => onClickListButton("DELETE", "wishlist")}>Remove from Wishlist</button>
                 </div>
             </div>
         </div>

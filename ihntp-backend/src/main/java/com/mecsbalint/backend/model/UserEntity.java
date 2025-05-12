@@ -1,12 +1,14 @@
 package com.mecsbalint.backend.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Set;
 
 @Entity
-@Data
+@Setter
+@Getter
 public class UserEntity {
 
     @Id
@@ -23,4 +25,10 @@ public class UserEntity {
     @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     private Set<UserRole> roles;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Game> wishlist;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Game> backlog;
 }

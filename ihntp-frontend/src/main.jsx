@@ -7,6 +7,8 @@ import HomePage from './pages/HomePage';
 import GamePage from './pages/GamePage';
 import RegistrationPage from './pages/RegistrationPage';
 import LoginPage from './pages/LoginPage';
+import WishlistPage from './pages/WishlistPage';
+import BacklogPage from './pages/BacklogPage';
 
 const router = createBrowserRouter([
   {
@@ -29,6 +31,14 @@ const router = createBrowserRouter([
       {
         path: "/login",
         element: <LoginPage />
+      },
+      {
+        path: "/wishlist",
+        element: <WishlistPage />
+      },
+      {
+        path: "/backlog",
+        element: <BacklogPage />
       }
     ],
   },

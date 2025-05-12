@@ -1,13 +1,15 @@
 package com.mecsbalint.backend.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
 @Entity
-@Data
+@Setter
+@Getter
 public class Game {
 
     @Id
@@ -26,14 +28,14 @@ public class Game {
     private String headerImg;
 
     @ElementCollection
-    private List<String> screenshots;
+    private Set<String> screenshots;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    private List<Developer> developers;
+    private Set<Developer> developers;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    private List<Publisher> publishers;
+    private Set<Publisher> publishers;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    private List<Tag> tags;
+    private Set<Tag> tags;
 }

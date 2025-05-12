@@ -8,13 +8,13 @@ function HomePage() {
         fetch('/api/games/all')
             .then(response => response.json())
             .then(response => setGames(response));
-    }, [])
+    }, []);
 
     return (
         <div className="place-items-center">
-            <GameList games={games} />
+            <GameList games={games} listTitle={"All games"} />
         </div>
-    )
+    );
 }
 
 export default HomePage;

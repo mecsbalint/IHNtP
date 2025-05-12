@@ -14,9 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -92,10 +90,10 @@ class GameServiceTest {
         game.setDescriptionShort("");
         game.setDescriptionLong("");
         game.setHeaderImg("https://example.com/img1.jpg");
-        game.setScreenshots(List.of());
-        game.setDevelopers(List.of());
-        game.setPublishers(List.of());
-        game.setTags(Collections.emptyList());
+        game.setScreenshots(Set.of());
+        game.setDevelopers(Set.of());
+        game.setPublishers(Set.of());
+        game.setTags(new HashSet<>());
 
         return game;
     }
@@ -106,21 +104,21 @@ class GameServiceTest {
         game1.setName("Game One");
         game1.setReleaseDate(LocalDate.of(2020, 1, 15));
         game1.setHeaderImg("https://example.com/img1.jpg");
-        game1.setTags(Collections.emptyList());
+        game1.setTags(new HashSet<>());
 
         Game game2 = new Game();
         game2.setId(2L);
         game2.setName("Game Two");
         game2.setReleaseDate(LocalDate.of(2021, 6, 10));
         game2.setHeaderImg("https://example.com/img2.jpg");
-        game2.setTags(Collections.emptyList());
+        game2.setTags(new HashSet<>());
 
         Game game3 = new Game();
         game3.setId(3L);
         game3.setName("Game Three");
         game3.setReleaseDate(LocalDate.of(2022, 11, 5));
         game3.setHeaderImg("https://example.com/img3.jpg");
-        game3.setTags(Collections.emptyList());
+        game3.setTags(new HashSet<>());
 
         return List.of(game1, game2, game3);
     }
