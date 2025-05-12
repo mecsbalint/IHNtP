@@ -50,6 +50,8 @@ class UserServiceTest {
 
     private UserService userService;
 
+    private UserEntity userEntity;
+
     @BeforeEach
     public void setup() {
         userService = new UserService(
@@ -62,11 +64,11 @@ class UserServiceTest {
 
         when(authTokenFilterMock.parseJwt(any())).thenReturn("");
         when(jwtUtilsMock.getUserNameFromJwtToken(any())).thenReturn("");
-        UserEntity authenticatedUser = new UserEntity();
-        authenticatedUser.setName("Authenticated User");
-        authenticatedUser.setBacklog(generateBacklog());
-        authenticatedUser.setWishlist(generateWishlist());
-        when(userRepositoryMock.findByEmail(any())).thenReturn(Optional.of(authenticatedUser));
+        userEntity = new UserEntity();
+        userEntity.setName("Authenticated User");
+        userEntity.setBacklog(generateBacklog());
+        userEntity.setWishlist(generateWishlist());
+        when(userRepositoryMock.findByEmail(any())).thenReturn(Optional.of(userEntity));
     }
 
     @ParameterizedTest
@@ -97,6 +99,7 @@ class UserServiceTest {
     public void addGameToWishlist_gameExistAndInWishlist_throwElementIsAlreadyInSetException() {
         Game gameToAdd = new Game();
         gameToAdd.setId(1L);
+        userEntity.getWishlist().add(gameToAdd);
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(gameToAdd));
 
         assertThrows(ElementIsAlreadyInSetException.class, () -> userService.addGameToWishlist(0L, null));
@@ -122,6 +125,7 @@ class UserServiceTest {
     public void addGameToBacklog_gameExistAndInBacklog_throwElementIsAlreadyInSetException() {
         Game gameToAdd = new Game();
         gameToAdd.setId(1L);
+        userEntity.getBacklog().add(gameToAdd);
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(gameToAdd));
 
         assertThrows(ElementIsAlreadyInSetException.class, () -> userService.addGameToBacklog(0L, null));
@@ -136,9 +140,10 @@ class UserServiceTest {
 
     @Test
     public void removeGameFromBacklog_gameExistAndInBacklog_userRepositorySaveCalled() {
-        Game gameToAdd = new Game();
-        gameToAdd.setId(1L);
-        when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(gameToAdd));
+        Game gameToRemove = new Game();
+        gameToRemove.setId(1L);
+        userEntity.getBacklog().add(gameToRemove);
+        when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(gameToRemove));
 
         userService.removeGameFromBacklog(0L, null);
 
@@ -161,9 +166,10 @@ class UserServiceTest {
 
     @Test
     public void removeGameFromWishlist_gameExistAndInWishlist_userRepositorySaveCalled() {
-        Game gameToAdd = new Game();
-        gameToAdd.setId(1L);
-        when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(gameToAdd));
+        Game gameToRemove = new Game();
+        gameToRemove.setId(1L);
+        userEntity.getWishlist().add(gameToRemove);
+        when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(gameToRemove));
 
         userService.removeGameFromWishlist(0L, null);
 
