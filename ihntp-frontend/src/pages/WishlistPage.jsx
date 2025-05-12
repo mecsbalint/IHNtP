@@ -1,20 +1,20 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import GameList from "../components/GameList/GameList";
 
-function HomePage() {
+function WishlistPage() {
     const [games, setGames] = useState([]);
 
     useEffect(() => {
-        fetch('/api/games/all')
+        fetch('/api/user/games/wishlist')
             .then(response => response.json())
             .then(response => setGames(response));
-    }, []);
+    }, [])
 
     return (
         <div className="place-items-center">
             <GameList games={games} />
         </div>
-    );
+    )
 }
 
-export default HomePage;
+export default WishlistPage;
