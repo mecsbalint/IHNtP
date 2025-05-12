@@ -81,7 +81,7 @@ public class UserService {
 
     public void addGameToWishlist(long gameId, HttpServletRequest request) {
         UserEntity user = getUserFromRequest(request);
-        Game game = gameRepository.getGameById(gameId).orElseThrow(() -> new GameNotFoundException("id", String.valueOf(gameId)));
+        Game game = getGameById(gameId);
 
         if (user.getWishlist().add(game)) {
             userRepository.save(user);
@@ -92,7 +92,7 @@ public class UserService {
 
     public void addGameToBacklog(long gameId, HttpServletRequest request) {
         UserEntity user = getUserFromRequest(request);
-        Game game = gameRepository.getGameById(gameId).orElseThrow(() -> new GameNotFoundException("id", String.valueOf(gameId)));
+        Game game = getGameById(gameId);
 
         if (user.getBacklog().add(game)) {
             userRepository.save(user);
@@ -103,7 +103,7 @@ public class UserService {
 
     public void removeGameFromWishlist(long gameId, HttpServletRequest request) {
         UserEntity user = getUserFromRequest(request);
-        Game game = gameRepository.getGameById(gameId).orElseThrow(() -> new GameNotFoundException("id", String.valueOf(gameId)));
+        Game game = getGameById(gameId);
 
         if (user.getWishlist().remove(game)) {
             userRepository.save(user);
@@ -114,12 +114,16 @@ public class UserService {
 
     public void removeGameFromBacklog(long gameId, HttpServletRequest request) {
         UserEntity user = getUserFromRequest(request);
-        Game game = gameRepository.getGameById(gameId).orElseThrow(() -> new GameNotFoundException("id", String.valueOf(gameId)));
+        Game game = getGameById(gameId);
 
         if (user.getBacklog().remove(game)) {
             userRepository.save(user);
         } else {
             throw new ElementNotFoundInSetException(game.toString());
         }
+    }
+
+    private Game getGameById(long gameId) {
+        return gameRepository.getGameById(gameId).orElseThrow(() -> new GameNotFoundException("id", String.valueOf(gameId)));
     }
 }
