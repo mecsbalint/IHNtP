@@ -52,7 +52,7 @@ public class UserController {
 
         User userDetails = (User) authentication.getPrincipal();
         Set<String> roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
-        String userName = userService.getUserByEmail(userLogin.email()).getEmail();
+        String userName = userService.getUserByEmail(userLogin.email()).getName();
 
         return ResponseEntity.ok(new JwtResponseDto(jwt, userName, roles));
     }

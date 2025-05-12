@@ -12,7 +12,7 @@ function HomePage() {
 
     return (
         <div className="place-items-center">
-            <GameList games={games} />
+            <GameList games={games} listTitle={"All games"} />
         </div>
     );
 }

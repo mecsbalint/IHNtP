@@ -1,9 +1,10 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import avatarPlaceholder from "../../assets/avatar_placeholder.png";
 import { useEffect, useState } from "react";
 
 function CustomNavBar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsLoggedIn(![null, "null"].includes(localStorage.getItem("ihntpJwt")));
@@ -23,10 +24,10 @@ function CustomNavBar() {
         />
       </div>
       <div className={`navbar-center ${isLoggedIn ? "" : "hidden"}`}>
-        <Link to={`/`} className="text-xl font-semibold text-amber-50 p-2 pb-0">
+        <Link to={`/wishlist`} className="text-xl font-semibold text-amber-50 p-2 pb-0">
           Wishlist
         </Link>
-        <Link to={`/`} className="text-xl font-semibold text-amber-50 p-2 pb-0">
+        <Link to={`/backlog`} className="text-xl font-semibold text-amber-50 p-2 pb-0">
           Backlog
         </Link>
       </div>
@@ -57,6 +58,7 @@ function CustomNavBar() {
                   localStorage.setItem("ihntpJwt", null);
                   localStorage.setItem("ihntpUsername", null);
                   setIsLoggedIn(false);
+                  navigate("/");
                 }}>
                   Logout
                 </a>
