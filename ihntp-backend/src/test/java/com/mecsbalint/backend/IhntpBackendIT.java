@@ -87,4 +87,26 @@ public class IhntpBackendIT {
                 .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    public void getUserBacklog_userLoggedIn_responseStatus200() throws Exception {
+        var userRegistrationDto = new UserRegistrationDto("Kuh", "kuh@email.de", "abcde");
+        var userEmailPasswordDto = new UserEmailPasswordDto("kuh@email.de", "abcde");
+
+        mvc.perform(post("/api/registration")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userRegistrationDto)));
+
+        String responseBody = mvc.perform(post("/api/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userEmailPasswordDto)))
+                .andReturn().getResponse().getContentAsString();
+
+        JwtResponseDto jwtResponseDto = objectMapper.createParser(responseBody).readValueAs(JwtResponseDto.class);
+        String jwtToken = jwtResponseDto.jwt();
+
+        mvc.perform(get("/api/user/games/backlog")
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isOk());
+    }
 }
