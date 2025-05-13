@@ -4,7 +4,7 @@
 
 ![IHNtP screenshot][screenshot]
 
-The I Have Nothing to Play project is a full-stack web application. It enables users to track and manage their gaming wishlist and backlog. Right now it is a foundament of a bigger and more complex web application. The backend is built with Java and Spring Boot, while the frontend utilizes JavaScript, all containerized using Docker for streamlined deployment. 
+The I Have Nothing to Play project is a full-stack web application. It enables users to track and manage their gaming wishlist and backlog. Right now, it is the foundation of a larger and more complex web application. The backend is built with Java and Spring Boot, while the frontend utilizes JavaScript, all containerized using Docker for streamlined deployment. 
 
 
 ### Core Features
@@ -46,7 +46,7 @@ Or alternatively clone the repository: ```git clone https://github.com/mecsbalin
 1. **Install and Run Docker Desktop:** Download and run the installation file and follow the steps. After installation run the Docker Desktop application.
 2. **Set up .env file**
     1. Rename the `.env.example` file to `.env` in the app's root folder
-    2. Optionally you can change the JWT secret key, the JWT expiration time, the database' username or password or the port number (for more details see [.env.example](https://github.com/mecsbalint/IHNtP/blob/main/.env.example))
+    2. Optionally you can change the JWT secret key, the JWT expiration time, the database' username or password, the port number or the database initialization type (for more details see [.env.example](https://github.com/mecsbalint/IHNtP/blob/main/.env.example))
 3. **Start the Application:** Run the `docker-start.bat` batch file from the application's root folder.
 4. **Access the Application:** Open a web browser and go to `http://localhost:` + `PORT_NUMBER` to access the frontend (by default it's `http://localhost:5173`). The port number can be changed in the `.env.example` file.
 5. **Stop the application:** Run the `docker-stop.bat` batch file from the application's root folder.
@@ -64,6 +64,7 @@ Or alternatively clone the repository: ```git clone https://github.com/mecsbalin
 1. **Set up PostgreSQL Database**
     1. Create a database dedicated to this application ([step-by-step guide](https://www.postgresql.org/docs/current/tutorial-createdb.html))
     2. Replace the `spring.datasource.url`, `spring.datasource.username` and `spring.datasource.password` variables' value with your database' properties in the `\ihntp-backend\src\main\resources\application.properties` file.
+    3. Set up the `spring.jpa.hibernate.ddl-auto` in the `\ihntp-backend\src\main\resources\application.properties` file.
 2. **Set up, Build and Run Spring Boot Backend**
     1. Set up the `mecsbalint.app.jwtExpirationMs` and `mecsbalint.app.jwtSecret` variables in the `\ihntp-backend\src\main\resources\application.properties` file.
     2. Open a terminal and navigate to the `\ihntp-backend` folder
