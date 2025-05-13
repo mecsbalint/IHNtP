@@ -2,7 +2,6 @@ package com.mecsbalint.backend.controller;
 
 import com.mecsbalint.backend.controller.dto.GameForListDto;
 import com.mecsbalint.backend.controller.dto.GameStatusDto;
-import com.mecsbalint.backend.model.UserEntity;
 import com.mecsbalint.backend.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/user/games")
@@ -26,20 +24,12 @@ public class UserGameController {
 
     @GetMapping("/wishlist")
     public Set<GameForListDto> getUserWishlist(HttpServletRequest request) {
-        UserEntity user = userService.getUserFromRequest(request);
-
-        return user.getWishlist().stream()
-                .map(GameForListDto::new)
-                .collect(Collectors.toSet());
+        return userService.getUserWishlist(request);
     }
 
     @GetMapping("/backlog")
     public Set<GameForListDto> getUserBacklog(HttpServletRequest request) {
-        UserEntity user = userService.getUserFromRequest(request);
-
-        return user.getBacklog().stream()
-                .map(GameForListDto::new)
-                .collect(Collectors.toSet());
+        return userService.getUserBacklog(request);
     }
 
     @GetMapping("/status/{gameId}")

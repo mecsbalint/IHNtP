@@ -1,5 +1,6 @@
 package com.mecsbalint.backend.service;
 
+import com.mecsbalint.backend.controller.dto.GameForListDto;
 import com.mecsbalint.backend.controller.dto.GameStatusDto;
 import com.mecsbalint.backend.controller.dto.UserRegistrationDto;
 import com.mecsbalint.backend.exception.ElementIsAlreadyInSetException;
@@ -61,10 +62,20 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(userEmail));
     }
 
-    public UserEntity getUserFromRequest(HttpServletRequest request) {
-        String jwt = authTokenFilter.parseJwt(request);
-        String email = jwtUtils.getUserNameFromJwtToken(jwt);
-        return getUserByEmail(email);
+    public Set<GameForListDto> getUserWishlist(HttpServletRequest request) {
+        UserEntity user = getUserFromRequest(request);
+
+        return user.getWishlist().stream()
+                .map(GameForListDto::new)
+                .collect(Collectors.toSet());
+    }
+
+    public Set<GameForListDto> getUserBacklog(HttpServletRequest request) {
+        UserEntity user = getUserFromRequest(request);
+
+        return user.getBacklog().stream()
+                .map(GameForListDto::new)
+                .collect(Collectors.toSet());
     }
 
     public GameStatusDto getGameStatus(long gameId, HttpServletRequest request) {
@@ -121,6 +132,12 @@ public class UserService {
         } else {
             throw new ElementNotFoundInSetException(game.toString());
         }
+    }
+
+    private UserEntity getUserFromRequest(HttpServletRequest request) {
+        String jwt = authTokenFilter.parseJwt(request);
+        String email = jwtUtils.getUserNameFromJwtToken(jwt);
+        return getUserByEmail(email);
     }
 
     private Game getGameById(long gameId) {

@@ -64,7 +64,7 @@ Or alternatively clone the repository: ```git clone https://github.com/mecsbalin
 1. **Set up PostgreSQL Database**
     1. Create a database dedicated to this application ([step-by-step guide](https://www.postgresql.org/docs/current/tutorial-createdb.html))
     2. Replace the `spring.datasource.url`, `spring.datasource.username` and `spring.datasource.password` variables' value with your database' properties in the `\ihntp-backend\src\main\resources\application.properties` file.
-    3. Set up the `spring.jpa.hibernate.ddl-auto` in the `\ihntp-backend\src\main\resources\application.properties` file.
+    3. Optionally set up the `spring.jpa.hibernate.ddl-auto` in the `\ihntp-backend\src\main\resources\application.properties` file (by default it is set to `update`).
 2. **Set up, Build and Run Spring Boot Backend**
     1. Set up the `mecsbalint.app.jwtExpirationMs` and `mecsbalint.app.jwtSecret` variables in the `\ihntp-backend\src\main\resources\application.properties` file.
     2. Open a terminal and navigate to the `\ihntp-backend` folder
