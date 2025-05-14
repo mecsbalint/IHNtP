@@ -1,5 +1,6 @@
 package com.mecsbalint.backend.service;
 
+import com.mecsbalint.backend.controller.dto.GameForListDto;
 import com.mecsbalint.backend.controller.dto.GameStatusDto;
 import com.mecsbalint.backend.controller.dto.UserRegistrationDto;
 import com.mecsbalint.backend.exception.ElementIsAlreadyInSetException;
@@ -27,16 +28,12 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final GameRepository gameRepository;
-    private final AuthTokenFilter authTokenFilter;
-    private final JwtUtils jwtUtils;
 
     @Autowired
-    public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository, GameRepository gameRepository, AuthTokenFilter authTokenFilter, JwtUtils jwtUtils) {
+    public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository, GameRepository gameRepository) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.gameRepository = gameRepository;
-        this.authTokenFilter = authTokenFilter;
-        this.jwtUtils = jwtUtils;
     }
 
     public boolean saveUser(UserRegistrationDto userRegistration) {
@@ -61,14 +58,24 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(userEmail));
     }
 
-    public UserEntity getUserFromRequest(HttpServletRequest request) {
-        String jwt = authTokenFilter.parseJwt(request);
-        String email = jwtUtils.getUserNameFromJwtToken(jwt);
-        return getUserByEmail(email);
+    public Set<GameForListDto> getUserWishlist(String authUserEmail) {
+        UserEntity user = getUserByEmail(authUserEmail);
+
+        return user.getWishlist().stream()
+                .map(GameForListDto::new)
+                .collect(Collectors.toSet());
     }
 
-    public GameStatusDto getGameStatus(long gameId, HttpServletRequest request) {
-        UserEntity user = getUserFromRequest(request);
+    public Set<GameForListDto> getUserBacklog(String authUserEmail) {
+        UserEntity user = getUserByEmail(authUserEmail);
+
+        return user.getBacklog().stream()
+                .map(GameForListDto::new)
+                .collect(Collectors.toSet());
+    }
+
+    public GameStatusDto getGameStatus(long gameId, String authUserEmail) {
+        UserEntity user = getUserByEmail(authUserEmail);
 
         Set<Long> backlogGameIds = user.getBacklog().stream().map(Game::getId).collect(Collectors.toSet());
         Set<Long> wishlistGameIds = user.getWishlist().stream().map(Game::getId).collect(Collectors.toSet());
@@ -79,8 +86,8 @@ public class UserService {
         return new GameStatusDto(wishlistStatus, backlogStatus);
     }
 
-    public void addGameToWishlist(long gameId, HttpServletRequest request) {
-        UserEntity user = getUserFromRequest(request);
+    public void addGameToWishlist(long gameId, String authUserEmail) {
+        UserEntity user = getUserByEmail(authUserEmail);
         Game game = getGameById(gameId);
 
         if (user.getWishlist().add(game)) {
@@ -90,8 +97,8 @@ public class UserService {
         }
     }
 
-    public void addGameToBacklog(long gameId, HttpServletRequest request) {
-        UserEntity user = getUserFromRequest(request);
+    public void addGameToBacklog(long gameId, String authUserEmail) {
+        UserEntity user = getUserByEmail(authUserEmail);
         Game game = getGameById(gameId);
 
         if (user.getBacklog().add(game)) {
@@ -101,8 +108,8 @@ public class UserService {
         }
     }
 
-    public void removeGameFromWishlist(long gameId, HttpServletRequest request) {
-        UserEntity user = getUserFromRequest(request);
+    public void removeGameFromWishlist(long gameId, String authUserEmail) {
+        UserEntity user = getUserByEmail(authUserEmail);
         Game game = getGameById(gameId);
 
         if (user.getWishlist().remove(game)) {
@@ -112,8 +119,8 @@ public class UserService {
         }
     }
 
-    public void removeGameFromBacklog(long gameId, HttpServletRequest request) {
-        UserEntity user = getUserFromRequest(request);
+    public void removeGameFromBacklog(long gameId, String authUserEmail) {
+        UserEntity user = getUserByEmail(authUserEmail);
         Game game = getGameById(gameId);
 
         if (user.getBacklog().remove(game)) {

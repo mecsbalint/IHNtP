@@ -9,6 +9,7 @@ import com.mecsbalint.backend.repository.GameRepository;
 import com.mecsbalint.backend.repository.PublisherRepository;
 import com.mecsbalint.backend.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,9 @@ import java.util.Set;
 
 @Component
 public class DatabaseSeeder implements CommandLineRunner {
+
+    @Value("${mecsbalint.app.isIntegrationTest}")
+    boolean isIntegrationTest;
 
     private final GameRepository gameRepository;
     private final TagRepository tagRepository;
@@ -34,8 +38,8 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        //Check if the database has been already populated
-        if (tagRepository.count() == 0) {
+        //Check if the database has been already populated, or it is an integration test
+        if (tagRepository.count() == 0 && !isIntegrationTest) {
             // Tags
             Tag tag1 = new Tag();
             tag1.setName("Rogue-lite");

@@ -1,9 +1,13 @@
 package com.mecsbalint.backend;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mecsbalint.backend.controller.dto.GameForListDto;
 import com.mecsbalint.backend.controller.dto.JwtResponseDto;
 import com.mecsbalint.backend.controller.dto.UserEmailPasswordDto;
 import com.mecsbalint.backend.controller.dto.UserRegistrationDto;
+import com.mecsbalint.backend.model.Game;
+import com.mecsbalint.backend.repository.GameRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +18,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.junit.jupiter.api.Assertions.*;
+
+
+import java.util.HashSet;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -27,8 +36,15 @@ public class IhntpBackendIT {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    private final GameRepository gameRepository;
+
     @Autowired
     private MockMvc mvc;
+
+    @Autowired
+    public IhntpBackendIT(GameRepository gameRepository) {
+        this.gameRepository = gameRepository;
+    }
 
     @Test
     public void registration_usernameIsNotOccupied_responseStatus200() throws Exception {
@@ -56,9 +72,21 @@ public class IhntpBackendIT {
     }
 
     @Test
-    public void getAllGamesSummary_responseStatus200() throws Exception {
-        mvc.perform(get("/api/games/all"))
-                .andExpect(status().isOk());
+    public void getAllGamesSummary_OneGameExist_returnListOfOneGame() throws Exception {
+        Game game = new Game();
+        game.setName("One Game");
+        game.setTags(new HashSet<>());
+        gameRepository.save(game);
+
+        String responseBody = mvc.perform(get("/api/games/all"))
+                .andReturn().getResponse().getContentAsString();
+
+        List<GameForListDto> games = objectMapper.createParser(responseBody).readValueAs(new TypeReference<List<GameForListDto>>() {});
+
+        String expectedGameName = game.getName();
+        String actualGameName = games.get(0).name();
+
+        assertEquals(expectedGameName, actualGameName);
     }
 
     @Test void getUserWishlist_noJwt_responseStatus401() throws Exception {

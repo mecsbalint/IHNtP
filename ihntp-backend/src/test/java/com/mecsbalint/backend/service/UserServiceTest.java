@@ -8,8 +8,6 @@ import com.mecsbalint.backend.model.Game;
 import com.mecsbalint.backend.model.UserEntity;
 import com.mecsbalint.backend.repository.GameRepository;
 import com.mecsbalint.backend.repository.UserRepository;
-import com.mecsbalint.backend.security.jwt.AuthTokenFilter;
-import com.mecsbalint.backend.security.jwt.JwtUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,12 +40,6 @@ class UserServiceTest {
     @Mock
     GameRepository gameRepositoryMock;
 
-    @Mock
-    JwtUtils jwtUtilsMock;
-
-    @Mock
-    AuthTokenFilter authTokenFilterMock;
-
     private UserService userService;
 
     private UserEntity userEntity;
@@ -57,13 +49,9 @@ class UserServiceTest {
         userService = new UserService(
                 passwordEncoderMock,
                 userRepositoryMock,
-                gameRepositoryMock,
-                authTokenFilterMock,
-                jwtUtilsMock
+                gameRepositoryMock
         );
 
-        when(authTokenFilterMock.parseJwt(any())).thenReturn("");
-        when(jwtUtilsMock.getUserNameFromJwtToken(any())).thenReturn("");
         userEntity = new UserEntity();
         userEntity.setName("Authenticated User");
         userEntity.setBacklog(generateBacklog());

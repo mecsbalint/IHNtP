@@ -43,22 +43,15 @@ class GameServiceTest {
     }
 
     @Test
-    public void getAllGamesSummary_threeGames_returnListOfThree() {
+    public void getAllGamesSummary_threeGames_returnListOfTheGames() {
         when(gameRepositoryMock.findAll()).thenReturn(getListOfGames());
 
-        int expectedListLength = 3;
-        int actualListLength = gameService.getAllGamesSummary().size();
+        List<GameForListDto> expectedGames = getListOfGames().stream().map(GameForListDto::new).toList();
+        List<GameForListDto> actualGames = gameService.getAllGamesSummary();
 
-        assertEquals(expectedListLength, actualListLength);
-    }
-
-    @Test
-    public void getAllGamesSummary_threeGames_returnGameSummaryDtoList() {
-        when(gameRepositoryMock.findAll()).thenReturn(getListOfGames());
-
-        GameForListDto actualGame1 = gameService.getAllGamesSummary().get(0);
-
-        assertEquals(GameForListDto.class, actualGame1.getClass());
+        assertEquals(expectedGames.get(0).name(), actualGames.get(0).name());
+        assertEquals(expectedGames.get(1).name(), actualGames.get(1).name());
+        assertEquals(expectedGames.get(2).name(), actualGames.get(2).name());
     }
 
     @Test
