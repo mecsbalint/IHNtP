@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import UserForm from "../components/UserForm";
+import UserForm from "../components/UserForm/UserForm";
 
 function LoginPage() {
     const navigate = useNavigate();
