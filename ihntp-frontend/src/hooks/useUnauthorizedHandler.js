@@ -11,4 +11,4 @@ function useUnauthorizedHandler() {
     }
 }
 
-export {useUnauthorizedHandler};
+export default useUnauthorizedHandler;

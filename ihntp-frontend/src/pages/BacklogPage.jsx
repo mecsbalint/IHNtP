@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import GameList from "../components/GameList/GameList";
-import { useUnauthorizedHandler } from "../utils";
+import useUnauthorizedHandler from "../hooks/useUnauthorizedHandler";
 
 function BacklogPage() {
     const [games, setGames] = useState([]);

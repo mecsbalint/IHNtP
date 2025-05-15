@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import GameProfile from "../components/GameProfile/GameProfile";
-import { useUnauthorizedHandler } from "../utils";
+import useUnauthorizedHandler from "../hooks/useUnauthorizedHandler";
 
 function GamePage() {
     const {id} = useParams();
