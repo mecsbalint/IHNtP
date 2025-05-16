@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import GameList from "../components/GameList/GameList";
+import { getAllGames } from "../services/gameService";
 
 function HomePage() {
     const [games, setGames] = useState([]);
 
     useEffect(() => {
-        fetch('/api/games/all')
-            .then(response => response.json())
-            .then(response => setGames(response));
+        getAllGames().then(allGames => setGames(allGames));
     }, []);
 
     return (

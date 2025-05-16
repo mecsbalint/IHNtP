@@ -18,7 +18,7 @@ function CustomNavBar() {
         </Link>
         <input
           type="text"
-          disabled="true"
+          disabled={true}
           placeholder="Under construction"
           className="input input-bordered w-24 md:w-auto"
         />

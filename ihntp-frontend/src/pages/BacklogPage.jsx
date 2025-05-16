@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import GameList from "../components/GameList/GameList";
 import useUnauthorizedHandler from "../hooks/useUnauthorizedHandler";
+import { getUserGameList } from "../services/userGameService";
 
 function BacklogPage() {
     const [games, setGames] = useState([]);
@@ -8,12 +9,7 @@ function BacklogPage() {
     const handleUnauthorizedResponse = useUnauthorizedHandler();
 
     useEffect(() => {
-        fetch('/api/user/games/backlog', {headers: {Authorization: `Bearer ${localStorage.getItem("ihntpJwt")}`}})
-            .then(response => {
-                response.status === 401 && handleUnauthorizedResponse();
-                return response.status === 200 ? response.json() : response;
-            })
-            .then(response => setGames(response));
+        getUserGameList("backlog", handleUnauthorizedResponse).then(backlog => setGames(backlog));
     }, []);
 
     return (

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import UserForm from "../components/UserForm/UserForm";
+import { registrateUser } from "../services/userAuthService";
 
 function RegistrationPage() {
     const navigate = useNavigate();
@@ -22,14 +23,7 @@ function RegistrationPage() {
             password: submitObj.password
         }
 
-        const response = await fetch("api/registration", {
-                method: "POST", 
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(registrationObj)
-            }
-        );
+        const response = await registrateUser(registrationObj);
 
         if (response.status === 409) {
             setEmailErrorMsg("This e-mail is already in use.")
