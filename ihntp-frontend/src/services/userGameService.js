@@ -23,8 +23,8 @@ export async function getGameStatuses(gameId, handleUnauthorizedResponse) {
     };
 }
 
-export function updateUserList(method, listType, gameId, handleUnauthorizedResponse) {
-    const responseObj = apiRequest({url: `/api/user/games/${listType}/${gameId}`, method: method, onUnauthorizedResponse: handleUnauthorizedResponse});
+export async function updateUserList(method, listType, gameId, handleUnauthorizedResponse) {
+    const responseObj = await apiRequest({url: `/api/user/games/${listType}/${gameId}`, method: method, onUnauthorizedResponse: handleUnauthorizedResponse});
 
     return responseObj.status;
 }

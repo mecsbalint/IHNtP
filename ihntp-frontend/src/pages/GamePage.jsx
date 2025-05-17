@@ -4,26 +4,28 @@ import GameProfile from "../components/GameProfile/GameProfile";
 import useUnauthorizedHandler from "../hooks/useUnauthorizedHandler";
 import { getGame } from "../services/gameService";
 import { getGameStatuses, updateUserList } from "../services/userGameService";
+import { useAuthContext } from "../hooks/useAuthContext";
 
 function GamePage() {
     const {id} = useParams();
-    console.log("GamePage param id:", id); 
     const [game, setGame] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const handleUnauthorizedResponse = useUnauthorizedHandler();
-
+    const {user} = useAuthContext();
     
     useEffect(() => {
-        setIsLoggedIn(![null, "null"].includes(localStorage.getItem("ihntpJwt")));
-    }, []);
+        setIsLoggedIn(Boolean(user));
+    }, [user]);
 
     useEffect(() => {
-        getGame(id).then(game => game && setGame(game));        
+        getGame(id)
+            .then(game => {
+                if (user) {
+                    return getGameStatuses(id, handleUnauthorizedResponse).then(statuses => game = {...game, ...statuses});
+                } else return game;
+            })
+            .then(game => game && setGame(game))
     }, [id]);
-
-    useEffect(() => {
-        isLoggedIn && game && getGameStatuses(id, handleUnauthorizedResponse).then(statuses => setGame(prevGame => ({...prevGame, ...statuses})))
-    }, [game, id, isLoggedIn]);
 
     async function onClickListButton(method, listType) {
         const responseStatus = await updateUserList(method, listType, id, handleUnauthorizedResponse);
@@ -33,7 +35,7 @@ function GamePage() {
                 ...prevGame,
                 inWishlist: method === "PUT"
             }));
-
+            
             listType === "backlog" && setGame(prevGame => ({
                 ...prevGame,
                 inBacklog: method === "PUT"
