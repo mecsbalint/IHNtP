@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import UserForm from "../components/UserForm";
+import UserForm from "../components/UserForm/UserForm";
+import { loginUser } from "../services/userAuthService";
 
 function LoginPage() {
     const navigate = useNavigate();
@@ -23,22 +24,14 @@ function LoginPage() {
             password: submitObj.password
         }
 
-        const response = await fetch("api/login", {
-                method: "POST", 
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(loginObj)
-            }
-        );
+        const response = await loginUser(loginObj);
 
         if (response.status === 401) {
             setEmailErrorMsg("Incorrect email or password!");
             setPasswordErrorMsg("Incorrect email or password!");
         } else if (response.status === 200) {
-            const responseBody = await response.json();
-            localStorage.setItem("ihntpJwt", responseBody.jwt);
-            localStorage.setItem("ihntpUsername", responseBody.name);
+            localStorage.setItem("ihntpJwt", response.body.jwt);
+            localStorage.setItem("ihntpUsername", response.body.name);
             navigate("/");
             window.location.reload();
         }

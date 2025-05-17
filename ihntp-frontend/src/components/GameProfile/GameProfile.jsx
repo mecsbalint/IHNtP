@@ -1,7 +1,6 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from "react";
 
-function GameProfile({game, isLoggedIn, inWishlist, inBacklog, onClickListButton}) {
+function GameProfile({game, isLoggedIn, onClickListButton}) {
 
     return (
         <div className="card shadow-md bg-base-100">
@@ -53,12 +52,12 @@ function GameProfile({game, isLoggedIn, inWishlist, inBacklog, onClickListButton
                 <div>
                     <p>{game.descriptionLong}</p>
                 </div>
-                <div className={`card-actions justify-end ${isLoggedIn && inWishlist !== null && inBacklog !== null ? "" : "hidden"}`}>
-                    <button className={`btn btn-primary ${inBacklog ? "hidden" : ""}`} onClick={() => onClickListButton("PUT", "backlog")}>Add to Backlog</button>
-                    <button className={`btn btn-primary ${inBacklog ? "" : "hidden"}`} onClick={() => onClickListButton("DELETE", "backlog")}>Remove from Backlog</button>
+                <div className={`card-actions justify-end ${isLoggedIn && game.inWishlist !== null && game.inBacklog !== null ? "" : "hidden"}`}>
+                    <button className={`btn btn-primary ${game.inBacklog ? "hidden" : ""}`} onClick={() => onClickListButton("PUT", "backlog")}>Add to Backlog</button>
+                    <button className={`btn btn-primary ${game.inBacklog ? "" : "hidden"}`} onClick={() => onClickListButton("DELETE", "backlog")}>Remove from Backlog</button>
 
-                    <button className={`btn bg-amber-400 ${inWishlist ? "hidden" : ""}`} onClick={() => onClickListButton("PUT", "wishlist")}>Add to Wishlist</button>
-                    <button className={`btn bg-amber-400 ${inWishlist ? "" : "hidden"}`} onClick={() => onClickListButton("DELETE", "wishlist")}>Remove from Wishlist</button>
+                    <button className={`btn bg-amber-400 ${game.inWishlist ? "hidden" : ""}`} onClick={() => onClickListButton("PUT", "wishlist")}>Add to Wishlist</button>
+                    <button className={`btn bg-amber-400 ${game.inWishlist ? "" : "hidden"}`} onClick={() => onClickListButton("DELETE", "wishlist")}>Remove from Wishlist</button>
                 </div>
             </div>
         </div>

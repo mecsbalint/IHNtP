@@ -1,60 +1,43 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import GameProfile from "../components/GameProfile/GameProfile";
-import { useUnauthorizedHandler } from "../utils";
+import useUnauthorizedHandler from "../hooks/useUnauthorizedHandler";
+import { getGame } from "../services/gameService";
+import { getGameStatuses, updateUserList } from "../services/userGameService";
 
 function GamePage() {
     const {id} = useParams();
+    console.log("GamePage param id:", id); 
     const [game, setGame] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [wishlistStatus, setWishlistStatus] = useState(null);
-    const [backlogStatus, setbacklogStatus] = useState(null);
-
     const handleUnauthorizedResponse = useUnauthorizedHandler();
 
+    
     useEffect(() => {
         setIsLoggedIn(![null, "null"].includes(localStorage.getItem("ihntpJwt")));
     }, []);
 
     useEffect(() => {
-        isLoggedIn && getGameStatus();
-        
-        async function getGameStatus() {
-            const response = await fetch(`/api/user/games/status/${id}`,  {headers: {Authorization: `Bearer ${localStorage.getItem("ihntpJwt")}`}});
-
-            switch (response.status) {
-                case 401:
-                    handleUnauthorizedResponse();
-                    break;
-                case 200: {
-                    const responseBody = await response.json();
-                    setWishlistStatus(responseBody.inWishlist);
-                    setbacklogStatus(responseBody.inBacklog);
-                    break;
-                }
-            }
-        }
-
-    }, [isLoggedIn, id, handleUnauthorizedResponse]);
-
-    useEffect(() => {
-        fetch(`/api/games/${id}`)
-            .then(response => response.json())
-            .then(response => setGame(response));
+        getGame(id).then(game => game && setGame(game));        
     }, [id]);
 
-    async function onClickListButton(method, listType) {
-        const response = await fetch(`/api/user/games/${listType}/${id}`,  {method: method, headers: {Authorization: `Bearer ${localStorage.getItem("ihntpJwt")}`}});
+    useEffect(() => {
+        isLoggedIn && game && getGameStatuses(id, handleUnauthorizedResponse).then(statuses => setGame(prevGame => ({...prevGame, ...statuses})))
+    }, [game, id, isLoggedIn]);
 
-        switch (response.status) {
-            case 401:
-                handleUnauthorizedResponse();
-                break;
-            case 200: {
-                listType === "wishlist" && setWishlistStatus(method === "PUT");
-                listType === "backlog" && setbacklogStatus(method === "PUT");
-                break;
-            }
+    async function onClickListButton(method, listType) {
+        const responseStatus = await updateUserList(method, listType, id, handleUnauthorizedResponse);
+
+        if (responseStatus === 200) {
+            listType === "wishlist" && setGame(prevGame => ({
+                ...prevGame,
+                inWishlist: method === "PUT"
+            }));
+
+            listType === "backlog" && setGame(prevGame => ({
+                ...prevGame,
+                inBacklog: method === "PUT"
+            }));
         }
     }
 
@@ -63,8 +46,6 @@ function GamePage() {
             {game && <GameProfile 
                 game={game} 
                 isLoggedIn={isLoggedIn} 
-                inBacklog={backlogStatus} 
-                inWishlist={wishlistStatus}
                 onClickListButton={onClickListButton}
             />}
         </div>
