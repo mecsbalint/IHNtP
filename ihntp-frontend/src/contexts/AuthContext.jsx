@@ -20,6 +20,18 @@ export function AuthContextProvider({children}) {
         user: null,
     });
 
+    useEffect(() => {
+        let user;
+        
+        try {
+            user = JSON.parse(localStorage.getItem("ihntpUser"));
+        } catch {
+            user = null;
+        }
+        
+        user && dispatch({type: "LOGIN", payload: user});
+    }, []);
+
     console.log("AuthContext state: " + state);
 
     return (

@@ -1,40 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import UserForm from "../components/UserForm/UserForm";
-import { loginUser } from "../services/userAuthService";
+import { useLogin } from "../hooks/useLogin";
+import { useAuthContext } from "../hooks/useAuthContext";
 
 function LoginPage() {
     const navigate = useNavigate();
-
-    const [emailErrorMsg, setEmailErrorMsg] = useState("");
-    const [passwordErrorMsg, setPasswordErrorMsg] = useState("");
+    const {error, isLoading, login} = useLogin();
+    const {user} = useAuthContext();
 
     useEffect(() => {
-        [null, "null"].includes(localStorage.getItem("ihntpJwt")) || navigate("/");
-    }, [navigate]);
+        user && navigate("/");
+    }, [user, navigate]);
 
     async function onSubmit(event, submitObj) {
         event.preventDefault();
 
-        setEmailErrorMsg("");
-        setPasswordErrorMsg("");
-
-        const loginObj = {
-            email: submitObj.email,
-            password: submitObj.password
-        }
-
-        const response = await loginUser(loginObj);
-
-        if (response.status === 401) {
-            setEmailErrorMsg("Incorrect email or password!");
-            setPasswordErrorMsg("Incorrect email or password!");
-        } else if (response.status === 200) {
-            localStorage.setItem("ihntpJwt", response.body.jwt);
-            localStorage.setItem("ihntpUsername", response.body.name);
-            navigate("/");
-            window.location.reload();
-        }
+        await login(submitObj);
     }
 
     return (
@@ -45,8 +27,9 @@ function LoginPage() {
                     <UserForm 
                         submitText={"Log in"}
                         onSubmit={onSubmit}
-                        emailErrorMsg={emailErrorMsg}
-                        passwordErrorMsg={passwordErrorMsg}                  
+                        emailErrorMsg={error}
+                        passwordErrorMsg={error}
+                        isLoading={isLoading}
                     />  
                 </div>
                 <Link className="text text-secondary my-1" to="/registration">Don't have an account?</Link>

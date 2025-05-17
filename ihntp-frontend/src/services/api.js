@@ -1,12 +1,18 @@
 
 export async function apiRequest({url, method = "GET", body = null, headers = {}, onUnauthorizedResponse = null}) {
-  const jwt = localStorage.getItem("ihntpJwt");
+  let user;
+
+  try {
+    user = JSON.parse(localStorage.getItem("ihntpUser"));
+  } catch {
+    user = {jwt: null};
+  }
 
   const response = await fetch(url, {
     method,
     body,
     headers: {
-      Authorization: jwt === "null" || !onUnauthorizedResponse ? "" : "Bearer " + jwt,
+      Authorization: !onUnauthorizedResponse ? "" : "Bearer " + user.jwt,
       ...headers,
     },
   });

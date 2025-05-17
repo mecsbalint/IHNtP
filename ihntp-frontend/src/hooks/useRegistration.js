@@ -19,13 +19,13 @@ export function useRegistration() {
 
         const response = await registrateUser(registrationObj);
 
-        response.ok || setIsLoading(false);
-
         if (response.status === 409) {
             setError("This e-mail is already in use.");
         } else if (response.status === 201) {
             navigate("/login");
         }
+        
+        setIsLoading(false);
     }
 
     return {error, isLoading, registrate};

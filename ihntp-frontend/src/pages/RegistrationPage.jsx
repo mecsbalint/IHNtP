@@ -1,16 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import UserForm from "../components/UserForm/UserForm";
-import { registrateUser } from "../services/userAuthService";
 import { useRegistration } from "../hooks/useRegistration";
+import { useAuthContext } from "../hooks/useAuthContext";
 
 function RegistrationPage() {
     const navigate = useNavigate();
     const {error, isLoading, registrate} = useRegistration();
+    const {user} = useAuthContext();
 
     useEffect(() => {
-        [null, "null"].includes(localStorage.getItem("solarWatchJwt")) || navigate("/solarwatch");
-    }, [navigate]);
+        user && navigate("/solarwatch");
+    }, [user, navigate]);
 
     async function onSubmit(event, submitObj) {
         event.preventDefault();

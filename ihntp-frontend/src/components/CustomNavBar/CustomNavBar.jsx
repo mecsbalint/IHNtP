@@ -1,14 +1,15 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import avatarPlaceholder from "../../assets/avatar_placeholder.png";
-import { useEffect, useState } from "react";
+import { useAuthContext } from "../../hooks/useAuthContext";
+import { useLogout } from "../../hooks/useLogout";
 
 function CustomNavBar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const navigate = useNavigate();
+  const {user} = useAuthContext();
+  const logout = useLogout();
 
-  useEffect(() => {
-    setIsLoggedIn(![null, "null"].includes(localStorage.getItem("ihntpJwt")));
-  }, []);
+  async function handleLogoutClick() {
+      await logout();
+  }
 
   return (
     <div className="navbar bg-blue-400 shadow-sm">
@@ -23,7 +24,7 @@ function CustomNavBar() {
           className="input input-bordered w-24 md:w-auto"
         />
       </div>
-      <div className={`navbar-center ${isLoggedIn ? "" : "hidden"}`}>
+      <div className={`navbar-center ${user ? "" : "hidden"}`}>
         <Link to={`/wishlist`} className="text-xl font-semibold text-amber-50 p-2 pb-0">
           Wishlist
         </Link>
@@ -32,9 +33,9 @@ function CustomNavBar() {
         </Link>
       </div>
       <div className="navbar-end">
-        <div className={`flex ${isLoggedIn ? "" : "hidden"}`}>
+        <div className={`flex ${user ? "" : "hidden"}`}>
           <span className="text-xl font-semibold text-amber-50 p-2 pb-0">
-            {localStorage.getItem("ihntpUsername")}
+            {user?.name}
           </span>
           <div className="dropdown dropdown-end">
             <div
@@ -54,19 +55,14 @@ function CustomNavBar() {
               className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
             >
               <li>
-                <a onClick={() => {
-                  localStorage.setItem("ihntpJwt", null);
-                  localStorage.setItem("ihntpUsername", null);
-                  setIsLoggedIn(false);
-                  navigate("/");
-                }}>
+                <a onClick={() => handleLogoutClick()}>
                   Logout
                 </a>
               </li>
             </ul>
           </div>
         </div>
-        <div className={isLoggedIn ? "hidden" : ""}>
+        <div className={user ? "hidden" : ""}>
           <Link to={`/login`} className="text-l font-semibold text-amber-50">
             Login
           </Link>
