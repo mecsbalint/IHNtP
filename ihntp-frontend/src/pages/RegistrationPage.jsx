@@ -10,7 +10,7 @@ function RegistrationPage() {
     const {user} = useAuthContext();
 
     useEffect(() => {
-        user && navigate("/solarwatch");
+        user && navigate("/");
     }, [user, navigate]);
 
     async function onSubmit(event, submitObj) {
