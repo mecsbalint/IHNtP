@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import UserForm from "../components/UserForm/UserForm";
 import { registrateUser } from "../services/userAuthService";
+import { useRegistration } from "../hooks/useRegistration";
 
 function RegistrationPage() {
     const navigate = useNavigate();
-
-    const [emailErrorMsg, setEmailErrorMsg] = useState("");
+    const {error, isLoading, registrate} = useRegistration();
 
     useEffect(() => {
         [null, "null"].includes(localStorage.getItem("solarWatchJwt")) || navigate("/solarwatch");
@@ -15,21 +15,7 @@ function RegistrationPage() {
     async function onSubmit(event, submitObj) {
         event.preventDefault();
 
-        setEmailErrorMsg("");
-
-        const registrationObj = {
-            email: submitObj.email,
-            name: submitObj.name,
-            password: submitObj.password
-        }
-
-        const response = await registrateUser(registrationObj);
-
-        if (response.status === 409) {
-            setEmailErrorMsg("This e-mail is already in use.")
-        } else if (response.status === 201) {
-            navigate("/login")
-        }
+        await registrate(submitObj);
     }
 
     return (
@@ -40,7 +26,8 @@ function RegistrationPage() {
                     <UserForm 
                         submitText={"Sign up"}
                         onSubmit={onSubmit}
-                        emailErrorMsg={emailErrorMsg}             
+                        emailErrorMsg={error}
+                        isLoading={isLoading}            
                     />  
                 </div>
                 <Link className="text text-secondary my-1" to="/login">Do you have already an account?</Link>

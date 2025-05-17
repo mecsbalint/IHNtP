@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-function UserForm({submitText, onSubmit, nameErrorMsg = "", emailErrorMsg = "", passwordErrorMsg = ""}) {
+function UserForm({submitText, onSubmit, nameErrorMsg = "", emailErrorMsg = "", passwordErrorMsg = "", isLoading = null}) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -62,7 +62,7 @@ function UserForm({submitText, onSubmit, nameErrorMsg = "", emailErrorMsg = "", 
         <p className="text-error">{passwordErrorState ? passwordErrorMsg : ""}</p>
       </div>
 
-      <button type="submit" className="btn btn-neutral mt-4">
+      <button type="submit" className="btn btn-neutral mt-4" disabled={isLoading}>
         {submitText}
       </button>
     </form>
