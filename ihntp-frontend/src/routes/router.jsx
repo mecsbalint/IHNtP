@@ -6,6 +6,7 @@ import RegistrationPage from '../pages/RegistrationPage';
 import LoginPage from '../pages/LoginPage';
 import WishlistPage from '../pages/WishlistPage';
 import BacklogPage from '../pages/BacklogPage';
+import AddGamePage from "../pages/AddGamePage";
 
 const router = createBrowserRouter([
   {
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
         path: "/backlog",
         element: <BacklogPage />,
       },
+      {
+        path: "/games/add",
+        element: <AddGamePage />
+      }
     ],
   },
 ]);
