@@ -6,7 +6,7 @@ import { getAllDevelopers } from "../../services/developerService";
 import AddGameAttributeModal from "../AddGameAttributeModal.jsx/AddGameAttributeModal";
 import deleteIcon from "../../assets/delete_icon.png";
 
-function GameForm({game}) {
+function GameForm({game, onSubmit, buttonText}) {
     const [name, setName] = useState(game.name ?? "");
     const [isNameAdded, setIsNameAdded] = useState(name !== "");
 
@@ -90,7 +90,7 @@ function GameForm({game}) {
                     <div className={`flex gap-2 ${isNameAdded ? "hidden" : ""}`}>
                         <button type="button" className="btn btn-primary w-15" onClick={() => setIsNameAdded(true)} disabled={name === ""}>Add</button>
                         <label className="input">
-                            <input type="text" onChange={event => setName(event.target.value)} value={name} onKeyDown={event => event.keyCode === 13 && name !== "" && setIsNameAdded(true)} required/>
+                            <input type="text" onChange={event => setName(event.target.value)} value={name} onKeyDown={event => event.keyCode === 13 && name !== "" && setIsNameAdded(true)} />
                         </label>
                     </div>
                     <div className={`flex items-center gap-2 ${isNameAdded ? "" : "hidden"}`}>
@@ -104,7 +104,7 @@ function GameForm({game}) {
                     <div className={`flex gap-2 ${isReleaseDateAdded ? "hidden" : ""}`}>
                         <button type="button" className="btn btn-primary" onClick={() => setIsReleaseDateAdded(true)} disabled={releaseDate === ""}>Add</button>
                         <label className="input">
-                            <input type="date" max="9999-12-31" onChange={event => setReleaseDate(event.target.value)} value={releaseDate} onKeyDown={event => event.keyCode === 13 && releaseDate !== "" && setIsReleaseDateAdded(true)} required/>
+                            <input type="date" max="9999-12-31" onChange={event => setReleaseDate(event.target.value)} value={releaseDate} onKeyDown={event => event.keyCode === 13 && releaseDate !== "" && setIsReleaseDateAdded(true)} />
                         </label>
                     </div>
                     <div className={`flex items-center gap-2 ${isReleaseDateAdded ? "" : "hidden"}`}>
@@ -166,7 +166,7 @@ function GameForm({game}) {
                     <div className={`flex gap-2 ${isDescriptionShortAdded ? "hidden" : ""}`}>
                         <button type="button" className="btn btn-primary w-15" disabled={!descriptionShort || descriptionShort.length > 240} onClick={() => setIsDescriptionShortAdded(true)}>Add</button>
                         <div>
-                            <textarea className="textarea h-24" onChange={event => setDescriptionShort(event.target.value)} value={descriptionShort} required />
+                            <textarea className="textarea h-24" onChange={event => setDescriptionShort(event.target.value)} value={descriptionShort} />
                             <div className="label">{`maximum 240 characters (${descriptionShort.length}/240)`}</div>
                         </div>
                     </div>
@@ -186,7 +186,7 @@ function GameForm({game}) {
                     <div className={`flex gap-2 ${isDescriptionLongAdded ? "hidden" : ""}`}>
                         <button type="button" className="btn btn-primary w-15" disabled={!descriptionLong || descriptionLong.length > 2000} onClick={() => setIsDescriptionLongAdded(true)}>Add</button>
                         <div>
-                            <textarea className="textarea h-36" onChange={event => setDescriptionLong(event.target.value)} value={descriptionLong} required />
+                            <textarea className="textarea h-36" onChange={event => setDescriptionLong(event.target.value)} value={descriptionLong} />
                             <div className="label">{`maximum 2000 characters (${descriptionLong.length}/2000)`}</div>
                         </div>
                     </div>
@@ -206,7 +206,7 @@ function GameForm({game}) {
                     <div className={`flex gap-2 ${isHeaderImgAdded ? "hidden" : ""}`}>
                         <button type="button" className="btn btn-primary w-15" onClick={() => setIsHeaderImgAdded(true)} disabled={headerImg === ""}>Add</button>
                         <label className="input">
-                            <input type="text" onChange={event => setHeaderImg(event.target.value)} value={headerImg} onKeyDown={event => event.keyCode === 13 && headerImg !== "" && setIsHeaderImgAdded(true)} required/>
+                            <input type="text" onChange={event => setHeaderImg(event.target.value)} value={headerImg} onKeyDown={event => event.keyCode === 13 && headerImg !== "" && setIsHeaderImgAdded(true)}/>
                         </label>
                     </div>
                     <div className={`flex items-center gap-2 ${isHeaderImgAdded ? "" : "hidden"}`}>
@@ -220,7 +220,7 @@ function GameForm({game}) {
                     <div className="flex gap-2">
                         <button type="button" className="btn btn-primary w-15" onClick={() => addElementToScreenshots()} disabled={screenshot.length === 0}>Add</button>
                         <label className="input">
-                            <input type="text" onChange={event => setScreenshot(event.target.value)} value={screenshot} onKeyDown={event => event.keyCode === 13 && screenshot !== "" && addElementToScreenshots()} required/>
+                            <input type="text" onChange={event => setScreenshot(event.target.value)} value={screenshot} onKeyDown={event => event.keyCode === 13 && screenshot !== "" && addElementToScreenshots()} />
                         </label>
                     </div>
                     <div>
@@ -230,6 +230,7 @@ function GameForm({game}) {
                     </div>
                 </fieldset>
 
+                <button type="button" onClick={() => onSubmit({name, releaseDate, tags, publishers, developers, descriptionShort, descriptionLong, headerImg, screenshots})} className="btn btn-primary mt-5" disabled={!isNameAdded || !isReleaseDateAdded || tags.length === 0 || developers.length === 0 || publishers.length === 0}>{buttonText}</button>
             </form>
             
             <AddGameAttributeModal modalId="tagModal" modalName="Tag" listSetter={setTags} list={tags} allList={allTags}/>
