@@ -1,11 +1,10 @@
 package com.mecsbalint.backend.controller;
 
+import com.mecsbalint.backend.controller.dto.TagForAdd;
 import com.mecsbalint.backend.controller.dto.TagIdNameDto;
 import com.mecsbalint.backend.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,5 +21,10 @@ public class TagController {
     @GetMapping("/all")
     public List<TagIdNameDto> getAllTags() {
         return tagService.getAllTags();
+    }
+
+    @PostMapping("/add")
+    public List<Long> addTags(@RequestBody List<TagForAdd> tagsToAdd) {
+        return tagService.addTags(tagsToAdd);
     }
 }

@@ -1,11 +1,9 @@
 package com.mecsbalint.backend.service;
 
-import com.mecsbalint.backend.controller.dto.GameForGameProfileDto;
 import com.mecsbalint.backend.controller.dto.GameForListDto;
 import com.mecsbalint.backend.exception.GameNotFoundException;
 import com.mecsbalint.backend.model.Game;
 import com.mecsbalint.backend.repository.GameRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -59,7 +57,7 @@ class GameServiceTest {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
 
         String expectedGameName = "Game One";
-        String actualGameName = gameService.getGameById(1L).name();
+        String actualGameName = gameService.getGameForProfileById(1L).name();
 
         assertEquals(expectedGameName, actualGameName);
     }
@@ -68,7 +66,7 @@ class GameServiceTest {
     public void getGameById_notExistingId_throwGameNotFoundException() {
         when(gameRepositoryMock.getGameById(any())).thenThrow(new GameNotFoundException("", ""));
 
-        assertThrows(GameNotFoundException.class, () -> gameService.getGameById(1L));
+        assertThrows(GameNotFoundException.class, () -> gameService.getGameForProfileById(1L));
     }
 
     private Game getGame() {

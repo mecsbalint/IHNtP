@@ -31,12 +31,12 @@ public class Game {
     @ElementCollection
     private Set<String> screenshots;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     private Set<Developer> developers;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     private Set<Publisher> publishers;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     private Set<Tag> tags;
 }

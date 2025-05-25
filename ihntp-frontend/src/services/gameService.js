@@ -11,7 +11,7 @@ export async function getAllGames() {
 }
 
 export async function getGame(id) {
-    const responseObj = await apiRequest({url: `/api/games/${id}`});
+    const responseObj = await apiRequest({url: `/api/games/profile/${id}`});
 
     if (responseObj.status === 200) {
         return responseObj.body;

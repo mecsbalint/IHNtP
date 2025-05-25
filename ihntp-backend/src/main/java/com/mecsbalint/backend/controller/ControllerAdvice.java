@@ -43,4 +43,11 @@ public class ControllerAdvice {
     public String elementNotFoundInSetExceptionHandler(ElementNotFoundInSetException exception) {
         return exception.getMessage();
     }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(ElementIsAlreadyInDatabaseException.class)
+    public String elementIsAlreadyInDatabaseExceptionHandler(ElementIsAlreadyInDatabaseException exception) {
+        return exception.getMessage();
+    }
 }

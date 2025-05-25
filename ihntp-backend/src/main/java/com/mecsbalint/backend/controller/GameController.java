@@ -1,5 +1,6 @@
 package com.mecsbalint.backend.controller;
 
+import com.mecsbalint.backend.controller.dto.GameForEditGameDto;
 import com.mecsbalint.backend.controller.dto.GameForGameProfileDto;
 import com.mecsbalint.backend.controller.dto.GameForListDto;
 import com.mecsbalint.backend.service.GameService;
@@ -26,8 +27,13 @@ public class GameController {
         return gameService.getAllGamesSummary();
     }
 
-    @GetMapping("/{id}")
-    public GameForGameProfileDto getGameById(@PathVariable long id) {
-        return gameService.getGameById(id);
+    @GetMapping("/profile/{id}")
+    public GameForGameProfileDto getGameForProfileById(@PathVariable long id) {
+        return gameService.getGameForProfileById(id);
+    }
+
+    @GetMapping("/edit/{id}")
+    public GameForEditGameDto getGameForEditGameById(@PathVariable long id) {
+        return gameService.getGameForEditGameById(id);
     }
 }
