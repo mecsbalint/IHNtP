@@ -50,4 +50,11 @@ public class ControllerAdvice {
     public String elementIsAlreadyInDatabaseExceptionHandler(ElementIsAlreadyInDatabaseException exception) {
         return exception.getMessage();
     }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MissingDataException.class)
+    public String missingDataExceptionHandler(MissingDataException exception) {
+        return exception.getMessage();
+    }
 }

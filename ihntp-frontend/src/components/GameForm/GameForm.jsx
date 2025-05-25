@@ -7,41 +7,83 @@ import AddGameAttributeModal from "../AddGameAttributeModal.jsx/AddGameAttribute
 import deleteIcon from "../../assets/delete_icon.png";
 
 function GameForm({game, onSubmit, buttonText}) {
-    const [name, setName] = useState(game.name ?? "");
-    const [isNameAdded, setIsNameAdded] = useState(name !== "");
+    const [name, setName] = useState("");
+    const [isNameAdded, setIsNameAdded] = useState(false);
 
-    const [releaseDate, setReleaseDate] = useState(game.releaseDate ?? "");
-    const [isReleaseDateAdded, setIsReleaseDateAdded] = useState(releaseDate !== "");
+    const [releaseDate, setReleaseDate] = useState("");
+    const [isReleaseDateAdded, setIsReleaseDateAdded] = useState(false);
 
     const [tags, setTags] = useState([]);
     const [selectedTag, setSelectedTag] = useState(null);
     const [allTags, setAllTags] = useState([]);
+    const [allTagsLoaded, setAllTagsLoaded] = useState(false);
 
     const [publishers, setPublishers] = useState([]);
     const [selectedPublisher, setSelectedPublisher] = useState(null)
     const [allPublishers, setAllPublishers] = useState([]);
+    const [allPublishersLoaded, setAllPublishersLoaded] = useState(false);
 
     const [developers, setDevelopers] = useState([]);
     const [selectedDeveloper, setSelectedDeveloper] = useState(null)
     const [allDevelopers, setAllDevelopers] = useState([]);
+    const [allDevelopersLoaded, setAllDevelopersLoaded] = useState(false);
 
-    const [descriptionShort, setDescriptionShort] = useState(game.descriptionShort ?? "");
-    const [isDescriptionShortAdded, setIsDescriptionShortAdded] = useState(descriptionShort !== "");
+    const [descriptionShort, setDescriptionShort] = useState("");
+    const [isDescriptionShortAdded, setIsDescriptionShortAdded] = useState(false);
     
-    const [descriptionLong, setDescriptionLong] = useState(game.descriptionLong ?? "");
-    const [isDescriptionLongAdded, setIsDescriptionLongAdded] = useState(descriptionLong !== "");
+    const [descriptionLong, setDescriptionLong] = useState("");
+    const [isDescriptionLongAdded, setIsDescriptionLongAdded] = useState(false);
 
-    const [headerImg, setHeaderImg] = useState(game.headerImg ?? "");
-    const [isHeaderImgAdded, setIsHeaderImgAdded] = useState(headerImg !== "");
+    const [headerImg, setHeaderImg] = useState("");
+    const [isHeaderImgAdded, setIsHeaderImgAdded] = useState(false);
 
     const [screenshot, setScreenshot] = useState("");
-    const [screenshots, setScreenshots] = useState(game.screenshots ?? []);
+    const [screenshots, setScreenshots] = useState([]);
     
     useEffect(() => {
-        getAllTags().then(tags => setAllTags(tags));
-        getAllPublishers().then(publishers => setAllPublishers(publishers));
-        getAllDevelopers().then(developers => setAllDevelopers(developers));
+        getAllTags().then(tags => {
+            setAllTags(tags);
+            setAllTagsLoaded(true);
+        });
+        getAllPublishers().then(publishers => {
+            setAllPublishers(publishers);
+            setAllPublishersLoaded(true);
+        });
+        getAllDevelopers().then(developers => {
+            setAllDevelopers(developers);
+            setAllDevelopersLoaded(true);
+        });
     }, []);
+
+    useEffect(() => {
+        if (game) {
+            setName(game.name);
+            setIsNameAdded(true);
+
+            setReleaseDate(game.releaseDate);
+            setIsReleaseDateAdded(true);
+
+            setTags(game.tags);
+            setAllTags(prev => prev.filter(prevTag => !game.tags.map(tag => tag.id).includes(prevTag.id)));
+
+            setPublishers(game.publishers);
+            setAllPublishers(prev => prev.filter(prevPublisher => !game.publishers.map(publisher => publisher.id).includes(prevPublisher.id)));
+
+            setDevelopers(game.developers);
+            setAllDevelopers(prev => prev.filter(prevDeveloper => !game.developers.map(developer => developer.id).includes(prevDeveloper.id)));
+
+            setDescriptionShort(game.descriptionShort);
+            setIsDescriptionShortAdded(game.descriptionShort !== "");
+
+            setDescriptionLong(game.descriptionLong);
+            setIsDescriptionLongAdded(game.descriptionLong !== "");
+
+            setHeaderImg(game.headerImg);
+            setIsHeaderImgAdded(game.headerImg !== "");
+
+            game.screenshots.forEach(screenshot => addElementToScreenshots(screenshot));
+        }
+    }, [game, allTagsLoaded, allPublishersLoaded, allDevelopersLoaded])
 
     function addToList(list, listSetter, newElement, newElementSetter, allListSetter) {
         const newList = [...list, newElement];
@@ -54,7 +96,7 @@ function GameForm({game, onSubmit, buttonText}) {
     }
 
     function removeFromList(elementToRemove, listSetter, allListSetter) {
-        listSetter(prev => prev.filter(element => element.id ? element.id !== elementToRemove.id : element.name !== elementToRemove.name));
+        listSetter(prev => prev.filter(element => element.id ? Number(element.id) !== Number(elementToRemove.id) : element.name !== elementToRemove.name));
 
         allListSetter(prev => {
             const newList = [...prev];
@@ -64,12 +106,12 @@ function GameForm({game, onSubmit, buttonText}) {
         });
     }
 
-    function addElementToScreenshots() {
+    function addElementToScreenshots(screenshotToAdd) {
         setScreenshots(prev => {
-            if (prev.includes(screenshot)){
+            if (prev.includes(screenshotToAdd)){
                 return prev;
             } else{
-                return [...prev, screenshot];
+                return [...prev, screenshotToAdd];
             }
         });
         setScreenshot("");
@@ -218,9 +260,9 @@ function GameForm({game, onSubmit, buttonText}) {
                 <fieldset className="fieldset">
                     <legend className="fieldset-legend w-full">Screenshots</legend>
                     <div className="flex gap-2">
-                        <button type="button" className="btn btn-primary w-15" onClick={() => addElementToScreenshots()} disabled={screenshot.length === 0}>Add</button>
+                        <button type="button" className="btn btn-primary w-15" onClick={() => addElementToScreenshots(screenshot)} disabled={screenshot.length === 0}>Add</button>
                         <label className="input">
-                            <input type="text" onChange={event => setScreenshot(event.target.value)} value={screenshot} onKeyDown={event => event.keyCode === 13 && screenshot !== "" && addElementToScreenshots()} />
+                            <input type="text" onChange={event => setScreenshot(event.target.value)} value={screenshot} onKeyDown={event => event.keyCode === 13 && screenshot !== "" && addElementToScreenshots(screenshot)} />
                         </label>
                     </div>
                     <div>

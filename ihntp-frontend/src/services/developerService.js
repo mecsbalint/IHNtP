@@ -9,3 +9,9 @@ export async function getAllDevelopers() {
 
     return [];
 }
+
+export async function addNewDevelopers(developersToAdd) {
+    const responseObj = await apiRequest({url: "/api/developers/add", method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(developersToAdd)});
+
+    return responseObj.status === 200 ? responseObj.body : [];
+}

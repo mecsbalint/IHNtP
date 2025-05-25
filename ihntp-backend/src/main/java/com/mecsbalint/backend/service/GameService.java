@@ -6,10 +6,8 @@ import com.mecsbalint.backend.controller.dto.GameForListDto;
 import com.mecsbalint.backend.controller.dto.GameToAdd;
 import com.mecsbalint.backend.exception.ElementIsAlreadyInDatabaseException;
 import com.mecsbalint.backend.exception.GameNotFoundException;
-import com.mecsbalint.backend.model.Developer;
+import com.mecsbalint.backend.exception.MissingDataException;
 import com.mecsbalint.backend.model.Game;
-import com.mecsbalint.backend.model.Publisher;
-import com.mecsbalint.backend.model.Tag;
 import com.mecsbalint.backend.repository.DeveloperRepository;
 import com.mecsbalint.backend.repository.GameRepository;
 import com.mecsbalint.backend.repository.PublisherRepository;
@@ -59,6 +57,8 @@ public class GameService {
     }
 
     public Long addGame(GameToAdd gameToAdd) {
+        if (!checkForRequiredData(gameToAdd)) throw new MissingDataException(gameToAdd.toString(), "Game");
+
         Game game = createGameFromGameToAdd(gameToAdd);
 
         try {
@@ -73,10 +73,16 @@ public class GameService {
     }
 
     public void editGame(GameToAdd gameToEdit, Long gameId) {
-        Game game = createGameFromGameToAdd(gameToEdit);
-        game.setId(gameId);
+        if (!checkForRequiredData(gameToEdit)) throw new MissingDataException(gameToEdit.toString(), "Game");
 
-        gameRepository.save(game);
+        if (gameRepository.findGameById(gameId).isPresent()) {
+            Game game = createGameFromGameToAdd(gameToEdit);
+            game.setId(gameId);
+
+            gameRepository.save(game);
+        } else {
+            throw new GameNotFoundException("id", gameId.toString());
+        }
     }
 
     private Game createGameFromGameToAdd(GameToAdd gameToAdd) {
@@ -92,5 +98,15 @@ public class GameService {
         game.setTags(new HashSet<>(tagRepository.findAllById(gameToAdd.tagIds())));
 
         return game;
+    }
+
+    private boolean checkForRequiredData(GameToAdd game) {
+        if (game.name().isEmpty()) return false;
+        if (game.releaseDate() == null) return false;
+        if (game.tagIds().isEmpty()) return false;
+        if (game.developerIds().isEmpty()) return false;
+        if (game.publisherIds().isEmpty()) return false;
+
+        return true;
     }
 }
