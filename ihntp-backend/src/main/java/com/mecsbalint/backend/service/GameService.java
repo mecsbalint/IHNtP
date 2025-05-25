@@ -59,11 +59,7 @@ public class GameService {
     }
 
     public Long addGame(GameToAdd gameToAdd) {
-        List<Developer> developers = developerRepository.findAllById(gameToAdd.developerIds());
-        List<Publisher> publishers = publisherRepository.findAllById(gameToAdd.publisherIds());
-        List<Tag> tags = tagRepository.findAllById(gameToAdd.tagIds());
-
-        Game game = createGameFromGameToAdd(gameToAdd, developers, publishers, tags);
+        Game game = createGameFromGameToAdd(gameToAdd);
 
         try {
             return gameRepository.save(game).getId();
@@ -76,7 +72,14 @@ public class GameService {
         }
     }
 
-    private Game createGameFromGameToAdd(GameToAdd gameToAdd, List<Developer> developers, List<Publisher> publishers, List<Tag> tags) {
+    public void editGame(GameToAdd gameToEdit, Long gameId) {
+        Game game = createGameFromGameToAdd(gameToEdit);
+        game.setId(gameId);
+
+        gameRepository.save(game);
+    }
+
+    private Game createGameFromGameToAdd(GameToAdd gameToAdd) {
         Game game = new Game();
         game.setName(gameToAdd.name());
         game.setReleaseDate(gameToAdd.releaseDate());
@@ -84,9 +87,9 @@ public class GameService {
         game.setDescriptionLong(gameToAdd.descriptionLong());
         game.setHeaderImg(gameToAdd.headerImg());
         game.setScreenshots(gameToAdd.screenshots());
-        game.setDevelopers(new HashSet<>(developers));
-        game.setPublishers(new HashSet<>(publishers));
-        game.setTags(new HashSet<>(tags));
+        game.setDevelopers(new HashSet<>(developerRepository.findAllById(gameToAdd.developerIds())));
+        game.setPublishers(new HashSet<>(publisherRepository.findAllById(gameToAdd.publisherIds())));
+        game.setTags(new HashSet<>(tagRepository.findAllById(gameToAdd.tagIds())));
 
         return game;
     }
