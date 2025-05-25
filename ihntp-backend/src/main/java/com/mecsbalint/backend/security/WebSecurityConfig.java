@@ -68,10 +68,10 @@ public class WebSecurityConfig {
                         auth
                                 .requestMatchers("api/registration/**").permitAll()
                                 .requestMatchers("api/login/**").permitAll()
-//                                .requestMatchers("api/games/edit/**").hasRole("USER")
-//                                .requestMatchers("api/games/add/**").hasRole("USER")
+                                .requestMatchers("api/games/edit/**").hasRole("USER")
+                                .requestMatchers("api/games/add/**").hasRole("USER")
                                 .requestMatchers("api/games/**").permitAll()
-//                                .requestMatchers("api/tags/add/**").hasRole("USER")
+                                .requestMatchers("api/tags/add/**").hasRole("USER")
                                 .requestMatchers("api/tags/**").permitAll()
 //                                .requestMatchers("api/publishers/add/**").hasRole("USER")
                                 .requestMatchers("api/publishers/**").permitAll()

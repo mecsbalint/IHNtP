@@ -1,11 +1,10 @@
 package com.mecsbalint.backend.controller;
 
+import com.mecsbalint.backend.controller.dto.DeveloperForAdd;
 import com.mecsbalint.backend.controller.dto.DeveloperIdNameDto;
 import com.mecsbalint.backend.service.DeveloperService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,5 +21,10 @@ public class DeveloperController {
     @GetMapping("/all")
     public List<DeveloperIdNameDto> getAllDevelopers() {
         return developerService.getAllDevelopers();
+    }
+
+    @PostMapping("/add")
+    public List<Long> addDevelopers(@RequestBody List<DeveloperForAdd> developersToAdd) {
+        return developerService.addDevelopers(developersToAdd);
     }
 }

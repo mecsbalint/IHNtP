@@ -3,7 +3,6 @@ package com.mecsbalint.backend.service;
 import com.mecsbalint.backend.controller.dto.TagForAdd;
 import com.mecsbalint.backend.controller.dto.TagIdNameDto;
 import com.mecsbalint.backend.exception.ElementIsAlreadyInDatabaseException;
-import com.mecsbalint.backend.exception.ElementNotFoundInSetException;
 import com.mecsbalint.backend.model.Tag;
 import com.mecsbalint.backend.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
