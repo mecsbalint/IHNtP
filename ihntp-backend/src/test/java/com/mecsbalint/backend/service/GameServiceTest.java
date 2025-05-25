@@ -3,7 +3,10 @@ package com.mecsbalint.backend.service;
 import com.mecsbalint.backend.controller.dto.GameForListDto;
 import com.mecsbalint.backend.exception.GameNotFoundException;
 import com.mecsbalint.backend.model.Game;
+import com.mecsbalint.backend.repository.DeveloperRepository;
 import com.mecsbalint.backend.repository.GameRepository;
+import com.mecsbalint.backend.repository.PublisherRepository;
+import com.mecsbalint.backend.repository.TagRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -23,11 +26,20 @@ class GameServiceTest {
     @Mock
     private GameRepository gameRepositoryMock;
 
+    @Mock
+    private DeveloperRepository developerRepositoryMock;
+
+    @Mock
+    private PublisherRepository publisherRepositoryMock;
+
+    @Mock
+    private TagRepository tagRepositoryMock;
+
     private GameService gameService;
 
     @BeforeEach
     public void setUp() {
-        gameService = new GameService(gameRepositoryMock);
+        gameService = new GameService(gameRepositoryMock, developerRepositoryMock, publisherRepositoryMock, tagRepositoryMock);
     }
 
     @Test

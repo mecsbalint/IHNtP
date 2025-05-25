@@ -1,11 +1,13 @@
 package com.mecsbalint.backend.service;
 
-import com.mecsbalint.backend.controller.dto.TagForAdd;
+import com.mecsbalint.backend.controller.dto.TagToAdd;
 import com.mecsbalint.backend.controller.dto.TagIdNameDto;
 import com.mecsbalint.backend.exception.ElementIsAlreadyInDatabaseException;
 import com.mecsbalint.backend.model.Tag;
 import com.mecsbalint.backend.repository.TagRepository;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -30,7 +32,7 @@ public class TagService {
                 .toList();
     }
 
-    public List<Long> addTags(List<TagForAdd> tagForAdds) {
+    public List<Long> addTags(List<TagToAdd> tagForAdds) {
         List<Tag> tagsToAdd = tagForAdds.stream()
                 .map(tagForAdd -> {
                     Tag tag = new Tag();
@@ -41,9 +43,13 @@ public class TagService {
 
         try {
             return tagRepository.saveAll(tagsToAdd).stream().map(Tag::getId).toList();
-        } catch (RuntimeException ignored) {
-            String elementsStr = tagsToAdd.stream().map(Tag::getName).collect(Collectors.joining(", "));
-            throw new ElementIsAlreadyInDatabaseException(elementsStr, "Tag");
+        } catch (DataIntegrityViolationException exception) {
+            if (exception.getCause() instanceof ConstraintViolationException) {
+                String elementsStr = tagsToAdd.stream().map(Tag::getName).collect(Collectors.joining(", "));
+                throw new ElementIsAlreadyInDatabaseException(elementsStr, "Tag");
+            } else {
+                throw exception;
+            }
         }
     }
 }

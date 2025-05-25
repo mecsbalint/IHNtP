@@ -1,11 +1,14 @@
 package com.mecsbalint.backend.service;
 
-import com.mecsbalint.backend.controller.dto.DeveloperForAdd;
+import com.mecsbalint.backend.controller.dto.DeveloperToAdd;
 import com.mecsbalint.backend.controller.dto.DeveloperIdNameDto;
 import com.mecsbalint.backend.exception.ElementIsAlreadyInDatabaseException;
 import com.mecsbalint.backend.model.Developer;
+import com.mecsbalint.backend.model.Tag;
 import com.mecsbalint.backend.repository.DeveloperRepository;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -30,8 +33,8 @@ public class DeveloperService {
                 .toList();
     }
 
-    public List<Long> addDevelopers(List<DeveloperForAdd> developerForAdds) {
-        List<Developer> tagsToAdd = developerForAdds.stream()
+    public List<Long> addDevelopers(List<DeveloperToAdd> developerForAdds) {
+        List<Developer> developersToAdd = developerForAdds.stream()
                 .map(developerForAdd -> {
                     Developer developer = new Developer();
                     developer.setName(developerForAdd.name());
@@ -40,10 +43,14 @@ public class DeveloperService {
                 .toList();
 
         try {
-            return developerRepository.saveAll(tagsToAdd).stream().map(Developer::getId).toList();
-        } catch (RuntimeException ignored) {
-            String elementsStr = tagsToAdd.stream().map(Developer::getName).collect(Collectors.joining(", "));
-            throw new ElementIsAlreadyInDatabaseException(elementsStr, "Developer");
+            return developerRepository.saveAll(developersToAdd).stream().map(Developer::getId).toList();
+        } catch (DataIntegrityViolationException exception) {
+            if (exception.getCause() instanceof ConstraintViolationException) {
+                String elementsStr = developersToAdd.stream().map(Developer::getName).collect(Collectors.joining(", "));
+                throw new ElementIsAlreadyInDatabaseException(elementsStr, "Developer");
+            } else {
+                throw exception;
+            }
         }
     }
 }

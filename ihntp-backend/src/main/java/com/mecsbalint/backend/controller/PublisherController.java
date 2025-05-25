@@ -1,6 +1,6 @@
 package com.mecsbalint.backend.controller;
 
-import com.mecsbalint.backend.controller.dto.PublisherForAdd;
+import com.mecsbalint.backend.controller.dto.PublisherToAdd;
 import com.mecsbalint.backend.controller.dto.PublisherIdNameDto;
 import com.mecsbalint.backend.service.PublisherService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class PublisherController {
     }
 
     @PostMapping("/add")
-    public List<Long> addPublishers(@RequestBody List<PublisherForAdd> publishersToAdd) {
+    public List<Long> addPublishers(@RequestBody List<PublisherToAdd> publishersToAdd) {
         return publisherService.addPublishers(publishersToAdd);
     }
 }

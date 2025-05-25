@@ -3,12 +3,10 @@ package com.mecsbalint.backend.controller;
 import com.mecsbalint.backend.controller.dto.GameForEditGameDto;
 import com.mecsbalint.backend.controller.dto.GameForGameProfileDto;
 import com.mecsbalint.backend.controller.dto.GameForListDto;
+import com.mecsbalint.backend.controller.dto.GameToAdd;
 import com.mecsbalint.backend.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -35,5 +33,10 @@ public class GameController {
     @GetMapping("/edit/{id}")
     public GameForEditGameDto getGameForEditGameById(@PathVariable long id) {
         return gameService.getGameForEditGameById(id);
+    }
+
+    @PostMapping("/add")
+    public Long addGame(@RequestBody GameToAdd gameToAdd) {
+        return gameService.addGame(gameToAdd);
     }
 }

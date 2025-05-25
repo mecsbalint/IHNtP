@@ -1,6 +1,6 @@
 package com.mecsbalint.backend.controller;
 
-import com.mecsbalint.backend.controller.dto.TagForAdd;
+import com.mecsbalint.backend.controller.dto.TagToAdd;
 import com.mecsbalint.backend.controller.dto.TagIdNameDto;
 import com.mecsbalint.backend.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class TagController {
     }
 
     @PostMapping("/add")
-    public List<Long> addTags(@RequestBody List<TagForAdd> tagsToAdd) {
+    public List<Long> addTags(@RequestBody List<TagToAdd> tagsToAdd) {
         return tagService.addTags(tagsToAdd);
     }
 }

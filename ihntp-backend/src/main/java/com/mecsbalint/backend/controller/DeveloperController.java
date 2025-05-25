@@ -1,6 +1,6 @@
 package com.mecsbalint.backend.controller;
 
-import com.mecsbalint.backend.controller.dto.DeveloperForAdd;
+import com.mecsbalint.backend.controller.dto.DeveloperToAdd;
 import com.mecsbalint.backend.controller.dto.DeveloperIdNameDto;
 import com.mecsbalint.backend.service.DeveloperService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class DeveloperController {
     }
 
     @PostMapping("/add")
-    public List<Long> addDevelopers(@RequestBody List<DeveloperForAdd> developersToAdd) {
+    public List<Long> addDevelopers(@RequestBody List<DeveloperToAdd> developersToAdd) {
         return developerService.addDevelopers(developersToAdd);
     }
 }
