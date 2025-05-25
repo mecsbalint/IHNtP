@@ -3,7 +3,6 @@ package com.mecsbalint.backend.controller;
 import com.mecsbalint.backend.controller.dto.GameForListDto;
 import com.mecsbalint.backend.controller.dto.GameStatusDto;
 import com.mecsbalint.backend.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,29 +24,29 @@ public class UserGameController {
     }
 
     @GetMapping("/wishlist")
-    public Set<GameForListDto> getUserWishlist(HttpServletRequest request) {
-        String authUserEmail = getAuthenticatedUserEmail(request);
+    public Set<GameForListDto> getUserWishlist() {
+        String authUserEmail = getAuthenticatedUserEmail();
 
         return userService.getUserWishlist(authUserEmail);
     }
 
     @GetMapping("/backlog")
-    public Set<GameForListDto> getUserBacklog(HttpServletRequest request) {
-        String authUserEmail = getAuthenticatedUserEmail(request);
+    public Set<GameForListDto> getUserBacklog() {
+        String authUserEmail = getAuthenticatedUserEmail();
 
         return userService.getUserBacklog(authUserEmail);
     }
 
     @GetMapping("/status/{gameId}")
-    public GameStatusDto getGameStatusById(@PathVariable long gameId, HttpServletRequest request) {
-        String authUserEmail = getAuthenticatedUserEmail(request);
+    public GameStatusDto getGameStatusById(@PathVariable long gameId) {
+        String authUserEmail = getAuthenticatedUserEmail();
 
         return userService.getGameStatus(gameId, authUserEmail);
     }
 
     @PutMapping("/wishlist/{gameId}")
-    public ResponseEntity<Void> addGameToWishlist(@PathVariable long gameId, HttpServletRequest request) {
-        String authUserEmail = getAuthenticatedUserEmail(request);
+    public ResponseEntity<Void> addGameToWishlist(@PathVariable long gameId) {
+        String authUserEmail = getAuthenticatedUserEmail();
 
         userService.addGameToWishlist(gameId, authUserEmail);
 
@@ -55,8 +54,8 @@ public class UserGameController {
     }
 
     @PutMapping("/backlog/{gameId}")
-    public ResponseEntity<Void> addGameToBacklog(@PathVariable long gameId, HttpServletRequest request) {
-        String authUserEmail = getAuthenticatedUserEmail(request);
+    public ResponseEntity<Void> addGameToBacklog(@PathVariable long gameId) {
+        String authUserEmail = getAuthenticatedUserEmail();
 
         userService.addGameToBacklog(gameId, authUserEmail);
 
@@ -64,8 +63,8 @@ public class UserGameController {
     }
 
     @DeleteMapping("/wishlist/{gameId}")
-    public long removeGameFromWishlist(@PathVariable long gameId, HttpServletRequest request) {
-        String authUserEmail = getAuthenticatedUserEmail(request);
+    public long removeGameFromWishlist(@PathVariable long gameId) {
+        String authUserEmail = getAuthenticatedUserEmail();
 
         userService.removeGameFromWishlist(gameId, authUserEmail);
 
@@ -73,15 +72,15 @@ public class UserGameController {
     }
 
     @DeleteMapping("/backlog/{gameId}")
-    public long removeGameFromBacklog(@PathVariable long gameId, HttpServletRequest request) {
-        String authUserEmail = getAuthenticatedUserEmail(request);
+    public long removeGameFromBacklog(@PathVariable long gameId) {
+        String authUserEmail = getAuthenticatedUserEmail();
 
         userService.removeGameFromBacklog(gameId, authUserEmail);
 
         return gameId;
     }
 
-    private String getAuthenticatedUserEmail(HttpServletRequest request) {
+    private String getAuthenticatedUserEmail() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication.getName();
     }
