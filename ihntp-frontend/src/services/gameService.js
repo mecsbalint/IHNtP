@@ -19,8 +19,8 @@ export async function getGameForProfile(id) {
     return responseObj.status === 200 ? responseObj.body : null;
 }
 
-export async function getGameForEdit(id) {
-    const responseObj = await apiRequest({url: `/api/games/edit/${id}`});
+export async function getGameForEdit(id, handleUnauthorizedResponse) {
+    const responseObj = await apiRequest({url: `/api/games/edit/${id}`, onUnauthorizedResponse: handleUnauthorizedResponse});
 
     return responseObj.status === 200 ? responseObj.body : null;
 }

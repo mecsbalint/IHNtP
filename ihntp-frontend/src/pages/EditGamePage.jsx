@@ -8,7 +8,6 @@ import { useAuthContext } from "../hooks/useAuthContext";
 function EditGamePage() {
     const {id} = useParams();
     const {isLoggedIn} = useAuthContext();
-    const [userState, setUserState] = useState();
     const [game, setGame] = useState(null);
     const navigate = useNavigate();
     const handleUnauthorizedResponse = useUnauthorizedHandler();
@@ -18,7 +17,7 @@ function EditGamePage() {
     }, [isLoggedIn, navigate]);
 
     useEffect(() => {
-        getGameForEdit(id).then(game => setGame(game ?? {}));
+        getGameForEdit(id, handleUnauthorizedResponse).then(game => setGame(game ?? {}));
     }, [id]);
 
     async function onSubmit(editGameObj) {
