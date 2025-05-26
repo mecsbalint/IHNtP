@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -31,12 +30,12 @@ public class Game {
     @ElementCollection
     private Set<String> screenshots;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     private Set<Developer> developers;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     private Set<Publisher> publishers;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     private Set<Tag> tags;
 }

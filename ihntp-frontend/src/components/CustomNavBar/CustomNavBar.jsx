@@ -4,7 +4,7 @@ import { useAuthContext } from "../../hooks/useAuthContext";
 import { useLogout } from "../../hooks/useLogout";
 
 function CustomNavBar() {
-  const {user} = useAuthContext();
+  const {user, isLoggedIn} = useAuthContext();
   const logout = useLogout();
 
   async function handleLogoutClick() {
@@ -13,7 +13,7 @@ function CustomNavBar() {
 
   return (
     <div className="navbar bg-blue-400 shadow-sm">
-      <div className="navbar-start">
+      <div className="navbar-start gap-2">
         <Link to={`/`} className="text-2xl font-semibold text-amber-50 p-2">
           IHNtP
         </Link>
@@ -24,7 +24,10 @@ function CustomNavBar() {
           className="input input-bordered w-24 md:w-auto"
         />
       </div>
-      <div className={`navbar-center ${user ? "" : "hidden"}`}>
+      <div className={`navbar-center ${isLoggedIn ? "" : "hidden"}`}>
+        <Link to={`/games/add`} className="text-xl font-semibold text-amber-50 p-2 pb-0">
+          Add Game
+        </Link>
         <Link to={`/wishlist`} className="text-xl font-semibold text-amber-50 p-2 pb-0">
           Wishlist
         </Link>
@@ -33,7 +36,7 @@ function CustomNavBar() {
         </Link>
       </div>
       <div className="navbar-end">
-        <div className={`flex ${user ? "" : "hidden"}`}>
+        <div className={`flex ${isLoggedIn ? "" : "hidden"}`}>
           <span className="text-xl font-semibold text-amber-50 p-2 pb-0">
             {user?.name}
           </span>
@@ -62,7 +65,7 @@ function CustomNavBar() {
             </ul>
           </div>
         </div>
-        <div className={user ? "hidden" : ""}>
+        <div className={isLoggedIn ? "hidden" : ""}>
           <Link to={`/login`} className="text-l font-semibold text-amber-50">
             Login
           </Link>

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import GameProfile from "../components/GameProfile/GameProfile";
 import useUnauthorizedHandler from "../hooks/useUnauthorizedHandler";
-import { getGame } from "../services/gameService";
+import { getGameForProfile } from "../services/gameService";
 import { getGameStatuses, updateUserList } from "../services/userGameService";
 import { useAuthContext } from "../hooks/useAuthContext";
 
@@ -18,7 +18,7 @@ function GamePage() {
     }, [user]);
 
     useEffect(() => {
-        getGame(id)
+        getGameForProfile(id)
             .then(game => {
                 if (user) {
                     return getGameStatuses(id, handleUnauthorizedResponse).then(statuses => game = {...game, ...statuses});

@@ -7,11 +7,11 @@ import { useAuthContext } from "../hooks/useAuthContext";
 function RegistrationPage() {
     const navigate = useNavigate();
     const {error, isLoading, registrate} = useRegistration();
-    const {user} = useAuthContext();
+    const {isLoggedIn} = useAuthContext();
 
     useEffect(() => {
-        user && navigate("/");
-    }, [user, navigate]);
+         isLoggedIn && navigate("/");
+    }, [isLoggedIn, navigate]);
 
     async function onSubmit(event, submitObj) {
         event.preventDefault();
