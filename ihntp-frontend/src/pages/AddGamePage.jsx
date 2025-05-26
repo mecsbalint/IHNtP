@@ -1,12 +1,21 @@
 import { useNavigate } from "react-router-dom";
 import GameForm from "../components/GameForm/GameForm";
 import { addNewGame } from "../services/gameService";
+import useUnauthorizedHandler from "../hooks/useUnauthorizedHandler";
+import { useEffect } from "react";
+import { useAuthContext } from "../hooks/useAuthContext";
 
 function AddGamePage() {
     const navigate = useNavigate();
+    const handleUnauthorizedResponse = useUnauthorizedHandler();
+    const {isLoggedIn} = useAuthContext();
+
+    useEffect(() => {
+        isLoggedIn !== null && !isLoggedIn && navigate("/login");
+    }, [isLoggedIn, navigate]);
 
     async function onSubmit(newGameObj) {
-        const newGameId = await addNewGame(newGameObj);
+        const newGameId = await addNewGame(newGameObj, handleUnauthorizedResponse);
 
         newGameId && navigate(`/game/${newGameId}`);
     }

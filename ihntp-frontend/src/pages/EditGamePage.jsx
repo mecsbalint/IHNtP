@@ -2,18 +2,27 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import GameForm from "../components/GameForm/GameForm";
 import { editGame, getGameForEdit } from "../services/gameService";
+import useUnauthorizedHandler from "../hooks/useUnauthorizedHandler";
+import { useAuthContext } from "../hooks/useAuthContext";
 
 function EditGamePage() {
     const {id} = useParams();
+    const {isLoggedIn} = useAuthContext();
+    const [userState, setUserState] = useState();
     const [game, setGame] = useState(null);
     const navigate = useNavigate();
+    const handleUnauthorizedResponse = useUnauthorizedHandler();
+    
+    useEffect(() => {
+        isLoggedIn !== null && !isLoggedIn && navigate("/login");
+    }, [isLoggedIn, navigate]);
 
     useEffect(() => {
         getGameForEdit(id).then(game => setGame(game ?? {}));
     }, [id]);
 
     async function onSubmit(editGameObj) {
-        const isSuccess = await editGame(editGameObj, id);
+        const isSuccess = await editGame(editGameObj, id, handleUnauthorizedResponse);
 
         isSuccess && navigate(`/game/${id}`);
     }

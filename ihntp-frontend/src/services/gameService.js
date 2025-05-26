@@ -25,18 +25,18 @@ export async function getGameForEdit(id) {
     return responseObj.status === 200 ? responseObj.body : null;
 }
 
-export async function addNewGame(newGameObj) {
+export async function addNewGame(newGameObj, handleUnauthorizedResponse) {
     await processEntityLists(newGameObj);
 
-    const responseObj = await apiRequest({url: "/api/games/add", method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(newGameObj)});
+    const responseObj = await apiRequest({url: "/api/games/add", method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(newGameObj), onUnauthorizedResponse: handleUnauthorizedResponse});
 
     return responseObj.status === 200 ? responseObj.body : null;
 }
 
-export async function editGame(editGameObj, id) {
+export async function editGame(editGameObj, id, handleUnauthorizedResponse) {
     await processEntityLists(editGameObj);
 
-    const responseObj = await apiRequest({url: `/api/games/edit/${id}`, method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(editGameObj)});
+    const responseObj = await apiRequest({url: `/api/games/edit/${id}`, method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(editGameObj), onUnauthorizedResponse: handleUnauthorizedResponse});
 
     return responseObj.status === 200;
 }

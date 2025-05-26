@@ -7,11 +7,11 @@ import { useAuthContext } from "../hooks/useAuthContext";
 function LoginPage() {
     const navigate = useNavigate();
     const {error, isLoading, login} = useLogin();
-    const {user} = useAuthContext();
+    const {isLoggedIn} = useAuthContext();
 
     useEffect(() => {
-        user && navigate("/");
-    }, [user, navigate]);
+        isLoggedIn && navigate("/");
+    }, [isLoggedIn, navigate]);
 
     async function onSubmit(event, submitObj) {
         event.preventDefault();
