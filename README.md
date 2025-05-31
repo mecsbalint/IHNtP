@@ -82,9 +82,11 @@ Or alternatively clone the repository: ```git clone https://github.com/mecsbalin
 
 - [x] Wishlist and Backlog
 - [x] Dockerization
-- [ ] Avatar image selection
-- [ ] Edit game and add new game pages
+- [x] Edit game and add new game pages
+- [ ] Switch to TypeScript
 - [ ] Integrate price information from IsThereAnyDeals API
+- [ ] End-to-end tests with Selenium
+- [ ] Avatar image selection
 - [ ] Search bar for games
 - [ ] Tracking users ownership of games
 
