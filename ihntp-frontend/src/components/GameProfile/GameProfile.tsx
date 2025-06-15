@@ -1,8 +1,16 @@
 /* eslint-disable react/prop-types */
 import { Link } from "react-router-dom";
 import editIcon from "../../assets/edit_icon.png";
+import { GameForGameProfileWithStatuses } from "../../types/Game";
+import { formDate } from "../../utils/utils";
 
-function GameProfile({game, isLoggedIn, onClickListButton}) {
+type GameProfileProps = {
+    game: GameForGameProfileWithStatuses,
+    isLoggedIn: boolean,
+    onClickListButton: (method: "PUT" | "DELETE", listType: "backlog" | "wishlist") => Promise<void>
+}
+
+function GameProfile({game, isLoggedIn, onClickListButton} : GameProfileProps) {
 
     return (
         <div className="card shadow-md bg-base-100">
@@ -30,7 +38,7 @@ function GameProfile({game, isLoggedIn, onClickListButton}) {
                         })}
                     </div>
                 </div>
-                <div>{game.releaseDate.split("-").join(" ")}</div>
+                <div>{formDate(game.releaseDate)}</div>
                 <div>
                     {game.developers.map((developer, index) => {
                         return (

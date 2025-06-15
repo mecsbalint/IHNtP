@@ -24,6 +24,11 @@ export type GameForGameProfile = GameWithId & {
     tags: TagWithId[]
 };
 
+export type GameForGameProfileWithStatuses = GameForGameProfile & {
+    inBacklog: boolean | null,
+    inWishlist: boolean | null
+}
+
 export type GameForEdit = GameWithId & {
     descriptionShort: string,
     descriptionLong: string,

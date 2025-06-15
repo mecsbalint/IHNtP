@@ -7,7 +7,7 @@ import { UserLogin } from "../types/User";
 type UseLoginResult = {
     error: "" | "Incorrect email or password!",
     isLoading: boolean | null,
-    login: (submitObj: UserLogin) => void
+    login: (submitObj: UserLogin) => Promise<void>
 }
 
 export function useLogin() : UseLoginResult {
