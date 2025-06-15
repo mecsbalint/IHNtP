@@ -19,7 +19,7 @@ export async function apiRequest<T>({
   body,
   headers = {},
   onUnauthorizedResponse
-} : ApiRequestParams) : Promise<ApiResponse<T>> {
+} : ApiRequestParams) : Promise<ApiResponse<T | null>> {
 
   let jwt : string | null;
   const localStorageItem : string | null = localStorage.getItem("ihntpUser");

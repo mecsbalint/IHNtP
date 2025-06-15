@@ -1,6 +1,6 @@
 
 export type Publisher = {
-    name: string
+    name: string,
 };
 
 export type PublisherWithId = Publisher & {

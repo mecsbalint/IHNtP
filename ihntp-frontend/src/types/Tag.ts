@@ -4,5 +4,5 @@ export type Tag = {
 };
 
 export type TagWithId = Tag & {
-    id: number
+    id: number,
 }
