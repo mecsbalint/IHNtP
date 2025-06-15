@@ -53,3 +53,8 @@ export type GameToAdd = Game & {
     publisherIds: number[],
     tagIds: number[]
 }
+
+export type GameStatuses = {
+    inWishlist: boolean | null,
+    inBacklog: boolean | null
+}
