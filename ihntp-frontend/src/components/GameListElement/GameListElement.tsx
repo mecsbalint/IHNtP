@@ -1,8 +1,13 @@
 /* eslint-disable react/prop-types */
-
 import { Link } from "react-router-dom";
+import { GameForList } from "../../types/Game";
+import { formDate } from "../../utils/utils";
 
-function GameListElement({game}) {
+type GameListElementProps = {
+    game: GameForList
+}
+
+function GameListElement({game} : GameListElementProps) {
 
     return (
         <li className="list-row">
@@ -15,7 +20,7 @@ function GameListElement({game}) {
                                 </figure>
                     <div className="card-body">
                         <h2 className="card-title">{game.name}</h2>
-                        <p>{game.releaseDate.split("-").join(" ")}</p>
+                        <p>{formDate(game.releaseDate)}</p>
                         <div className="card-actions justify-end">
                             {game.tags.map(tag => tag.name).join(", ")}
                         </div>

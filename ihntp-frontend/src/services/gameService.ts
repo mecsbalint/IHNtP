@@ -1,5 +1,5 @@
 import { Developer, DeveloperWithId } from "../types/Developer";
-import { GameForEdit, GameForGameProfile, GameFormSubmit, GameToAdd } from "../types/Game";
+import { GameForEdit, GameForGameProfile, GameForList, GameFormSubmit, GameToAdd } from "../types/Game";
 import { Publisher, PublisherWithId } from "../types/Publisher";
 import { Tag, TagWithId } from "../types/Tag";
 import { apiRequest } from "./api";
@@ -7,14 +7,10 @@ import { addNewDevelopers } from "./developerService";
 import { addNewPublishers } from "./publisherService";
 import { addNewTags } from "./tagService";
 
-export async function getAllGames() {
-    const responseObj = await apiRequest({url: "/api/games/all"});
+export async function getAllGames() : Promise<GameForList[]> {
+    const responseObj = await apiRequest<GameForList[]>({url: "/api/games/all"});
 
-    if (responseObj.status === 200) {
-        return responseObj.body;
-    }
-
-    return [];
+    return responseObj.status === 200 && responseObj.body !== null ? responseObj.body : [];
 }
 
 export async function getGameForProfile(id : number) : Promise<GameForGameProfile | null> {
