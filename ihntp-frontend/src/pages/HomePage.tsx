@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import GameList from "../components/GameList/GameList";
 import { getAllGames } from "../services/gameService";
+import { GameForList } from "../types/Game";
 
 function HomePage() {
-    const [games, setGames] = useState([]);
+    const [games, setGames] = useState<GameForList[]>([]);
 
     useEffect(() => {
         getAllGames().then(allGames => setGames(allGames));

@@ -6,7 +6,7 @@ import { UserRegistration } from "../types/User";
 type UseRegistrationResult = {
     error: "" | "This e-mail is already in use",
     isLoading: boolean | null,
-    registrate: (submitObj: UserRegistration) => void
+    registrate: (submitObj: UserRegistration) => Promise<void>
 }
 
 export function useRegistration() : UseRegistrationResult {
