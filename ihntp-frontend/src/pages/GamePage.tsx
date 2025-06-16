@@ -5,10 +5,11 @@ import useUnauthorizedHandler from "../hooks/useUnauthorizedHandler";
 import { getGameForProfile } from "../services/gameService";
 import { getGameStatuses, updateUserList } from "../services/userGameService";
 import { useAuthContext } from "../hooks/useAuthContext";
+import { GameForGameProfile, GameForGameProfileWithStatuses } from "../types/Game";
 
 function GamePage() {
-    const {id} = useParams();
-    const [game, setGame] = useState(null);
+    const id = useParams().id as unknown as number;
+    const [game, setGame] = useState<GameForGameProfileWithStatuses | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const handleUnauthorizedResponse = useUnauthorizedHandler();
     const {user} = useAuthContext();
@@ -20,24 +21,26 @@ function GamePage() {
     useEffect(() => {
         getGameForProfile(id)
             .then(game => {
-                if (user) {
-                    return getGameStatuses(id, handleUnauthorizedResponse).then(statuses => game = {...game, ...statuses});
-                } else return game;
+                if (game) {
+                    if (user) {
+                        return getGameStatuses(id, handleUnauthorizedResponse).then(statuses => ({...game, ...statuses}));
+                    } else return {...game, inWishlist: null, inBacklog: null};
+                }
             })
-            .then(game => game && setGame(game))
+            .then(game => game && setGame(game));
     }, [id]);
 
-    async function onClickListButton(method, listType) {
+    async function onClickListButton(method: "PUT" | "DELETE", listType: "wishlist" | "backlog") {
         const responseStatus = await updateUserList(method, listType, id, handleUnauthorizedResponse);
 
         if (responseStatus === 200) {
             listType === "wishlist" && setGame(prevGame => ({
-                ...prevGame,
+                ...prevGame!,
                 inWishlist: method === "PUT"
             }));
             
             listType === "backlog" && setGame(prevGame => ({
-                ...prevGame,
+                ...prevGame!,
                 inBacklog: method === "PUT"
             }));
         }

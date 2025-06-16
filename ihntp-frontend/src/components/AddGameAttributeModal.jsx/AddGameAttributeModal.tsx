@@ -1,8 +1,36 @@
 /* eslint-disable react/prop-types */
 
-import { useState } from "react";
+import { useState, KeyboardEvent } from "react";
+import { Tag, TagWithId } from "../../types/Tag";
+import { Developer, DeveloperWithId } from "../../types/Developer";
+import { Publisher, PublisherWithId } from "../../types/Publisher";
 
-function AddGameAttributeModal({ modalId, modalName, listSetter, allList, list }) {
+type AddGameAttributeModalPropsTag = {
+    modalId: "tagModal",
+    modalName: "Tag",
+    listSetter:  React.Dispatch<React.SetStateAction<(Tag | TagWithId)[]>>,
+    list: Array<Tag | TagWithId>,
+    allList: Array<Tag | TagWithId>
+};
+
+type AddGameAttributeModalPropsDeveloper = {
+    modalId: "developerModal",
+    modalName: "Developer",
+    listSetter:  React.Dispatch<React.SetStateAction<(Developer | DeveloperWithId)[]>>,
+    list: Array<Developer | DeveloperWithId>,
+    allList: Array<Developer | DeveloperWithId>
+};
+
+type AddGameAttributeModalPropsPublisher = {
+    modalId: "publisherModal",
+    modalName: "Publisher",
+    listSetter:  React.Dispatch<React.SetStateAction<(Publisher | PublisherWithId)[]>>,
+    list: Array<Publisher | PublisherWithId>,
+    allList: Array<Publisher | PublisherWithId>
+};
+
+function AddGameAttributeModal
+({ modalId, modalName, listSetter, allList, list } : AddGameAttributeModalPropsTag | AddGameAttributeModalPropsDeveloper | AddGameAttributeModalPropsPublisher ) {
     const [name, setName] = useState("");
     const [errorState, setErrorState] = useState(false);
 
@@ -18,13 +46,13 @@ function AddGameAttributeModal({ modalId, modalName, listSetter, allList, list }
 
             setName("");
 
-            document.getElementById(modalId).close();
+            (document.getElementById(modalId) as HTMLDialogElement).close();
         } else {
             setErrorState(true);
         }
     }
 
-    function handleKeyDown(event) {
+    function handleKeyDown(event : KeyboardEvent<HTMLInputElement>) {
         if (event.keyCode === 13) {
             event.preventDefault();
             handleAddBtnClick();

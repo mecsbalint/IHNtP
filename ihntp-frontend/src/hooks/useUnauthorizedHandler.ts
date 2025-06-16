@@ -6,7 +6,7 @@ function useUnauthorizedHandler() {
     const {dispatch} = useAuthContext();
 
     return function handleUnauthorizedResponse() {
-        localStorage.setItem("ihntpUser", null);
+        localStorage.setItem("ihntpUser", "null");
         dispatch({type: "LOGOUT"});
         navigate("/login");
     }

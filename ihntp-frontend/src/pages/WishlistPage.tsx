@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import GameList from "../components/GameList/GameList";
 import useUnauthorizedHandler from "../hooks/useUnauthorizedHandler";
 import { getUserGameList } from "../services/userGameService";
+import { GameForList } from "../types/Game";
 
 function WishlistPage() {
-    const [games, setGames] = useState([]);
+    const [games, setGames] = useState<GameForList[]>([]);
 
     const handleUnauthorizedResponse = useUnauthorizedHandler();
 

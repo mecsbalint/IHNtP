@@ -4,11 +4,12 @@ import GameForm from "../components/GameForm/GameForm";
 import { editGame, getGameForEdit } from "../services/gameService";
 import useUnauthorizedHandler from "../hooks/useUnauthorizedHandler";
 import { useAuthContext } from "../hooks/useAuthContext";
+import { GameForEdit, GameFormSubmit } from "../types/Game";
 
 function EditGamePage() {
-    const {id} = useParams();
+    const id = useParams().id as unknown as number;
     const {isLoggedIn} = useAuthContext();
-    const [game, setGame] = useState(null);
+    const [game, setGame] = useState<GameForEdit | null>(null);
     const navigate = useNavigate();
     const handleUnauthorizedResponse = useUnauthorizedHandler();
     
@@ -17,10 +18,10 @@ function EditGamePage() {
     }, [isLoggedIn, navigate]);
 
     useEffect(() => {
-        getGameForEdit(id, handleUnauthorizedResponse).then(game => setGame(game ?? {}));
+        getGameForEdit(id, handleUnauthorizedResponse).then(game => setGame(game));
     }, [id]);
 
-    async function onSubmit(editGameObj) {
+    async function onSubmit(editGameObj : GameFormSubmit) {
         const isSuccess = await editGame(editGameObj, id, handleUnauthorizedResponse);
 
         isSuccess && navigate(`/game/${id}`);

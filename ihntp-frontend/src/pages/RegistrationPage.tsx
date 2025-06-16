@@ -1,41 +1,41 @@
 import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import UserForm from "../components/UserForm/UserForm";
-import { useLogin } from "../hooks/useLogin";
+import { useRegistration } from "../hooks/useRegistration";
 import { useAuthContext } from "../hooks/useAuthContext";
+import { UserRegistration } from "../types/User";
 
-function LoginPage() {
+function RegistrationPage() {
     const navigate = useNavigate();
-    const {error, isLoading, login} = useLogin();
+    const {error, isLoading, registrate} = useRegistration();
     const {isLoggedIn} = useAuthContext();
 
     useEffect(() => {
-        isLoggedIn && navigate("/");
+         isLoggedIn && navigate("/");
     }, [isLoggedIn, navigate]);
 
-    async function onSubmit(event, submitObj) {
+    async function onSubmit(event : React.FormEvent<HTMLFormElement>, submitObj : UserRegistration) {
         event.preventDefault();
 
-        await login(submitObj);
+        await registrate(submitObj);
     }
 
     return (
         <div className="w-full bg-blue-400 h-[100vh] justify-items-center pt-20">
             <fieldset className="fieldset w-xs bg-base-200 border border-base-300 p-4 rounded-box">
                 <div>
-                    <legend className="fieldset-legend text-2xl">Login</legend>
+                    <legend className="fieldset-legend text-2xl">Registration</legend>
                     <UserForm 
-                        submitText={"Log in"}
+                        submitText={"Sign up"}
                         onSubmit={onSubmit}
                         emailErrorMsg={error}
-                        passwordErrorMsg={error}
-                        isLoading={isLoading}
+                        isLoading={isLoading}            
                     />  
                 </div>
-                <Link className="text text-secondary my-1" to="/registration">Don't have an account?</Link>
+                <Link className="text text-secondary my-1" to="/login">Do you have already an account?</Link>
             </fieldset>
         </div>
-    )
+    );
 }
 
-export default LoginPage;
+export default RegistrationPage;

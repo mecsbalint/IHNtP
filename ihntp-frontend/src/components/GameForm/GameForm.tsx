@@ -5,27 +5,38 @@ import { getAllPublishers } from "../../services/publisherService";
 import { getAllDevelopers } from "../../services/developerService";
 import AddGameAttributeModal from "../AddGameAttributeModal.jsx/AddGameAttributeModal";
 import deleteIcon from "../../assets/delete_icon.png";
+import { Tag, TagWithId } from "../../types/Tag";
+import { Publisher, PublisherWithId } from "../../types/Publisher";
+import { Developer, DeveloperWithId } from "../../types/Developer";
+import { GameForEdit, GameFormSubmit } from "../../types/Game";
+import { formDate } from "../../utils/utils";
 
-function GameForm({game, onSubmit, buttonText}) {
+type GameFormProps = {
+    game: GameForEdit | null,
+    onSubmit: (submitObj: GameFormSubmit) => Promise<void>,
+    buttonText: "Save changes" | "Add new game"
+};
+
+function GameForm({game, onSubmit, buttonText} : GameFormProps) {
     const [name, setName] = useState("");
     const [isNameAdded, setIsNameAdded] = useState(false);
 
     const [releaseDate, setReleaseDate] = useState("");
     const [isReleaseDateAdded, setIsReleaseDateAdded] = useState(false);
 
-    const [tags, setTags] = useState([]);
-    const [selectedTag, setSelectedTag] = useState(null);
-    const [allTags, setAllTags] = useState([]);
+    const [tags, setTags] = useState<Array<Tag | TagWithId>>([]);
+    const [selectedTag, setSelectedTag] = useState<Tag | TagWithId | null>(null);
+    const [allTags, setAllTags] = useState<Array<Tag | TagWithId>>([]);
     const [allTagsLoaded, setAllTagsLoaded] = useState(false);
 
-    const [publishers, setPublishers] = useState([]);
-    const [selectedPublisher, setSelectedPublisher] = useState(null)
-    const [allPublishers, setAllPublishers] = useState([]);
+    const [publishers, setPublishers] = useState<Array<Publisher | PublisherWithId>>([]);
+    const [selectedPublisher, setSelectedPublisher] = useState<Publisher | PublisherWithId | null>(null)
+    const [allPublishers, setAllPublishers] = useState<Array<Publisher | PublisherWithId>>([]);
     const [allPublishersLoaded, setAllPublishersLoaded] = useState(false);
 
-    const [developers, setDevelopers] = useState([]);
-    const [selectedDeveloper, setSelectedDeveloper] = useState(null)
-    const [allDevelopers, setAllDevelopers] = useState([]);
+    const [developers, setDevelopers] = useState<Array<Developer | DeveloperWithId>>([]);
+    const [selectedDeveloper, setSelectedDeveloper] = useState<Developer | DeveloperWithId | null>(null)
+    const [allDevelopers, setAllDevelopers] = useState<Array<Developer | DeveloperWithId>>([]);
     const [allDevelopersLoaded, setAllDevelopersLoaded] = useState(false);
 
     const [descriptionShort, setDescriptionShort] = useState("");
@@ -38,7 +49,7 @@ function GameForm({game, onSubmit, buttonText}) {
     const [isHeaderImgAdded, setIsHeaderImgAdded] = useState(false);
 
     const [screenshot, setScreenshot] = useState("");
-    const [screenshots, setScreenshots] = useState([]);
+    const [screenshots, setScreenshots] = useState<string[]>([]);
     
     useEffect(() => {
         getAllTags().then(tags => {
@@ -60,17 +71,17 @@ function GameForm({game, onSubmit, buttonText}) {
             setName(game.name);
             setIsNameAdded(true);
 
-            setReleaseDate(game.releaseDate);
+            setReleaseDate(formDate(game.releaseDate));
             setIsReleaseDateAdded(true);
 
             setTags(game.tags);
-            setAllTags(prev => prev.filter(prevTag => !game.tags.map(tag => tag.id).includes(prevTag.id)));
+            setAllTags(prev => prev.filter(prevTag => "id" in prevTag && !game.tags.map(tag => tag.id).includes(prevTag.id)));
 
             setPublishers(game.publishers);
-            setAllPublishers(prev => prev.filter(prevPublisher => !game.publishers.map(publisher => publisher.id).includes(prevPublisher.id)));
+            setAllPublishers(prev => prev.filter(prevPublisher => "id" in prevPublisher &&  !game.publishers.map(publisher => publisher.id).includes(prevPublisher.id)));
 
             setDevelopers(game.developers);
-            setAllDevelopers(prev => prev.filter(prevDeveloper => !game.developers.map(developer => developer.id).includes(prevDeveloper.id)));
+            setAllDevelopers(prev => prev.filter(prevDeveloper => "id" in prevDeveloper &&  !game.developers.map(developer => developer.id).includes(prevDeveloper.id)));
 
             setDescriptionShort(game.descriptionShort);
             setIsDescriptionShortAdded(game.descriptionShort !== "");
@@ -85,28 +96,38 @@ function GameForm({game, onSubmit, buttonText}) {
         }
     }, [game, allTagsLoaded, allPublishersLoaded, allDevelopersLoaded])
 
-    function addToList(list, listSetter, newElement, newElementSetter, allListSetter) {
+    function addToList(
+            list : Array<Tag | TagWithId> | Array<Developer | DeveloperWithId> | Array<Publisher | PublisherWithId>, 
+            listSetter : React.Dispatch<React.SetStateAction<(Tag | TagWithId)[]>> | React.Dispatch<React.SetStateAction<(Developer | DeveloperWithId)[]>> | React.Dispatch<React.SetStateAction<(Publisher | PublisherWithId)[]>>, 
+            newElement : Tag | TagWithId | Developer | DeveloperWithId | Publisher | PublisherWithId,
+            newElementSetter : React.Dispatch<React.SetStateAction<Tag | TagWithId | null>> | React.Dispatch<React.SetStateAction<Developer | DeveloperWithId | null>> | React.Dispatch<React.SetStateAction<Publisher | PublisherWithId | null>>,
+            allListSetter: React.Dispatch<React.SetStateAction<(Tag | TagWithId)[]>> | React.Dispatch<React.SetStateAction<(Developer | DeveloperWithId)[]>> | React.Dispatch<React.SetStateAction<(Publisher | PublisherWithId)[]>>
+        ) {
         const newList = [...list, newElement];
         listSetter(newList);
 
-        const listIds = newList.map(element => element.id);
-        allListSetter(prev => prev.filter(element => !listIds.includes(String(element.id))));
+        const listIds = newList.map(element => "id" in element ? element.id : undefined);
+        allListSetter(prev => prev.filter(element => "id" in element ? !listIds.includes(String(element.id)) : element.name !== newElement.name));
 
         newElementSetter(null);
     }
 
-    function removeFromList(elementToRemove, listSetter, allListSetter) {
-        listSetter(prev => prev.filter(element => element.id ? Number(element.id) !== Number(elementToRemove.id) : element.name !== elementToRemove.name));
+    function removeFromList(
+        elementToRemove : Tag | TagWithId | Developer | DeveloperWithId | Publisher | PublisherWithId, 
+        listSetter : React.Dispatch<React.SetStateAction<(Tag | TagWithId)[]>> | React.Dispatch<React.SetStateAction<(Developer | DeveloperWithId)[]>> | React.Dispatch<React.SetStateAction<(Publisher | PublisherWithId)[]>>,
+        allListSetter : React.Dispatch<React.SetStateAction<(Tag | TagWithId)[]>> | React.Dispatch<React.SetStateAction<(Developer | DeveloperWithId)[]>> | React.Dispatch<React.SetStateAction<(Publisher | PublisherWithId)[]>>
+    ) {
+        listSetter(prev => prev.filter(element => element.name !== elementToRemove.name));
 
         allListSetter(prev => {
             const newList = [...prev];
-            elementToRemove.id && newList.push(elementToRemove);
+            "id" in elementToRemove && newList.push(elementToRemove);
             newList.sort((a, b) => a.name.localeCompare(b.name));
             return newList;
         });
     }
 
-    function addElementToScreenshots(screenshotToAdd) {
+    function addElementToScreenshots(screenshotToAdd : string) {
         setScreenshots(prev => {
             if (prev.includes(screenshotToAdd)){
                 return prev;
@@ -117,7 +138,7 @@ function GameForm({game, onSubmit, buttonText}) {
         setScreenshot("");
     }
 
-    function removeElementFromScreenshots(elementToRemove) {
+    function removeElementFromScreenshots(elementToRemove : string) {
         setScreenshots(prev => {
             return [...prev.filter(element => element !== elementToRemove)];
         });
@@ -156,50 +177,50 @@ function GameForm({game, onSubmit, buttonText}) {
                 </fieldset>
 
                 <fieldset className="fieldset">
-                    <legend className="fieldset-legend w-full">Tags<button type="button" className="btn btn-xs btn-primary btn-soft justify-end" onClick={()=>document.getElementById('tagModal').showModal()}>Create new tag</button></legend>
+                    <legend className="fieldset-legend w-full">Tags<button type="button" className="btn btn-xs btn-primary btn-soft justify-end" onClick={()=>(document.getElementById('tagModal') as HTMLDialogElement).showModal()}>Create new tag</button></legend>
                     <div className="flex gap-2">
-                        <button type="button" className="btn btn-primary w-15" disabled={!selectedTag} onClick={() => addToList(tags, setTags, selectedTag, setSelectedTag, setAllTags)}>Add</button>
+                        <button type="button" className="btn btn-primary w-15" disabled={!selectedTag} onClick={() => addToList(tags, setTags, selectedTag!, setSelectedTag, setAllTags)}>Add</button>
                         <label className="select pl-0">
-                            <select value={selectedTag?.name ?? "Choose a tag"} className="ml-0!" onChange={event => setSelectedTag({id: event.target.selectedOptions[0].dataset.id, name: event.target.selectedOptions[0].value})}>
-                                <option disabled={true} defaultValue={true}>Choose a tag</option>
-                                {allTags.map(tag => (<option  data-id={tag.id} key={tag.id} value={tag.name}>{tag.name}</option>))}
+                            <select value={selectedTag?.name ?? "Choose a tag"} className="ml-0!" onChange={event => setSelectedTag(typeof event.target.selectedOptions[0].dataset.id === "undefined" ? {name: event.target.selectedOptions[0].value} : {id: event.target.selectedOptions[0].dataset.id as unknown as number, name: event.target.selectedOptions[0].value})}>
+                                <option disabled={true}>Choose a tag</option>
+                                {allTags.map(tag => (<option  data-id={"id" in tag ? tag.id : undefined} key={"id" in tag ? tag.id : undefined} value={tag.name}>{tag.name}</option>))}
                             </select>
                         </label>
                     </div>
                     <div className="max-w-80">
-                        {tags.map(tag => (<span data-id={tag.id} data-name={tag.name} key={tag.id} className="badge badge-outline badge-info mr-1 mb-1 cursor-pointer" onClick={event => removeFromList({id: event.target.dataset.id, name: event.target.dataset.name}, setTags, setAllTags)}>{tag.name}</span>))}
+                        {tags.map(tag => (<span data-id={"id" in tag ? tag.id : undefined} data-name={tag.name} key={"id" in tag ? tag.id : undefined} className="badge badge-outline badge-info mr-1 mb-1 cursor-pointer" onClick={event => removeFromList(typeof (event.target as HTMLSpanElement).dataset.id === "undefined" ? {name: (event.target as HTMLSpanElement).dataset.name!} : {id: (event.target as HTMLSpanElement).dataset.id as unknown as number, name: (event.target as HTMLSpanElement).dataset.name!}, setTags, setAllTags)}>{tag.name}</span>))}
                     </div>
                 </fieldset>
 
                 <fieldset className="fieldset">
-                    <legend className="fieldset-legend w-full">Developers<button type="button" className="btn btn-xs btn-primary btn-soft justify-end" onClick={()=>document.getElementById('developerModal').showModal()}>Create new developer</button></legend>
+                    <legend className="fieldset-legend w-full">Developers<button type="button" className="btn btn-xs btn-primary btn-soft justify-end" onClick={()=>(document.getElementById('developerModal') as HTMLDialogElement).showModal()}>Create new developer</button></legend>
                     <div className="flex gap-2">
-                        <button type="button" className="btn btn-primary w-15" disabled={!selectedDeveloper} onClick={() => addToList(developers, setDevelopers, selectedDeveloper, setSelectedDeveloper, setAllDevelopers)}>Add</button>
+                        <button type="button" className="btn btn-primary w-15" disabled={!selectedDeveloper} onClick={() => addToList(developers, setDevelopers, selectedDeveloper!, setSelectedDeveloper, setAllDevelopers)}>Add</button>
                         <label className="select pl-0">
-                            <select value={selectedDeveloper?.name ?? "Choose a developer"} className="ml-0!" onChange={event => setSelectedDeveloper({id: event.target.selectedOptions[0].dataset.id, name: event.target.selectedOptions[0].value})}>
-                                <option disabled={true} defaultValue={true}>Choose a developer</option>
-                                {allDevelopers.map(developer => (<option data-id={developer.id} key={developer.id} value={developer.name}>{developer.name}</option>))}
+                            <select value={selectedDeveloper?.name ?? "Choose a developer"} className="ml-0!" onChange={event => setSelectedDeveloper(typeof event.target.selectedOptions[0].dataset.id === "undefined" ? {name: event.target.selectedOptions[0].value} : {id: event.target.selectedOptions[0].dataset.id as unknown as number, name: event.target.selectedOptions[0].value})}>
+                                <option disabled={true}>Choose a developer</option>
+                                {allDevelopers.map(developer => (<option data-id={"id" in developer ? developer.id : undefined} key={"id" in developer ? developer.id : undefined} value={developer.name}>{developer.name}</option>))}
                             </select>
                         </label>
                     </div>
                     <div className="max-w-80">
-                        {developers.map(developer => (<span data-id={developer.id} data-name={developer.name} key={developer.id} className="badge badge-outline badge-info mr-1 mb-1 cursor-pointer" onClick={event => removeFromList({id: event.target.dataset.id, name: event.target.dataset.name}, setDevelopers, setAllDevelopers)}>{developer.name}</span>))}
+                        {developers.map(developer => (<span data-id={"id" in developer ? developer.id : undefined} data-name={developer.name} key={"id" in developer ? developer.id : undefined} className="badge badge-outline badge-info mr-1 mb-1 cursor-pointer" onClick={event => removeFromList(typeof (event.target as HTMLSpanElement).dataset.id === "undefined" ? {name: (event.target as HTMLSpanElement).dataset.name!} : {id: (event.target as HTMLSpanElement).dataset.id as unknown as number, name: (event.target as HTMLSpanElement).dataset.name!}, setDevelopers, setAllDevelopers)}>{developer.name}</span>))}
                     </div>
                 </fieldset>
 
                 <fieldset className="fieldset">
-                    <legend className="fieldset-legend w-full">Publishers<button type="button" className="btn btn-xs btn-primary btn-soft justify-end" onClick={()=>document.getElementById('publisherModal').showModal()}>Create new publisher</button></legend>
+                    <legend className="fieldset-legend w-full">Publishers<button type="button" className="btn btn-xs btn-primary btn-soft justify-end" onClick={()=>(document.getElementById('publisherModal') as HTMLDialogElement).showModal()}>Create new publisher</button></legend>
                     <div className="flex gap-2">
-                        <button type="button" className="btn btn-primary w-15" disabled={!selectedPublisher} onClick={() => addToList(publishers, setPublishers, selectedPublisher, setSelectedPublisher, setAllPublishers)}>Add</button>
+                        <button type="button" className="btn btn-primary w-15" disabled={!selectedPublisher} onClick={() => addToList(publishers, setPublishers, selectedPublisher!, setSelectedPublisher, setAllPublishers)}>Add</button>
                         <label className="select pl-0">
-                            <select value={selectedPublisher?.name ?? "Choose a publisher"} className="ml-0!" onChange={event => setSelectedPublisher({id: event.target.selectedOptions[0].dataset.id, name: event.target.selectedOptions[0].value})}>
-                                <option disabled={true} defaultValue={true}>Choose a publisher</option>
-                                {allPublishers.map(publisher => (<option data-id={publisher.id} key={publisher.id} value={publisher.name}>{publisher.name}</option>))}
+                            <select value={selectedPublisher?.name ?? "Choose a publisher"} className="ml-0!" onChange={event => setSelectedPublisher(typeof event.target.selectedOptions[0].dataset.id === "undefined" ? {name: event.target.selectedOptions[0].value} : {id: event.target.selectedOptions[0].dataset.id as unknown as number, name: event.target.selectedOptions[0].value})}>
+                                <option disabled={true}>Choose a publisher</option>
+                                {allPublishers.map(publisher => (<option data-id={"id" in publisher ? publisher.id : undefined} key={"id" in publisher ? publisher.id : undefined} value={publisher.name}>{publisher.name}</option>))}
                             </select>
                         </label>
                     </div>
                     <div className="max-w-80">
-                        {publishers.map(publisher => (<span data-id={publisher.id} data-name={publisher.name} key={publisher.id} className="badge badge-outline badge-info mr-1 mb-1 cursor-pointer" onClick={event => removeFromList({id: event.target.dataset.id, name: event.target.dataset.name}, setPublishers, setAllPublishers)}>{publisher.name}</span>))}
+                        {publishers.map(publisher => (<span data-id={"id" in publisher ? publisher.id : undefined} data-name={publisher.name} key={"id" in publisher ? publisher.id : undefined} className="badge badge-outline badge-info mr-1 mb-1 cursor-pointer" onClick={event => removeFromList(typeof (event.target as HTMLSpanElement).dataset.id === "undefined" ? {name: (event.target as HTMLSpanElement).dataset.name!} : {id: (event.target as HTMLSpanElement).dataset.id as unknown as number, name: (event.target as HTMLSpanElement).dataset.name!}, setPublishers, setAllPublishers)}>{publisher.name}</span>))}
                     </div>
                 </fieldset>
 
@@ -267,12 +288,12 @@ function GameForm({game, onSubmit, buttonText}) {
                     </div>
                     <div>
                         {screenshots.map((screenshot, index) => {
-                            return <div key={"scrsht" + index} className="text-sm ml-20 mb-1 flex items-center"><img data-screenshot={screenshot} onClick={event => removeElementFromScreenshots(event.target.dataset.screenshot)} title="delete screenshot" className="w-5 inline border-1 rounded-full mr-1 cursor-pointer" src={deleteIcon}/><span title={screenshot}>{screenshot.length < 30 ? screenshot : screenshot.slice(0, 22) + "..."}</span></div>
+                            return <div key={"scrsht" + index} className="text-sm ml-20 mb-1 flex items-center"><img data-screenshot={screenshot} onClick={event => removeElementFromScreenshots((event.target as HTMLImageElement).dataset.screenshot!)} title="delete screenshot" className="w-5 inline border-1 rounded-full mr-1 cursor-pointer" src={deleteIcon}/><span title={screenshot}>{screenshot.length < 30 ? screenshot : screenshot.slice(0, 22) + "..."}</span></div>
                             })}
                     </div>
                 </fieldset>
 
-                <button type="button" onClick={() => onSubmit({name, releaseDate, tags, publishers, developers, descriptionShort, descriptionLong, headerImg, screenshots})} className="btn btn-primary mt-5" disabled={!isNameAdded || !isReleaseDateAdded || tags.length === 0 || developers.length === 0 || publishers.length === 0}>{buttonText}</button>
+                <button type="button" onClick={() => onSubmit({name, releaseDate: new Date(releaseDate), tags, publishers, developers, descriptionShort, descriptionLong, headerImg, screenshots})} className="btn btn-primary mt-5" disabled={!isNameAdded || !isReleaseDateAdded || tags.length === 0 || developers.length === 0 || publishers.length === 0}>{buttonText}</button>
             </form>
             
             <AddGameAttributeModal modalId="tagModal" modalName="Tag" listSetter={setTags} list={tags} allList={allTags}/>

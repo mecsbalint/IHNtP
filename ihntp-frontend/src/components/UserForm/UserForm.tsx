@@ -1,6 +1,16 @@
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+import { UserRegistration } from "../../types/User";
 
-function UserForm({submitText, onSubmit, nameErrorMsg = "", emailErrorMsg = "", passwordErrorMsg = "", isLoading = null}) {
+type UserFormProps = {
+  submitText: string,
+  onSubmit: (event: FormEvent<HTMLFormElement>, formData: UserRegistration) => Promise<void>,
+  nameErrorMsg?: string,
+  emailErrorMsg?: string,
+  passwordErrorMsg?: string,
+  isLoading?: boolean | null
+}
+
+function UserForm({submitText, onSubmit, nameErrorMsg = "", emailErrorMsg = "", passwordErrorMsg = "", isLoading = null} : UserFormProps) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -62,7 +72,7 @@ function UserForm({submitText, onSubmit, nameErrorMsg = "", emailErrorMsg = "", 
         <p className="text-error">{passwordErrorState ? passwordErrorMsg : ""}</p>
       </div>
 
-      <button type="submit" className="btn btn-neutral mt-4" disabled={isLoading}>
+      <button type="submit" className="btn btn-neutral mt-4" disabled={!!isLoading}>
         {submitText}
       </button>
     </form>

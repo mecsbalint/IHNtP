@@ -1,7 +1,13 @@
 /* eslint-disable react/prop-types */
 import GameListElement from "../GameListElement/GameListElement";
+import { GameForList } from "../../types/Game";
 
-function GameList({games, listTitle}) {
+type GameListProps = {
+    games: GameForList[],
+    listTitle: string
+}
+
+function GameList({games, listTitle} : GameListProps) {
     return (
         <ul className={`w-full list bg-blue-400 rounded-b-box shadow-md ${games.length > 0 ? "" : "hidden"}`}>
             <li className="p-4 pb-2 text-3xl text-amber-50">{listTitle}</li>
