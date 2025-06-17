@@ -20,6 +20,7 @@ The I Have Nothing to Play project is a full-stack web application. It enables u
 ### Built with
 
 * [![Node.js][Node-ico]][Node-url]
+* [![TypeScript][TS-ico]][TS-url]
 * [![React][React-ico]][React-url]
 * [![Tailwind css][Tailwind-ico]][Tailwind-url]
 * [![DaisyUI][DaisyUI-ico]][DaisyUI-url]
@@ -83,8 +84,9 @@ Or alternatively clone the repository: ```git clone https://github.com/mecsbalin
 - [x] Wishlist and Backlog
 - [x] Dockerization
 - [x] Edit game and add new game pages
-- [ ] Switch to TypeScript
+- [x] Switch to TypeScript
 - [ ] Integrate price information from IsThereAnyDeals API
+- [ ] Responsive UI design
 - [ ] End-to-end tests with Selenium
 - [ ] Avatar image selection
 - [ ] Search bar for games
@@ -102,8 +104,11 @@ mecsbalint@gmail.com - https://github.com/mecsbalint
 
 [screenshot]: readme_resources/ihntp_screenshot_01.png
 
-[Node-ico]: https://img.shields.io/badge/Node.js-35495E?style=for-the-badge&logo=node.js
+[Node-ico]: https://img.shields.io/badge/Node.js-35422E?style=for-the-badge&logo=node.js
 [Node-url]: https://nodejs.org/
+
+[TS-ico]: https://img.shields.io/badge/TypeScript-687959?style=for-the-badge&logo=typescript
+[TS-url]: https://www.typescriptlang.org/
 
 [React-ico]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react
 [React-url]: https://reactjs.org/
