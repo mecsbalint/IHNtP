@@ -7,8 +7,8 @@ export async function getAllDevelopers() : Promise<DeveloperWithId[]> {
     return responseObj.status === 200 && responseObj.body !== null ? responseObj.body : [];
 }
 
-export async function addNewDevelopers(developersToAdd : Developer[]) : Promise<number[]> {
-    const responseObj = await apiRequest<number[]>({url: "/api/developers/add", method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(developersToAdd)});
+export async function addNewDevelopers(developersToAdd : Developer[], handleUnauthorizedResponse : () => void) : Promise<number[]> {
+    const responseObj = await apiRequest<number[]>({url: "/api/developers/add", method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(developersToAdd), onUnauthorizedResponse: handleUnauthorizedResponse});
 
     return responseObj.status === 200 && responseObj.body !== null ? responseObj.body : [];
 }

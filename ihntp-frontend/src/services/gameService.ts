@@ -26,7 +26,7 @@ export async function getGameForEdit(id : number, handleUnauthorizedResponse : (
 }
 
 export async function addNewGame(newGameObj : GameFormSubmit, handleUnauthorizedResponse : () => void) {
-    const gameToAdd = await processEntityLists(newGameObj);
+    const gameToAdd = await processEntityLists(newGameObj, handleUnauthorizedResponse);
 
     const responseObj = await apiRequest({url: "/api/games/add", method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(gameToAdd), onUnauthorizedResponse: handleUnauthorizedResponse});
 
@@ -34,17 +34,17 @@ export async function addNewGame(newGameObj : GameFormSubmit, handleUnauthorized
 }
 
 export async function editGame(editGameObj : GameFormSubmit, id : number, handleUnauthorizedResponse : () => void) {
-    const gameToEdit = await processEntityLists(editGameObj);
+    const gameToEdit = await processEntityLists(editGameObj, handleUnauthorizedResponse);
 
     const responseObj = await apiRequest({url: `/api/games/edit/${id}`, method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(gameToEdit), onUnauthorizedResponse: handleUnauthorizedResponse});
 
     return responseObj.status === 200;
 }
 
-async function processEntityLists(gameObj : GameFormSubmit) : Promise<GameToAdd> {
-    const developerIds = await processEntities<[Developer, DeveloperWithId]>({entities: gameObj.developers, postFunction: addNewDevelopers});
-    const publisherIds = await processEntities<[Publisher, PublisherWithId]>({entities: gameObj.publishers, postFunction: addNewPublishers});
-    const tagIds = await processEntities<[Tag, TagWithId]>({entities: gameObj.tags, postFunction: addNewTags});
+async function processEntityLists(gameObj : GameFormSubmit, handleUnauthorizedResponse : () => void) : Promise<GameToAdd> {
+    const developerIds = await processEntities<[Developer, DeveloperWithId]>({entities: gameObj.developers, postFunction: addNewDevelopers, handleUnauthorizedResponse});
+    const publisherIds = await processEntities<[Publisher, PublisherWithId]>({entities: gameObj.publishers, postFunction: addNewPublishers, handleUnauthorizedResponse});
+    const tagIds = await processEntities<[Tag, TagWithId]>({entities: gameObj.tags, postFunction: addNewTags, handleUnauthorizedResponse});
 
     return {
         ...gameObj,
@@ -56,14 +56,15 @@ async function processEntityLists(gameObj : GameFormSubmit) : Promise<GameToAdd>
 
 type ProcessEntitiesParams<Entity, EntityWithId> = {
         entities: Array<Entity | EntityWithId>,
-        postFunction: (entitiesToAdd: Entity[]) => Promise<number[]>
+        postFunction: (entitiesToAdd: Entity[], handleUnauthorizedResponse: () => void) => Promise<number[]>,
+        handleUnauthorizedResponse : () => void
     };
 
-async function processEntities<ParamTypes extends [Developer, DeveloperWithId] | [Publisher, PublisherWithId] | [Tag, TagWithId]>({entities, postFunction} : ProcessEntitiesParams<ParamTypes[0], ParamTypes[1]>) : Promise<number[]> {
+async function processEntities<ParamTypes extends [Developer, DeveloperWithId] | [Publisher, PublisherWithId] | [Tag, TagWithId]>({entities, postFunction, handleUnauthorizedResponse} : ProcessEntitiesParams<ParamTypes[0], ParamTypes[1]>) : Promise<number[]> {
     const entitiesToPost = entities.filter((entity): entity is ParamTypes[0] => !('id' in entity));
     const existingDeveloperIds = entities.filter((entity): entity is ParamTypes[1] => 'id' in entity).map(entity => entity.id);
     
-    const createdIds = await postFunction(entitiesToPost);
+    const createdIds = await postFunction(entitiesToPost, handleUnauthorizedResponse);
     
     return [...createdIds, ...existingDeveloperIds];
 }

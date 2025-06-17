@@ -4,7 +4,7 @@ import { Tag, TagWithId } from "./Tag";
 
 type Game = {
     name: string,
-    releaseDate: Date,
+    releaseDate: string,
 };
 
 type GameWithId = Game & {

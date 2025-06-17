@@ -19,12 +19,12 @@ export async function apiRequest<T>({
   body,
   headers = {},
   onUnauthorizedResponse
-} : ApiRequestParams) : Promise<ApiResponse<T | null>> {
+} : ApiRequestParams) : Promise<ApiResponse<T>> {
 
   let jwt : string | null;
   const localStorageItem : string | null = localStorage.getItem("ihntpUser");
   
-  jwt = localStorageItem === null ? null : (JSON.parse(localStorageItem) as User).jwt;
+  jwt = localStorageItem === null || localStorageItem === "null" ? null : (JSON.parse(localStorageItem) as User).jwt;
 
   const response = await fetch(url, {
     method,
@@ -40,7 +40,7 @@ export async function apiRequest<T>({
     return {status: response.status, body: null};
   }
 
-  const responseBody = await response.json().catch(() => null);
+  let responseBody = await response.json().catch(() => null);
 
   return {status: response.status, body: responseBody as T};
 }
