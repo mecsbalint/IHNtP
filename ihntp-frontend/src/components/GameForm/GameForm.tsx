@@ -9,7 +9,7 @@ import { Tag, TagWithId } from "../../types/Tag";
 import { Publisher, PublisherWithId } from "../../types/Publisher";
 import { Developer, DeveloperWithId } from "../../types/Developer";
 import { GameForEdit, GameFormSubmit } from "../../types/Game";
-import { formDate } from "../../utils/utils";
+import { dateFormatter, formDate } from "../../utils/utils";
 
 type GameFormProps = {
     game: GameForEdit | null,
@@ -293,7 +293,7 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
                     </div>
                 </fieldset>
 
-                <button type="button" onClick={() => onSubmit({name, releaseDate: new Date(releaseDate), tags, publishers, developers, descriptionShort, descriptionLong, headerImg, screenshots})} className="btn btn-primary mt-5" disabled={!isNameAdded || !isReleaseDateAdded || tags.length === 0 || developers.length === 0 || publishers.length === 0}>{buttonText}</button>
+                <button type="button" onClick={() => onSubmit({name, releaseDate: dateFormatter(releaseDate), tags, publishers, developers, descriptionShort, descriptionLong, headerImg, screenshots})} className="btn btn-primary mt-5" disabled={!isNameAdded || !isReleaseDateAdded || tags.length === 0 || developers.length === 0 || publishers.length === 0}>{buttonText}</button>
             </form>
             
             <AddGameAttributeModal modalId="tagModal" modalName="Tag" listSetter={setTags} list={tags} allList={allTags}/>
