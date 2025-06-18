@@ -1,9 +1,6 @@
 package com.mecsbalint.backend.controller;
 
-import com.mecsbalint.backend.controller.dto.GameForEditGameDto;
-import com.mecsbalint.backend.controller.dto.GameForGameProfileDto;
-import com.mecsbalint.backend.controller.dto.GameForListDto;
-import com.mecsbalint.backend.controller.dto.GameToAdd;
+import com.mecsbalint.backend.controller.dto.*;
 import com.mecsbalint.backend.repository.GameRepository;
 import com.mecsbalint.backend.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +41,7 @@ public class GameController {
     }
 
     @PutMapping("/edit/{id}")
-    public ResponseEntity<Void> editGame(@PathVariable Long id, @RequestPart("game") GameToAdd gameToEdit, @RequestPart(value = "screenshots", required = false) List<MultipartFile> screenshots, @RequestPart(value = "headerImg", required = false) MultipartFile headerImg) {
+    public ResponseEntity<Void> editGame(@PathVariable Long id, @RequestPart("game") GameToEdit gameToEdit, @RequestPart(value = "screenshots", required = false) List<MultipartFile> screenshots, @RequestPart(value = "headerImg", required = false) MultipartFile headerImg) {
         gameService.editGame(id, gameToEdit, screenshots, headerImg);
 
         return ResponseEntity.status(HttpStatus.OK).build();

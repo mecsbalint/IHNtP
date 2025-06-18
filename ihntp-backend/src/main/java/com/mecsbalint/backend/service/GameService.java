@@ -1,9 +1,6 @@
 package com.mecsbalint.backend.service;
 
-import com.mecsbalint.backend.controller.dto.GameForEditGameDto;
-import com.mecsbalint.backend.controller.dto.GameForGameProfileDto;
-import com.mecsbalint.backend.controller.dto.GameForListDto;
-import com.mecsbalint.backend.controller.dto.GameToAdd;
+import com.mecsbalint.backend.controller.dto.*;
 import com.mecsbalint.backend.exception.ElementIsAlreadyInDatabaseException;
 import com.mecsbalint.backend.exception.GameNotFoundException;
 import com.mecsbalint.backend.exception.InvalidFileException;
@@ -30,7 +27,9 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class GameService {
@@ -85,20 +84,27 @@ public class GameService {
             }
         }
 
+        game.setScreenshots(new HashSet<>());
         saveAndSetImages(game, screenshots, headerImg);
 
         return gameRepository.save(game).getId();
     }
 
-    public void editGame(Long gameId, GameToAdd gameToEdit, List<MultipartFile> screenshots, MultipartFile headerImg) {
+    public void editGame(Long gameId, GameToEdit gameToEdit, List<MultipartFile> screenshots, MultipartFile headerImg) {
         if (!checkForRequiredData(gameToEdit)) throw new MissingDataException(gameToEdit.toString(), "Game");
 
         Game gameOg = gameRepository.findGameById(gameId).orElseThrow(() -> new GameNotFoundException("id", gameId.toString()));
 
-        Game game = createGameFromGameToAdd(gameToEdit);
+        Game game = createGameFromGameToEdit(gameToEdit);
         game.setId(gameId);
 
         deleteUnnecessaryFiles(gameOg, game);
+
+        game.setHeaderImg(gameOg.getHeaderImg());
+        game.setScreenshots(game.getScreenshots().stream()
+                .filter(screenshot -> gameOg.getScreenshots().contains(screenshot))
+                .collect(Collectors.toSet())
+        );
 
         saveAndSetImages(game, screenshots, headerImg);
 
@@ -117,6 +123,7 @@ public class GameService {
         imagesToDelete.addAll(screenshotsToDelete);
 
         for (String imagePath: imagesToDelete) {
+            if (imagePath.contains("https")) continue;
             Path fileToDeletePath = Paths.get(uploadDir + "\\" + imagePath);
             try {
                 Files.deleteIfExists(fileToDeletePath);
@@ -141,7 +148,7 @@ public class GameService {
     }
 
     private String saveImage(MultipartFile image, long gameId) {
-        return saveImages(List.of(image), gameId, "header_img").stream().toList().getFirst();
+        return saveImages(List.of(image), gameId, "header_img").stream().findFirst().orElse(null);
     }
 
     private Set<String> saveImages(List<MultipartFile> images, long gameId, String folderName) {
@@ -154,6 +161,8 @@ public class GameService {
             String relativePath = gameId + "\\" + folderName + "\\" + generatedFilename;
 
             try {
+                File targetFile = new File(Paths.get(uploadDir).toAbsolutePath() + "\\" + relativePath);
+                targetFile.getParentFile().mkdirs();
                 image.transferTo(new File(Paths.get(uploadDir).toAbsolutePath() + "\\" + relativePath));
             } catch (IOException e) {
                 throw new UncheckedIOException(String.format("The system can't save this file: %s", relativePath), e);
@@ -178,28 +187,45 @@ public class GameService {
     }
 
     private Game createGameFromGameToAdd(GameToAdd gameToAdd) {
-        Game game = new Game();
-        game.setName(gameToAdd.name());
-        game.setReleaseDate(gameToAdd.releaseDate());
-        game.setDescriptionShort(gameToAdd.descriptionShort());
-        game.setDescriptionLong(gameToAdd.descriptionLong());
-        game.setHeaderImg(gameToAdd.headerImg());
-        game.setScreenshots(gameToAdd.screenshots());
-        game.setDevelopers(new HashSet<>(developerRepository.findAllById(gameToAdd.developerIds())));
-        game.setPublishers(new HashSet<>(publisherRepository.findAllById(gameToAdd.publisherIds())));
-        game.setTags(new HashSet<>(tagRepository.findAllById(gameToAdd.tagIds())));
+        return createGame(gameToAdd.name(), gameToAdd.releaseDate(), gameToAdd.descriptionShort(), gameToAdd.descriptionLong(), gameToAdd.developerIds(), gameToAdd.publisherIds(), gameToAdd.tagIds());
+    }
+
+    private Game createGameFromGameToEdit(GameToEdit gameToEdit) {
+        Game game = createGame(gameToEdit.name(), gameToEdit.releaseDate(), gameToEdit.descriptionShort(), gameToEdit.descriptionLong(), gameToEdit.developerIds(), gameToEdit.publisherIds(), gameToEdit.tagIds());
+        game.setHeaderImg(gameToEdit.headerImg());
+        game.setScreenshots(gameToEdit.screenshots());
 
         return game;
     }
 
+    private Game createGame(String name, LocalDate releaseDate, String descriptionShort, String descriptionLong, Set<Long> developerIds, Set<Long> publisherIds, Set<Long> tagIds) {
+        Game game = new Game();
+        game.setName(name);
+        game.setReleaseDate(releaseDate);
+        game.setDescriptionShort(descriptionShort);
+        game.setDescriptionLong(descriptionLong);
+        game.setDevelopers(new HashSet<>(developerRepository.findAllById(developerIds)));
+        game.setPublishers(new HashSet<>(publisherRepository.findAllById(publisherIds)));
+        game.setTags(new HashSet<>(tagRepository.findAllById(tagIds)));
+
+        return game;
+    }
+
+    private boolean checkForRequiredData(GameToEdit game) {
+        return checkForRequiredData(game.name(), game.releaseDate(), game.tagIds(), game.developerIds(), game.publisherIds());
+    }
+
     private boolean checkForRequiredData(GameToAdd game) {
-        if (game.name().isEmpty()) return false;
-        if (game.releaseDate() == null) return false;
-        if (game.tagIds().isEmpty()) return false;
-        if (game.developerIds().isEmpty()) return false;
-        if (game.publisherIds().isEmpty()) return false;
+        return checkForRequiredData(game.name(), game.releaseDate(), game.tagIds(), game.developerIds(), game.publisherIds());
+    }
+
+    private boolean checkForRequiredData(String name, LocalDate releaseDate, Set<Long> tagIds, Set<Long> developerIds, Set<Long> publisherIds) {
+        if (name.isEmpty()) return false;
+        if (releaseDate == null) return false;
+        if (tagIds.isEmpty()) return false;
+        if (developerIds.isEmpty()) return false;
+        if (publisherIds.isEmpty()) return false;
 
         return true;
     }
-
 }
