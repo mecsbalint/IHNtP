@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import java.io.UncheckedIOException;
+import java.io.WriteAbortedException;
+
 @org.springframework.web.bind.annotation.ControllerAdvice
 public class ControllerAdvice {
 
@@ -55,6 +58,13 @@ public class ControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MissingDataException.class)
     public String missingDataExceptionHandler(MissingDataException exception) {
+        return exception.getMessage();
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(UncheckedIOException.class)
+    public String uncheckedIOExceptionHandler(UncheckedIOException exception) {
         return exception.getMessage();
     }
 }

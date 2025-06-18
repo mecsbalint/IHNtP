@@ -7,10 +7,15 @@ import com.mecsbalint.backend.controller.dto.GameToAdd;
 import com.mecsbalint.backend.repository.GameRepository;
 import com.mecsbalint.backend.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -46,7 +51,7 @@ public class GameController {
     }
 
     @PostMapping("/add")
-    public Long addGame(@RequestBody GameToAdd gameToAdd) {
-        return gameService.addGame(gameToAdd);
+    public Long addGame(@RequestPart("game") GameToAdd gameToAdd, @RequestPart(value = "screenshots", required = false) List<MultipartFile> screenshots, @RequestPart(value = "headerImg", required = false) MultipartFile headerImg) {
+        return gameService.addGame(gameToAdd, screenshots, headerImg);
     }
 }

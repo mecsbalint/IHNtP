@@ -6,6 +6,7 @@ import com.mecsbalint.backend.controller.dto.GameForListDto;
 import com.mecsbalint.backend.controller.dto.GameToAdd;
 import com.mecsbalint.backend.exception.ElementIsAlreadyInDatabaseException;
 import com.mecsbalint.backend.exception.GameNotFoundException;
+import com.mecsbalint.backend.exception.InvalidFileException;
 import com.mecsbalint.backend.exception.MissingDataException;
 import com.mecsbalint.backend.model.Game;
 import com.mecsbalint.backend.repository.DeveloperRepository;
@@ -13,13 +14,23 @@ import com.mecsbalint.backend.repository.GameRepository;
 import com.mecsbalint.backend.repository.PublisherRepository;
 import com.mecsbalint.backend.repository.TagRepository;
 import jakarta.transaction.Transactional;
+import org.apache.commons.imaging.Imaging;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.io.FilenameUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashSet;
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.io.WriteAbortedException;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 public class GameService {
@@ -27,6 +38,9 @@ public class GameService {
     private final DeveloperRepository developerRepository;
     private final PublisherRepository publisherRepository;
     private final TagRepository tagRepository;
+
+    @Value("${mecsbalint.app.file-upload-dir}")
+    private String uploadDir;
 
     @Autowired
     public GameService(GameRepository gameRepository, DeveloperRepository developerRepository, PublisherRepository publisherRepository, TagRepository tagRepository) {
@@ -56,13 +70,13 @@ public class GameService {
         return new GameForEditGameDto(gameEntity);
     }
 
-    public Long addGame(GameToAdd gameToAdd) {
+    public Long addGame(GameToAdd gameToAdd, List<MultipartFile> screenshots, MultipartFile headerImg) {
         if (!checkForRequiredData(gameToAdd)) throw new MissingDataException(gameToAdd.toString(), "Game");
 
         Game game = createGameFromGameToAdd(gameToAdd);
 
         try {
-            return gameRepository.save(game).getId();
+            game = gameRepository.saveAndFlush(game);
         } catch (DataIntegrityViolationException exception) {
             if (exception.getCause() instanceof ConstraintViolationException) {
                 throw new ElementIsAlreadyInDatabaseException(game.toString(), "Game");
@@ -70,6 +84,20 @@ public class GameService {
                 throw exception;
             }
         }
+
+        if (screenshots != null) {
+            validateImages(screenshots);
+            Set<String> screenshotPaths = saveImages(screenshots, game.getId(), "screenshots");
+            game.setScreenshots(screenshotPaths);
+        }
+
+        if (headerImg != null) {
+            validateImages(List.of(headerImg));
+            String headerImgPath = saveImage(headerImg, game.getId());
+            game.setHeaderImg(headerImgPath);
+        }
+
+        return gameRepository.save(game).getId();
     }
 
     public void editGame(GameToAdd gameToEdit, Long gameId) {
@@ -82,6 +110,42 @@ public class GameService {
             gameRepository.save(game);
         } else {
             throw new GameNotFoundException("id", gameId.toString());
+        }
+    }
+
+    private String saveImage(MultipartFile image, long gameId) {
+        return saveImages(List.of(image), gameId, "header_img").stream().toList().getFirst();
+    }
+
+    private Set<String> saveImages(List<MultipartFile> images, long gameId, String folderName) {
+        Set<String> imagePaths = new HashSet<>();
+
+        for (MultipartFile image: images) {
+            String extension = FilenameUtils.getExtension(image.getOriginalFilename());
+            String generatedFilename = UUID.randomUUID() + "." + extension;
+            String relativePath = gameId + "\\" + folderName + "\\" + generatedFilename;
+
+            try {
+                image.transferTo(new File(Paths.get(uploadDir).toAbsolutePath() + "\\" + relativePath));
+            } catch (IOException e) {
+                throw new UncheckedIOException(String.format("The system can't save this file: %s", relativePath), e);
+            }
+
+            imagePaths.add(relativePath);
+        }
+
+        return imagePaths;
+    }
+
+    private void validateImages(List<MultipartFile> files) {
+        for (MultipartFile file: files) {
+            try {
+                Imaging.getImageInfo(file.getBytes());
+            } catch (ImagingException e) {
+                throw new InvalidFileException(file.getOriginalFilename(), "JPEG/PNG/BMP/GIF/TIFF/PSD/WBMP/ICO", e);
+            } catch (IOException e) {
+                throw new UncheckedIOException(String.format("The system can't read the file (original filename: %s)", file.getOriginalFilename()), e);
+            }
         }
     }
 
@@ -109,4 +173,5 @@ public class GameService {
 
         return true;
     }
+
 }
