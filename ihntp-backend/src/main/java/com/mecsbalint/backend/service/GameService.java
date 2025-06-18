@@ -27,10 +27,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.io.WriteAbortedException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Stream;
 
 @Service
 public class GameService {
@@ -85,31 +85,58 @@ public class GameService {
             }
         }
 
+        saveAndSetImages(game, screenshots, headerImg);
+
+        return gameRepository.save(game).getId();
+    }
+
+    public void editGame(Long gameId, GameToAdd gameToEdit, List<MultipartFile> screenshots, MultipartFile headerImg) {
+        if (!checkForRequiredData(gameToEdit)) throw new MissingDataException(gameToEdit.toString(), "Game");
+
+        Game gameOg = gameRepository.findGameById(gameId).orElseThrow(() -> new GameNotFoundException("id", gameId.toString()));
+
+        Game game = createGameFromGameToAdd(gameToEdit);
+        game.setId(gameId);
+
+        deleteUnnecessaryFiles(gameOg, game);
+
+        saveAndSetImages(game, screenshots, headerImg);
+
+        gameRepository.save(game);
+
+    }
+
+    private void deleteUnnecessaryFiles(Game gameOg, Game gameNew) {
+        List<String> imagesToDelete = new ArrayList<>();
+
+        if (gameOg.getHeaderImg() != null && gameNew.getHeaderImg() == null) imagesToDelete.add(gameOg.getHeaderImg());
+
+        List<String> screenshotsToDelete = gameOg.getScreenshots().stream()
+                .filter(screenshot -> !gameNew.getScreenshots().contains(screenshot))
+                .toList();
+        imagesToDelete.addAll(screenshotsToDelete);
+
+        for (String imagePath: imagesToDelete) {
+            Path fileToDeletePath = Paths.get(uploadDir + "\\" + imagePath);
+            try {
+                Files.deleteIfExists(fileToDeletePath);
+            } catch (IOException e) {
+                throw new UncheckedIOException(String.format("The system can't delete this file: %s", fileToDeletePath), e);
+            }
+        }
+    }
+
+    private void saveAndSetImages(Game game, List<MultipartFile> screenshots, MultipartFile headerImg) {
         if (screenshots != null) {
             validateImages(screenshots);
             Set<String> screenshotPaths = saveImages(screenshots, game.getId(), "screenshots");
-            game.setScreenshots(screenshotPaths);
+            game.getScreenshots().addAll(screenshotPaths);
         }
 
         if (headerImg != null) {
             validateImages(List.of(headerImg));
             String headerImgPath = saveImage(headerImg, game.getId());
             game.setHeaderImg(headerImgPath);
-        }
-
-        return gameRepository.save(game).getId();
-    }
-
-    public void editGame(GameToAdd gameToEdit, Long gameId) {
-        if (!checkForRequiredData(gameToEdit)) throw new MissingDataException(gameToEdit.toString(), "Game");
-
-        if (gameRepository.findGameById(gameId).isPresent()) {
-            Game game = createGameFromGameToAdd(gameToEdit);
-            game.setId(gameId);
-
-            gameRepository.save(game);
-        } else {
-            throw new GameNotFoundException("id", gameId.toString());
         }
     }
 
@@ -121,6 +148,7 @@ public class GameService {
         Set<String> imagePaths = new HashSet<>();
 
         for (MultipartFile image: images) {
+
             String extension = FilenameUtils.getExtension(image.getOriginalFilename());
             String generatedFilename = UUID.randomUUID() + "." + extension;
             String relativePath = gameId + "\\" + folderName + "\\" + generatedFilename;

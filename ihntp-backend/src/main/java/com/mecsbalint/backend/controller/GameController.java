@@ -44,8 +44,8 @@ public class GameController {
     }
 
     @PutMapping("/edit/{id}")
-    public ResponseEntity<Void> editGame(@RequestBody GameToAdd gameToEdit, @PathVariable Long id) {
-        gameService.editGame(gameToEdit, id);
+    public ResponseEntity<Void> editGame(@PathVariable Long id, @RequestPart("game") GameToAdd gameToEdit, @RequestPart(value = "screenshots", required = false) List<MultipartFile> screenshots, @RequestPart(value = "headerImg", required = false) MultipartFile headerImg) {
+        gameService.editGame(id, gameToEdit, screenshots, headerImg);
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
