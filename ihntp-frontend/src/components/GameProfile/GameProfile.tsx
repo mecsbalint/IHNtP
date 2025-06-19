@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import editIcon from "../../assets/edit_icon.png";
 import { GameForGameProfileWithStatuses } from "../../types/Game";
 import { formDate, imagePathFormatter } from "../../utils/utils";
+import placeholderScreenshot from "../../assets/placegolder_screenshot.png";
 
 type GameProfileProps = {
     game: GameForGameProfileWithStatuses,
@@ -26,6 +27,16 @@ function GameProfile({game, isLoggedIn, onClickListButton} : GameProfileProps) {
                         </div>
                     );
                 })}
+                {game.screenshots.length === 0 && (
+                        <div key="placeholder" className="carousel-item w-full rounded-t-box">
+                            <img
+                                src={placeholderScreenshot}
+                                className="w-full rounded-t-box"
+                                alt="placeholder image"
+                            />
+                        </div>
+                    )
+                }
             </div>
             <div className="card-body">
                 <div className="flex justify-between w-full">
