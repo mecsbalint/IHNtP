@@ -52,11 +52,14 @@ export type GameFormSubmit = Game & {
 export type GameToAdd = Game & {
     descriptionShort: string,
     descriptionLong: string,
-    headerImg: string,
-    screenshots: string[],
     developerIds: number[],
     publisherIds: number[],
     tagIds: number[]
+};
+
+export type GameToEdit = GameToAdd & {
+    headerImg: string,
+    screenshots: string[],
 }
 
 export type GameStatuses = {

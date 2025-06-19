@@ -52,7 +52,6 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
 
     const [screenshots, setScreenshots] = useState<Array<File | string>>([]);
     const carouselRef = useRef<HTMLDivElement | null>(null);
-
     
     useEffect(() => {
         getAllTags().then(tags => {
