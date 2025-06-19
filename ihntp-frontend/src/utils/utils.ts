@@ -11,3 +11,9 @@ export function formDate(dateStr : string) : string {
 export function dateFormatter(date: string) : string {
     return date.split(" ").reverse().join("-");
 }
+
+export function imagePathFormatter(imagePath : string) : string {
+    if (imagePath.includes("http")) return imagePath;
+
+    return window.location.origin + "/static/" + imagePath;
+}

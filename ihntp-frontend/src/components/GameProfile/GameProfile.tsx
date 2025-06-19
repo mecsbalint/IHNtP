@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import editIcon from "../../assets/edit_icon.png";
 import { GameForGameProfileWithStatuses } from "../../types/Game";
-import { formDate } from "../../utils/utils";
+import { formDate, imagePathFormatter } from "../../utils/utils";
 
 type GameProfileProps = {
     game: GameForGameProfileWithStatuses,
@@ -19,7 +19,7 @@ function GameProfile({game, isLoggedIn, onClickListButton} : GameProfileProps) {
                     return (
                         <div key={screenshot} className="carousel-item w-full rounded-t-box">
                             <img
-                                src={screenshot}
+                                src={imagePathFormatter(screenshot)}
                                 className="w-full rounded-t-box"
                                 alt={`${game.name} screenshot no. ${index + 1}`}
                             />
