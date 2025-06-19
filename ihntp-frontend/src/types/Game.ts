@@ -42,8 +42,8 @@ export type GameForEdit = GameWithId & {
 export type GameFormSubmit = Game & {
     descriptionShort: string,
     descriptionLong: string,
-    headerImg: string,
-    screenshots: string[],
+    headerImg: string | File,
+    screenshots: Array<string | File>,
     developers: Array<Developer | DeveloperWithId>,
     publishers: Array<Publisher | PublisherWithId>,
     tags: Array<Tag | TagWithId>
