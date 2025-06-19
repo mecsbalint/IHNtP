@@ -100,7 +100,7 @@ public class GameService {
 
         deleteUnnecessaryFiles(gameOg, game);
 
-        game.setHeaderImg(gameOg.getHeaderImg());
+        game.setHeaderImg(game.getHeaderImg());
         game.setScreenshots(game.getScreenshots().stream()
                 .filter(screenshot -> gameOg.getScreenshots().contains(screenshot))
                 .collect(Collectors.toSet())

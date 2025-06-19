@@ -1,7 +1,8 @@
 /* eslint-disable react/prop-types */
 import { Link } from "react-router-dom";
 import { GameForList } from "../../types/Game";
-import { formDate } from "../../utils/utils";
+import { formDate, imagePathFormatter } from "../../utils/utils";
+import placeholderHeaderImg from "../../assets/placegolder_header_img.png";
 
 type GameListElementProps = {
     game: GameForList
@@ -15,7 +16,7 @@ function GameListElement({game} : GameListElementProps) {
                 <div className="grid grid-cols-2 card card-side bg-base-100 shadow-sm">
                     <figure>
                         <img
-                        src={game.headerImg}
+                        src={game.headerImg ? imagePathFormatter(game.headerImg) : placeholderHeaderImg}
                         alt={game.name} />
                                 </figure>
                     <div className="card-body">

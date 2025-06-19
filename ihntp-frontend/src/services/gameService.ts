@@ -1,5 +1,5 @@
 import { Developer, DeveloperWithId } from "../types/Developer";
-import { GameForEdit, GameForGameProfile, GameForList, GameFormSubmit, GameToAdd } from "../types/Game";
+import { GameForEdit, GameForGameProfile, GameForList, GameFormSubmit, GameToEdit, GameToAdd } from "../types/Game";
 import { Publisher, PublisherWithId } from "../types/Publisher";
 import { Tag, TagWithId } from "../types/Tag";
 import { apiRequest } from "./api";
@@ -26,28 +26,50 @@ export async function getGameForEdit(id : number, handleUnauthorizedResponse : (
 }
 
 export async function addNewGame(newGameObj : GameFormSubmit, handleUnauthorizedResponse : () => void) {
-    const gameToAdd = await processEntityLists(newGameObj, handleUnauthorizedResponse);
+    const headerImg = typeof newGameObj.headerImg === "string" ? null : newGameObj.headerImg;
+    const screenshots = newGameObj.screenshots.filter((screenshot) : screenshot is File => typeof screenshot !== "string");
 
-    const responseObj = await apiRequest({url: "/api/games/add", method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(gameToAdd), onUnauthorizedResponse: handleUnauthorizedResponse});
+    const gameToAdd : GameToAdd = await processEntityLists(newGameObj, handleUnauthorizedResponse);
+
+    const requestBody = createMultipartFormData<GameToAdd>(gameToAdd, headerImg, screenshots);
+
+    const responseObj = await apiRequest({url: "/api/games/add", method: "POST", body: requestBody, onUnauthorizedResponse: handleUnauthorizedResponse});
 
     return responseObj.status === 200 ? responseObj.body : null;
 }
 
 export async function editGame(editGameObj : GameFormSubmit, id : number, handleUnauthorizedResponse : () => void) {
+    const headerImg = typeof editGameObj.headerImg === "string" ? null : editGameObj.headerImg;
+    const screenshots = editGameObj.screenshots.filter((screenshot) : screenshot is File => typeof screenshot !== "string");
+
     const gameToEdit = await processEntityLists(editGameObj, handleUnauthorizedResponse);
 
-    const responseObj = await apiRequest({url: `/api/games/edit/${id}`, method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(gameToEdit), onUnauthorizedResponse: handleUnauthorizedResponse});
+    const requestBody = createMultipartFormData<GameToEdit>(gameToEdit, headerImg, screenshots);
+
+    const responseObj = await apiRequest({url: `/api/games/edit/${id}`, method: "PUT", body: requestBody, onUnauthorizedResponse: handleUnauthorizedResponse});
 
     return responseObj.status === 200;
 }
 
-async function processEntityLists(gameObj : GameFormSubmit, handleUnauthorizedResponse : () => void) : Promise<GameToAdd> {
+function createMultipartFormData<T extends GameToAdd | GameToEdit>(gameObj : T, headerImg : File | null, screenshots : File[]) : FormData {
+    const formData = new FormData();
+
+    formData.append("game", new Blob([JSON.stringify(gameObj)], {type: "application/json"}));
+    headerImg && formData.append("headerImg", headerImg);
+    screenshots.forEach(screenshot => formData.append("screenshots", screenshot));
+
+    return formData;
+}
+
+async function processEntityLists(gameObj : GameFormSubmit, handleUnauthorizedResponse : () => void) : Promise<GameToEdit> {
     const developerIds = await processEntities<[Developer, DeveloperWithId]>({entities: gameObj.developers, postFunction: addNewDevelopers, handleUnauthorizedResponse});
     const publisherIds = await processEntities<[Publisher, PublisherWithId]>({entities: gameObj.publishers, postFunction: addNewPublishers, handleUnauthorizedResponse});
     const tagIds = await processEntities<[Tag, TagWithId]>({entities: gameObj.tags, postFunction: addNewTags, handleUnauthorizedResponse});
 
     return {
         ...gameObj,
+        headerImg: typeof gameObj.headerImg === "string" ? gameObj.headerImg : "",
+        screenshots: gameObj.screenshots.filter((screenshot) : screenshot is string => typeof screenshot === "string"),
         developerIds,
         publisherIds,
         tagIds

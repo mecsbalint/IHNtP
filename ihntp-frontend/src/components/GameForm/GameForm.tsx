@@ -1,10 +1,11 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getAllTags } from "../../services/tagService";
 import { getAllPublishers } from "../../services/publisherService";
 import { getAllDevelopers } from "../../services/developerService";
 import AddGameAttributeModal from "../AddGameAttributeModal.jsx/AddGameAttributeModal";
 import deleteIcon from "../../assets/delete_icon.png";
+import uploadIcon from "../../assets/upload_icon.png";
 import { Tag, TagWithId } from "../../types/Tag";
 import { Publisher, PublisherWithId } from "../../types/Publisher";
 import { Developer, DeveloperWithId } from "../../types/Developer";
@@ -45,11 +46,12 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
     const [descriptionLong, setDescriptionLong] = useState("");
     const [isDescriptionLongAdded, setIsDescriptionLongAdded] = useState(false);
 
-    const [headerImg, setHeaderImg] = useState("");
+    const [headerImgUrl, setHeaderImgUrl] = useState("");
+    const [headerImg, setHeaderImg] = useState<File | null>();
     const [isHeaderImgAdded, setIsHeaderImgAdded] = useState(false);
 
-    const [screenshot, setScreenshot] = useState("");
-    const [screenshots, setScreenshots] = useState<string[]>([]);
+    const [screenshots, setScreenshots] = useState<Array<File | string>>([]);
+    const carouselRef = useRef<HTMLDivElement | null>(null);
     
     useEffect(() => {
         getAllTags().then(tags => {
@@ -89,12 +91,20 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
             setDescriptionLong(game.descriptionLong);
             setIsDescriptionLongAdded(game.descriptionLong !== "");
 
-            setHeaderImg(game.headerImg);
+            setHeaderImgUrl(game.headerImg);
             setIsHeaderImgAdded(game.headerImg !== "");
 
-            game.screenshots.forEach(screenshot => addElementToScreenshots(screenshot));
+            setScreenshots(game.screenshots);
         }
-    }, [game, allTagsLoaded, allPublishersLoaded, allDevelopersLoaded])
+    }, [game, allTagsLoaded, allPublishersLoaded, allDevelopersLoaded]);
+
+    useEffect(() => {
+        const carousel = carouselRef.current;
+        if (carousel) {
+          const lastChild = carousel.lastElementChild;
+          lastChild?.scrollIntoView({ behavior: 'auto', inline: 'start' });
+        }
+      }, [screenshots]);
 
     function addToList(
             list : Array<Tag | TagWithId> | Array<Developer | DeveloperWithId> | Array<Publisher | PublisherWithId>, 
@@ -127,20 +137,54 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
         });
     }
 
-    function addElementToScreenshots(screenshotToAdd : string) {
-        setScreenshots(prev => {
-            if (prev.includes(screenshotToAdd)){
-                return prev;
-            } else{
-                return [...prev, screenshotToAdd];
-            }
-        });
-        setScreenshot("");
+    function handleHeaderImgChange(event: React.FormEvent<HTMLInputElement>) {
+        const target = event.target as HTMLInputElement & {
+            files: FileList
+        }
+
+        const uploadedImage = target.files[0];
+
+        if (uploadedImage.type.startsWith("image/")) {
+            setHeaderImg(uploadedImage);
+    
+            setHeaderImgUrl(URL.createObjectURL(uploadedImage));
+    
+            setIsHeaderImgAdded(true);
+        } else {
+            target.value = "";
+        }
+
     }
 
-    function removeElementFromScreenshots(elementToRemove : string) {
+    function handleHeaderImgDelete() {
+        setHeaderImg(null);
+
+        setHeaderImgUrl("");
+
+        setIsHeaderImgAdded(false);
+    }
+
+    function addElementToScreenshots(event : React.FormEvent<HTMLInputElement>) {
+        const target = event.target as HTMLInputElement & {
+            files: FileList
+        }
+
+        const uploadedImage = target.files[0];
+
+        if (uploadedImage.type.startsWith("image/")) {
+            setScreenshots(prev => [...prev, uploadedImage]);
+        } else {
+            target.value = "";
+        }
+    }
+
+    function removeElementFromScreenshots(removeIndex : string) {
+        const index = removeIndex as any as number;
+
         setScreenshots(prev => {
-            return [...prev.filter(element => element !== elementToRemove)];
+            const newArr = [...prev];
+            newArr.splice(index, 1);
+            return newArr;
         });
     }
 
@@ -264,36 +308,52 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
                     </div>
                 </fieldset>
                 
-                <fieldset className="fieldset h-20">
+                <fieldset className="fieldset h-fit">
                     <legend className="fieldset-legend">Header image</legend>
-                    <div className={`flex gap-2 ${isHeaderImgAdded ? "hidden" : ""}`}>
-                        <button type="button" className="btn btn-primary w-15" onClick={() => setIsHeaderImgAdded(true)} disabled={headerImg === ""}>Add</button>
-                        <label className="input">
-                            <input type="text" onChange={event => setHeaderImg(event.target.value)} value={headerImg} onKeyDown={event => event.keyCode === 13 && headerImg !== "" && setIsHeaderImgAdded(true)}/>
+                    <div className={`flex ${isHeaderImgAdded ? "hidden" : ""}`}>
+                        <label className="w-full h-30 border-1 border-dashed rounded flex items-center justify-center cursor-pointer">
+                                <img className="w-10" src={uploadIcon}></img>
+                                Upload File
+                                <input className="hidden" type="file" accept="image/*" onChange={(event) => handleHeaderImgChange(event)}/>
                         </label>
                     </div>
-                    <div className={`flex items-center gap-2 ${isHeaderImgAdded ? "" : "hidden"}`}>
-                        <button title="edit name" type="button" className="btn btn-primary cursor-pointer w-15" onClick={() => setIsHeaderImgAdded(false)}>Edit</button>
-                        <span title={headerImg} className="text-sm">{headerImg.length < 30 ? headerImg : headerImg.slice(0, 22) + "..."}</span>
+                    <div className={`w-full h-30 flex justify-left ${isHeaderImgAdded ? "" : "hidden"}`}>
+                        <img title="delete uploaded header image" className="w-5 h-5 inline border-1 rounded-full mr-1 cursor-pointer" src={deleteIcon} onClick={handleHeaderImgDelete} />
+                        <img className="h-full" src={headerImgUrl} />
                     </div>
                 </fieldset>
 
                 <fieldset className="fieldset">
                     <legend className="fieldset-legend w-full">Screenshots</legend>
                     <div className="flex gap-2">
-                        <button type="button" className="btn btn-primary w-15" onClick={() => addElementToScreenshots(screenshot)} disabled={screenshot.length === 0}>Add</button>
-                        <label className="input">
-                            <input type="text" onChange={event => setScreenshot(event.target.value)} value={screenshot} onKeyDown={event => event.keyCode === 13 && screenshot !== "" && addElementToScreenshots(screenshot)} />
+                        <label className="btn btn-primary w-15">
+                            Add
+                            <input className="hidden" type="file" accept="image/*" onChange={addElementToScreenshots}/>
                         </label>
-                    </div>
-                    <div>
-                        {screenshots.map((screenshot, index) => {
-                            return <div key={"scrsht" + index} className="text-sm ml-20 mb-1 flex items-center"><img data-screenshot={screenshot} onClick={event => removeElementFromScreenshots((event.target as HTMLImageElement).dataset.screenshot!)} title="delete screenshot" className="w-5 inline border-1 rounded-full mr-1 cursor-pointer" src={deleteIcon}/><span title={screenshot}>{screenshot.length < 30 ? screenshot : screenshot.slice(0, 22) + "..."}</span></div>
+                        <div ref={carouselRef} className="carousel w-full h-30">
+                            {screenshots.map((screenshot, index) => {
+                                const screenshotUrl = typeof screenshot === "string" ? screenshot : URL.createObjectURL(screenshot);
+                                return (
+                                    <div key={screenshotUrl} className="carousel-item w-full rounded-t-box relative">
+                                        <img 
+                                            title="delete screenshot" 
+                                            className="w-5 h-5 absolute top-1 left-1 border-1 rounded-full mr-1 cursor-pointer bg-white" 
+                                            src={deleteIcon}
+                                            data-index={index}
+                                            onClick={event => removeElementFromScreenshots((event.target as HTMLImageElement).dataset.index!)} 
+                                            />
+                                        <img
+                                            src={screenshotUrl}
+                                            alt={`${name} screenshot no. ${index + 1}`}
+                                        />
+                                    </div>
+                                )
                             })}
+                        </div>
                     </div>
                 </fieldset>
 
-                <button type="button" onClick={() => onSubmit({name, releaseDate: dateFormatter(releaseDate), tags, publishers, developers, descriptionShort, descriptionLong, headerImg, screenshots})} className="btn btn-primary mt-5" disabled={!isNameAdded || !isReleaseDateAdded || tags.length === 0 || developers.length === 0 || publishers.length === 0}>{buttonText}</button>
+                <button type="button" onClick={() => onSubmit({name, releaseDate: dateFormatter(releaseDate), tags, publishers, developers, descriptionShort, descriptionLong, headerImg: headerImg ?? headerImgUrl, screenshots})} className="btn btn-primary mt-5" disabled={!isNameAdded || !isReleaseDateAdded || tags.length === 0 || developers.length === 0 || publishers.length === 0}>{buttonText}</button>
             </form>
             
             <AddGameAttributeModal modalId="tagModal" modalName="Tag" listSetter={setTags} list={tags} allList={allTags}/>

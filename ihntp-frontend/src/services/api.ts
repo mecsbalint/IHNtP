@@ -3,7 +3,7 @@ import { User } from "../types/User";
 type ApiRequestParams = {
   url: string,
   method?: "GET" | "POST" | "DELETE" | "PUT" | "PATCH",
-  body?: string,
+  body?: string | FormData,
   headers?: {[key: string]: string},
   onUnauthorizedResponse?: (() => void)
 };
