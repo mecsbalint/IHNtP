@@ -37,16 +37,15 @@ public class GameService {
     private final DeveloperRepository developerRepository;
     private final PublisherRepository publisherRepository;
     private final TagRepository tagRepository;
-
-    @Value("${mecsbalint.app.file-upload-dir}")
-    private String uploadDir;
+    private final ImageStorageService imageStorageService;
 
     @Autowired
-    public GameService(GameRepository gameRepository, DeveloperRepository developerRepository, PublisherRepository publisherRepository, TagRepository tagRepository) {
+    public GameService(GameRepository gameRepository, DeveloperRepository developerRepository, PublisherRepository publisherRepository, TagRepository tagRepository, ImageStorageService imageStorageService) {
         this.gameRepository = gameRepository;
         this.developerRepository = developerRepository;
         this.publisherRepository = publisherRepository;
         this.tagRepository = tagRepository;
+        this.imageStorageService = imageStorageService;
     }
 
     @Transactional
@@ -118,71 +117,24 @@ public class GameService {
         if (gameOg.getHeaderImg() != null && gameNew.getHeaderImg() == null) imagesToDelete.add(gameOg.getHeaderImg());
 
         List<String> screenshotsToDelete = gameOg.getScreenshots().stream()
-                .filter(screenshot -> !gameNew.getScreenshots().contains(screenshot))
+                .filter(screenshot -> !gameNew.getScreenshots().contains(screenshot) && !screenshot.contains("http"))
                 .toList();
         imagesToDelete.addAll(screenshotsToDelete);
 
-        for (String imagePath: imagesToDelete) {
-            if (imagePath.contains("https")) continue;
-            Path fileToDeletePath = Paths.get(uploadDir + "\\" + imagePath);
-            try {
-                Files.deleteIfExists(fileToDeletePath);
-            } catch (IOException e) {
-                throw new UncheckedIOException(String.format("The system can't delete this file: %s", fileToDeletePath), e);
-            }
-        }
+        imageStorageService.deleteFiles(imagesToDelete);
     }
 
     private void saveAndSetImages(Game game, List<MultipartFile> screenshots, MultipartFile headerImg) {
         if (screenshots != null) {
-            validateImages(screenshots);
-            Set<String> screenshotPaths = saveImages(screenshots, game.getId(), "screenshots");
+            imageStorageService.validateImages(screenshots);
+            Set<String> screenshotPaths = imageStorageService.saveImages(screenshots, game.getId() + "\\screenshots");
             game.getScreenshots().addAll(screenshotPaths);
         }
 
         if (headerImg != null) {
-            validateImages(List.of(headerImg));
-            String headerImgPath = saveImage(headerImg, game.getId());
+            imageStorageService.validateImages(List.of(headerImg));
+            String headerImgPath = imageStorageService.saveImage(headerImg, game.getId() + "\\header_img");
             game.setHeaderImg(headerImgPath);
-        }
-    }
-
-    private String saveImage(MultipartFile image, long gameId) {
-        return saveImages(List.of(image), gameId, "header_img").stream().findFirst().orElse(null);
-    }
-
-    private Set<String> saveImages(List<MultipartFile> images, long gameId, String folderName) {
-        Set<String> imagePaths = new HashSet<>();
-
-        for (MultipartFile image: images) {
-
-            String extension = FilenameUtils.getExtension(image.getOriginalFilename());
-            String generatedFilename = UUID.randomUUID() + "." + extension;
-            String relativePath = gameId + "\\" + folderName + "\\" + generatedFilename;
-
-            try {
-                File targetFile = new File(Paths.get(uploadDir).toAbsolutePath() + "\\" + relativePath);
-                targetFile.getParentFile().mkdirs();
-                image.transferTo(new File(Paths.get(uploadDir).toAbsolutePath() + "\\" + relativePath));
-            } catch (IOException e) {
-                throw new UncheckedIOException(String.format("The system can't save this file: %s", relativePath), e);
-            }
-
-            imagePaths.add(relativePath);
-        }
-
-        return imagePaths;
-    }
-
-    private void validateImages(List<MultipartFile> files) {
-        for (MultipartFile file: files) {
-            try {
-                Imaging.getImageInfo(file.getBytes());
-            } catch (ImagingException e) {
-                throw new InvalidFileException(file.getOriginalFilename(), "JPEG/PNG/BMP/GIF/TIFF/PSD/WBMP/ICO", e);
-            } catch (IOException e) {
-                throw new UncheckedIOException(String.format("The system can't read the file (original filename: %s)", file.getOriginalFilename()), e);
-            }
         }
     }
 

@@ -35,11 +35,14 @@ class GameServiceTest {
     @Mock
     private TagRepository tagRepositoryMock;
 
+    @Mock
+    private ImageStorageService imageStorageServiceMock;
+
     private GameService gameService;
 
     @BeforeEach
     public void setUp() {
-        gameService = new GameService(gameRepositoryMock, developerRepositoryMock, publisherRepositoryMock, tagRepositoryMock);
+        gameService = new GameService(gameRepositoryMock, developerRepositoryMock, publisherRepositoryMock, tagRepositoryMock, imageStorageServiceMock);
     }
 
     @Test
