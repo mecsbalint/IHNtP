@@ -68,7 +68,7 @@ class GameServiceTest {
     }
 
     @Test
-    public void getGameById_existingId_ReturnGameDto() {
+    public void getGameForProfileById_existingId_ReturnGameDto() {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
 
         String expectedGameName = "Game One";
@@ -78,10 +78,27 @@ class GameServiceTest {
     }
 
     @Test
-    public void getGameById_notExistingId_throwGameNotFoundException() {
+    public void getGameForProfileById_notExistingId_throwGameNotFoundException() {
         when(gameRepositoryMock.getGameById(any())).thenThrow(new GameNotFoundException("", ""));
 
         assertThrows(GameNotFoundException.class, () -> gameService.getGameForProfileById(1L));
+    }
+
+    @Test
+    public void getGameForEditGameById_existingId_ReturnGameDto() {
+        when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
+
+        String expectedGameName = "Game One";
+        String actualGameName = gameService.getGameForEditGameById(1L).name();
+
+        assertEquals(expectedGameName, actualGameName);
+    }
+
+    @Test
+    public void getGameForEditGameById_notExistingId_throwGameNotFoundException() {
+        when(gameRepositoryMock.getGameById(any())).thenThrow(new GameNotFoundException("", ""));
+
+        assertThrows(GameNotFoundException.class, () -> gameService.getGameForEditGameById(1L));
     }
 
     private Game getGame() {
