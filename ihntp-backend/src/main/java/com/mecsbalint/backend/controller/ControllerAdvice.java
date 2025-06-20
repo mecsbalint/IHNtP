@@ -67,4 +67,11 @@ public class ControllerAdvice {
     public String uncheckedIOExceptionHandler(UncheckedIOException exception) {
         return exception.getMessage();
     }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(InvalidFileException.class)
+    public String invalidFileExceptionHandler(InvalidFileException exception) {
+        return exception.getMessage();
+    }
 }

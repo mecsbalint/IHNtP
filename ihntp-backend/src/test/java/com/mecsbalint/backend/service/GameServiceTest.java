@@ -101,6 +101,9 @@ class GameServiceTest {
         assertThrows(GameNotFoundException.class, () -> gameService.getGameForEditGameById(1L));
     }
 
+    @Test
+    public void addGame_
+
     private Game getGame() {
         Game game = new Game();
         game.setId(1L);

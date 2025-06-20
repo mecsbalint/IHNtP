@@ -62,15 +62,16 @@ public class ImageStorageService {
         return relativePath;
     }
 
-    public void validateImages(List<MultipartFile> files) {
+    public boolean validateImages(List<MultipartFile> files) {
         for (MultipartFile file: files) {
             try {
                 Imaging.getImageInfo(file.getBytes());
             } catch (ImagingException e) {
-                throw new InvalidFileException(file.getOriginalFilename(), "JPEG/PNG/BMP/GIF/TIFF/PSD/WBMP/ICO", e);
+                return false;
             } catch (IOException e) {
                 throw new UncheckedIOException(String.format("The system can't read the file (original filename: %s)", file.getOriginalFilename()), e);
             }
         }
+        return true;
     }
 }

@@ -3,6 +3,7 @@ package com.mecsbalint.backend.service;
 import com.mecsbalint.backend.controller.dto.*;
 import com.mecsbalint.backend.exception.ElementIsAlreadyInDatabaseException;
 import com.mecsbalint.backend.exception.GameNotFoundException;
+import com.mecsbalint.backend.exception.InvalidFileException;
 import com.mecsbalint.backend.exception.MissingDataException;
 import com.mecsbalint.backend.model.Game;
 import com.mecsbalint.backend.repository.DeveloperRepository;
@@ -115,13 +116,13 @@ public class GameService {
 
     private void saveAndSetImages(Game game, List<MultipartFile> screenshots, MultipartFile headerImg) {
         if (screenshots != null) {
-            imageStorageService.validateImages(screenshots);
+            if (!imageStorageService.validateImages(screenshots)) throw new InvalidFileException("JPEG/PNG/BMP/GIF/TIFF/PSD/WBMP/ICO");
             Set<String> screenshotPaths = imageStorageService.saveImages(screenshots, game.getId() + "\\screenshots");
             game.getScreenshots().addAll(screenshotPaths);
         }
 
         if (headerImg != null) {
-            imageStorageService.validateImages(List.of(headerImg));
+            if (!imageStorageService.validateImages(List.of(headerImg))) throw new InvalidFileException("JPEG/PNG/BMP/GIF/TIFF/PSD/WBMP/ICO");
             String headerImgPath = imageStorageService.saveImage(headerImg, game.getId() + "\\header_img");
             game.setHeaderImg(headerImgPath);
         }
