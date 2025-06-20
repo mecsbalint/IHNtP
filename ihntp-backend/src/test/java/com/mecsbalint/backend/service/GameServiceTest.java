@@ -1,17 +1,23 @@
 package com.mecsbalint.backend.service;
 
 import com.mecsbalint.backend.controller.dto.GameForListDto;
-import com.mecsbalint.backend.exception.GameNotFoundException;
+import com.mecsbalint.backend.controller.dto.GameToAdd;
+import com.mecsbalint.backend.controller.dto.GameToEdit;
+import com.mecsbalint.backend.exception.*;
 import com.mecsbalint.backend.model.Game;
 import com.mecsbalint.backend.repository.DeveloperRepository;
 import com.mecsbalint.backend.repository.GameRepository;
 import com.mecsbalint.backend.repository.PublisherRepository;
 import com.mecsbalint.backend.repository.TagRepository;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.time.LocalDate;
@@ -35,11 +41,14 @@ class GameServiceTest {
     @Mock
     private TagRepository tagRepositoryMock;
 
+    @Mock
+    private ImageStorageService imageStorageServiceMock;
+
     private GameService gameService;
 
     @BeforeEach
     public void setUp() {
-        gameService = new GameService(gameRepositoryMock, developerRepositoryMock, publisherRepositoryMock, tagRepositoryMock);
+        gameService = new GameService(gameRepositoryMock, developerRepositoryMock, publisherRepositoryMock, tagRepositoryMock, imageStorageServiceMock);
     }
 
     @Test
@@ -65,7 +74,7 @@ class GameServiceTest {
     }
 
     @Test
-    public void getGameById_existingId_ReturnGameDto() {
+    public void getGameForProfileById_existingId_ReturnGameDto() {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
 
         String expectedGameName = "Game One";
@@ -75,10 +84,137 @@ class GameServiceTest {
     }
 
     @Test
-    public void getGameById_notExistingId_throwGameNotFoundException() {
+    public void getGameForProfileById_notExistingId_throwGameNotFoundException() {
         when(gameRepositoryMock.getGameById(any())).thenThrow(new GameNotFoundException("", ""));
 
         assertThrows(GameNotFoundException.class, () -> gameService.getGameForProfileById(1L));
+    }
+
+    @Test
+    public void getGameForEditGameById_existingId_ReturnGameDto() {
+        when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
+
+        String expectedGameName = "Game One";
+        String actualGameName = gameService.getGameForEditGameById(1L).name();
+
+        assertEquals(expectedGameName, actualGameName);
+    }
+
+    @Test
+    public void getGameForEditGameById_notExistingId_throwGameNotFoundException() {
+        when(gameRepositoryMock.getGameById(any())).thenThrow(new GameNotFoundException("", ""));
+
+        assertThrows(GameNotFoundException.class, () -> gameService.getGameForEditGameById(1L));
+    }
+
+    @Test
+    public void addGame_happyCaseWithNoFiles_callSaveAndFlushAndSaveMethods() {
+        when(gameRepositoryMock.saveAndFlush(any())).thenReturn(getGame());
+        when(gameRepositoryMock.save(any())).thenReturn(getGame());
+
+        gameService.addGame(getGameToAdd(getGame()), null, null);
+
+        verify(gameRepositoryMock).saveAndFlush(any());
+        verify(gameRepositoryMock).save(any());
+    }
+
+    @Test
+    public void addGame_happyCaseWithBothScreenshotsAndHeaderImg_callValidateImagesTwoTimesAndSaveImagesAndSaveImage() {
+        when(gameRepositoryMock.saveAndFlush(any())).thenReturn(getGame());
+        when(gameRepositoryMock.save(any())).thenReturn(getGame());
+        when(imageStorageServiceMock.validateImages(any())).thenReturn(true);
+        when(imageStorageServiceMock.saveImage(any(), any())).thenReturn("");
+        when(imageStorageServiceMock.saveImages(any(), any())).thenReturn(Set.of());
+
+        gameService.addGame(getGameToAdd(getGame()), List.of(getMultipartFileMock()), getMultipartFileMock());
+
+        verify(imageStorageServiceMock, times(2)).validateImages(any());
+        verify(imageStorageServiceMock).saveImage(any(), any());
+        verify(imageStorageServiceMock).saveImages(any(), any());
+    }
+
+    @Test
+    public void addGame_gameNotHaveRequiredData_throwMissingDataException() {
+        Game incompleteGame = getGame();
+        incompleteGame.setName("");
+        incompleteGame.setReleaseDate(null);
+
+        assertThrows(MissingDataException.class, () -> gameService.addGame(getGameToAdd(incompleteGame), null ,null));
+    }
+
+    @Test
+    public void addGame_gameIsAlreadyExist_throwsElementIsAlreadyInDatabaseException() {
+        ConstraintViolationException constraintViolationException = new ConstraintViolationException("Constraint violation", null, "SomeConstraint");
+        DataIntegrityViolationException dataIntegrityViolationException = new DataIntegrityViolationException("", constraintViolationException);
+        when(gameRepositoryMock.saveAndFlush(any())).thenThrow(dataIntegrityViolationException);
+
+        assertThrows(ElementIsAlreadyInDatabaseException.class, () -> gameService.addGame(getGameToAdd(getGame()), null, null));
+    }
+
+    @Test
+    public void addGame_atLeastOneFileIsNotInSupportedImageFormat_throwsInvalidFileException() {
+        when(gameRepositoryMock.saveAndFlush(any())).thenReturn(getGame());
+        when(imageStorageServiceMock.validateImages(any())).thenReturn(false);
+
+        assertThrows(InvalidFileException.class, () -> gameService.addGame(getGameToAdd(getGame()), null, getMultipartFileMock()));
+    }
+
+    @Test
+    public void editGame_happyCaseWithNoFiles_callSave() {
+        when(gameRepositoryMock.findGameById(any())).thenReturn(Optional.of(getGame()));
+
+        gameService.editGame(1L, getGameToEdit(getGame()), null, null);
+
+        verify(gameRepositoryMock).save(any());
+    }
+
+    @Test
+    public void editGame_happyCaseWithNewScreenshotsAndHeaderImg_callValidateImagesTwoTimesAndSaveImagesAndSaveImage() {
+        when(gameRepositoryMock.findGameById(any())).thenReturn(Optional.of(getGame()));
+        when(imageStorageServiceMock.validateImages(any())).thenReturn(true);
+        when(imageStorageServiceMock.saveImage(any(), any())).thenReturn("");
+        when(imageStorageServiceMock.saveImages(any(), any())).thenReturn(Set.of());
+
+        gameService.editGame(1L, getGameToEdit(getGame()), List.of(getMultipartFileMock()), getMultipartFileMock());
+
+        verify(imageStorageServiceMock, times(2)).validateImages(any());
+        verify(imageStorageServiceMock).saveImage(any(), any());
+        verify(imageStorageServiceMock).saveImages(any(), any());
+    }
+
+    @Test
+    public void editGame_happyCaseWithFilesBecomeUnnecessary_callDeleteFiles() {
+        when(gameRepositoryMock.findGameById(any())).thenReturn(Optional.of(getGame()));
+        Game newGame = getGame();
+        newGame.setHeaderImg(null);
+
+        gameService.editGame(1L, getGameToEdit(newGame), null, null);
+
+        verify(imageStorageServiceMock).deleteFiles(any());
+    }
+
+    @Test
+    public void editGame_gameNotHaveRequiredData_throwMissingDataException() {
+        Game incompleteGame = getGame();
+        incompleteGame.setName("");
+        incompleteGame.setReleaseDate(null);
+
+        assertThrows(MissingDataException.class, () -> gameService.editGame(1L, getGameToEdit(incompleteGame), null, null));
+    }
+
+    @Test
+    public void editGame_gameNotExist_throwsGameNotFoundException() {
+        when(gameRepositoryMock.findGameById(any())).thenReturn(Optional.empty());
+
+        assertThrows(GameNotFoundException.class, () -> gameService.editGame(1L, getGameToEdit(getGame()), null, null));
+    }
+
+    @Test
+    public void editGame_atLeastOneFileIsNotInSupportedImageFormat_throwsInvalidFileException() {
+        when(gameRepositoryMock.findGameById(any())).thenReturn(Optional.of(getGame()));
+        when(imageStorageServiceMock.validateImages(any())).thenReturn(false);
+
+        assertThrows(InvalidFileException.class, () -> gameService.editGame(1L, getGameToEdit(getGame()), null, getMultipartFileMock()));
     }
 
     private Game getGame() {
@@ -95,6 +231,32 @@ class GameServiceTest {
         game.setTags(new HashSet<>());
 
         return game;
+    }
+
+    private GameToAdd getGameToAdd(Game game) {
+        return new GameToAdd(
+                game.getName(),
+                game.getReleaseDate(),
+                game.getDescriptionShort(),
+                game.getDescriptionLong(),
+                Set.of(1L),
+                Set.of(1L),
+                Set.of(1L)
+        );
+    }
+
+    private GameToEdit getGameToEdit(Game game) {
+        return new GameToEdit(
+                game.getName(),
+                game.getReleaseDate(),
+                game.getDescriptionShort(),
+                game.getDescriptionLong(),
+                game.getHeaderImg(),
+                game.getScreenshots(),
+                Set.of(1L),
+                Set.of(1L),
+                Set.of(1L)
+        );
     }
 
     private List<Game> getListOfGames() {
@@ -120,5 +282,9 @@ class GameServiceTest {
         game3.setTags(new HashSet<>());
 
         return List.of(game1, game2, game3);
+    }
+
+    private MultipartFile getMultipartFileMock() {
+        return new MockMultipartFile("file", "image.png", "image/png", new byte[]{1, 2, 3});
     }
 }
