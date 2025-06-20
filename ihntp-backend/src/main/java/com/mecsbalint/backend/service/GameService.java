@@ -98,7 +98,6 @@ public class GameService {
         saveAndSetImages(game, screenshots, headerImg);
 
         gameRepository.save(game);
-
     }
 
     private void deleteUnnecessaryFiles(Game gameOg, Game gameNew) {
