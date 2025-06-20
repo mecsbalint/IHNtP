@@ -22,8 +22,11 @@ import java.util.UUID;
 @Service
 public class ImageStorageService {
 
-    @Value("${mecsbalint.app.file-upload-dir}")
-    private String uploadDir;
+    private final String uploadDir;
+
+    public ImageStorageService(@Value("${mecsbalint.app.file-upload-dir}") String uploadDir) {
+        this.uploadDir = uploadDir;
+    }
 
     public void deleteFiles(List<String> filePaths) {
         for (String imagePath: filePaths) {
