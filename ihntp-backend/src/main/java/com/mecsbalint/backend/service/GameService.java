@@ -184,9 +184,9 @@ public class GameService {
 
         if (gameInfo.game() == null) return Optional.empty();
 
-        String[] itadGameId = {gameInfo.game().id()};
+        String itadGameId = gameInfo.game().id();
         String priceInfoFetchUrl = String.format("https://api.isthereanydeal.com/games/prices/v3?key=%s&deals=false", itadApiKey);
-        ItadGamePriceInfoDto[] gameprices = fetcher.postFetch(priceInfoFetchUrl, ItadGamePriceInfoDto[].class, itadGameId);
+        ItadGamePriceInfoDto[] gameprices = fetcher.postFetch(priceInfoFetchUrl, ItadGamePriceInfoDto[].class, new String[]{itadGameId});
 
         if (gameprices.length == 0) return Optional.empty();
 
@@ -195,7 +195,7 @@ public class GameService {
         ItadPriceDto historyLowPrice = gameprices[0].historyLow().all();
 
         GamePriceDto currentPrice = new GamePriceDto(currentBestPrice.price().currency(), currentBestPrice.price().amount(), currentBestPrice.url());
-        String priceHistoryUrl = String.format("https://isthereanydeal.com/game/%s/history/", game.getName().replace(' ', '-'));
+        String priceHistoryUrl = String.format("https://isthereanydeal.com/game/id:%s/history/", itadGameId);
         GamePriceDto historyLow = new GamePriceDto(historyLowPrice.currency(), historyLowPrice.amount(), priceHistoryUrl);
         return Optional.of(new GamePricesDto(currentPrice, historyLow));
     }
