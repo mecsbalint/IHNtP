@@ -2,30 +2,42 @@ package com.mecsbalint.backend;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mecsbalint.backend.controller.dto.GameForListDto;
-import com.mecsbalint.backend.controller.dto.JwtResponseDto;
-import com.mecsbalint.backend.controller.dto.UserEmailPasswordDto;
-import com.mecsbalint.backend.controller.dto.UserRegistrationDto;
+import com.mecsbalint.backend.controller.dto.*;
+import com.mecsbalint.backend.model.Developer;
 import com.mecsbalint.backend.model.Game;
+import com.mecsbalint.backend.model.Publisher;
+import com.mecsbalint.backend.model.Tag;
+import com.mecsbalint.backend.repository.DeveloperRepository;
 import com.mecsbalint.backend.repository.GameRepository;
-import org.junit.jupiter.api.Test;
+import com.mecsbalint.backend.repository.PublisherRepository;
+import com.mecsbalint.backend.repository.TagRepository;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.multipart.MultipartFile;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDate;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -34,16 +46,39 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestPropertySource(locations = "classpath:application-integrationtest.properties")
 public class IhntpBackendIT {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private final GameRepository gameRepository;
+
+    private final TagRepository tagRepository;
+
+    private final DeveloperRepository developerRepository;
+
+    private final PublisherRepository publisherRepository;
+
+    private Path testDir;
 
     @Autowired
     private MockMvc mvc;
 
     @Autowired
-    public IhntpBackendIT(GameRepository gameRepository) {
+    public IhntpBackendIT(GameRepository gameRepository, TagRepository tagRepository, DeveloperRepository developerRepository, PublisherRepository publisherRepository) {
         this.gameRepository = gameRepository;
+        this.tagRepository = tagRepository;
+        this.developerRepository = developerRepository;
+        this.publisherRepository = publisherRepository;
+    }
+
+    @BeforeEach
+    public void setupTestDirectory() throws IOException {
+        testDir = Files.createTempDirectory("test-upload-directory");
+        System.setProperty("mecsbalint.app.file-upload-dir", testDir.toString());
+    }
+
+    @AfterEach
+    public void cleanUpTestDirectory() throws IOException {
+        Files.walk(testDir).sorted((a, b) -> b.compareTo(a)).map(Path::toFile).forEach(File::delete);
     }
 
     @Test
@@ -61,9 +96,7 @@ public class IhntpBackendIT {
         var userRegistrationDto = new UserRegistrationDto("Kitten", "kitten@email.com", "password");
         var userEmailPasswordDto = new UserEmailPasswordDto("kitten@email.com", "password");
 
-        mvc.perform(post("/api/registration")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRegistrationDto)));
+        signupUser(userRegistrationDto);
 
         mvc.perform(post("/api/login")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -99,17 +132,11 @@ public class IhntpBackendIT {
         var userRegistrationDto = new UserRegistrationDto("Boci", "boci@email.com", "abcde");
         var userEmailPasswordDto = new UserEmailPasswordDto("boci@email.com", "abcde");
 
-        mvc.perform(post("/api/registration")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRegistrationDto)));
+        signupUser(userRegistrationDto);
 
-        String responseBody = mvc.perform(post("/api/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userEmailPasswordDto)))
-                .andReturn().getResponse().getContentAsString();
+        String responseBody = loginUser(userEmailPasswordDto);
 
-        JwtResponseDto jwtResponseDto = objectMapper.createParser(responseBody).readValueAs(JwtResponseDto.class);
-        String jwtToken = jwtResponseDto.jwt();
+        String jwtToken = getJwtFromResponseBody(responseBody);
 
         mvc.perform(get("/api/user/games/wishlist")
                 .header("Authorization", "Bearer " + jwtToken))
@@ -121,20 +148,77 @@ public class IhntpBackendIT {
         var userRegistrationDto = new UserRegistrationDto("Kuh", "kuh@email.de", "abcde");
         var userEmailPasswordDto = new UserEmailPasswordDto("kuh@email.de", "abcde");
 
-        mvc.perform(post("/api/registration")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRegistrationDto)));
+        signupUser(userRegistrationDto);
 
-        String responseBody = mvc.perform(post("/api/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userEmailPasswordDto)))
-                .andReturn().getResponse().getContentAsString();
+        String responseBody = loginUser(userEmailPasswordDto);
 
-        JwtResponseDto jwtResponseDto = objectMapper.createParser(responseBody).readValueAs(JwtResponseDto.class);
-        String jwtToken = jwtResponseDto.jwt();
+        String jwtToken = getJwtFromResponseBody(responseBody);
 
         mvc.perform(get("/api/user/games/backlog")
                         .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void addGame_happyCaseWithNewFiles_responseStatusOk() throws Exception {
+        var userRegistrationDto = new UserRegistrationDto("Kuh", "kuh@email.de", "abcde");
+        var userEmailPasswordDto = new UserEmailPasswordDto("kuh@email.de", "abcde");
+
+        signupUser(userRegistrationDto);
+        String responseBody = loginUser(userEmailPasswordDto);
+        String jwtToken = getJwtFromResponseBody(responseBody);
+
+        Developer newDeveloper = new Developer();
+        newDeveloper.setName("new developer");
+        Publisher newPublisher = new Publisher();
+        newPublisher.setName("new publisher");
+        Tag newTag = new Tag();
+        newTag.setName("new tag");
+        long newDeveloperId = developerRepository.save(newDeveloper).getId();
+        long newPublisherId = publisherRepository.save(newPublisher).getId();
+        long newTagId = tagRepository.save(newTag).getId();
+
+        GameToAdd gameToAdd = new GameToAdd("new game", LocalDate.of(2020, 1, 15), "short description", "long description", Set.of(newDeveloperId), Set.of(newPublisherId), Set.of(newTagId));
+        MockMultipartFile gameToAddJsonFile = new MockMultipartFile("game", "", "application/json", objectMapper.writeValueAsBytes(gameToAdd));
+
+        mvc.perform(multipart("/api/games/add")
+                        .file(gameToAddJsonFile)
+                        .file(getMultipartImageFileMock("headerImg"))
+                        .file(getMultipartImageFileMock("screenshots"))
+                        .file(getMultipartImageFileMock("screenshots"))
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void editGame_happyCaseWithNewFiles_responseStatusOk() {
+        var userRegistrationDto = new UserRegistrationDto("Kuh", "kuh@email.de", "abcde");
+        var userEmailPasswordDto = new UserEmailPasswordDto("kuh@email.de", "abcde");
+
+//        .with(request -> {request.setMethod("POST"); return request;})
+    }
+
+    private void signupUser(UserRegistrationDto userRegistrationDto) throws Exception {
+        mvc.perform(post("/api/registration")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userRegistrationDto)));
+    }
+
+    private String loginUser(UserEmailPasswordDto userEmailPasswordDto) throws Exception {
+        return mvc.perform(post("/api/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userEmailPasswordDto)))
+                .andReturn().getResponse().getContentAsString();
+    }
+
+    private String getJwtFromResponseBody(String responseBody) throws IOException {
+        JwtResponseDto jwtResponseDto = objectMapper.createParser(responseBody).readValueAs(JwtResponseDto.class);
+        return jwtResponseDto.jwt();
+    }
+
+    private MockMultipartFile getMultipartImageFileMock(String name) {
+        byte[] validPngImage = Base64.getDecoder().decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=");
+        return new MockMultipartFile(name, "image.png", "image/png", validPngImage);
     }
 }
