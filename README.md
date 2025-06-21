@@ -47,7 +47,8 @@ Or alternatively clone the repository: ```git clone https://github.com/mecsbalin
 1. **Install and Run Docker Desktop:** Download and run the installation file and follow the steps. After installation run the Docker Desktop application.
 2. **Set up .env file**
     1. Rename the `.env.example` file to `.env` in the app's root folder
-    2. Optionally you can change the JWT secret key, the JWT expiration time, the database' username or password, the port number or the database initialization type (for more details see [.env.example](https://github.com/mecsbalint/IHNtP/blob/main/.env.example))
+    2. Optionally you can create an account and registrate your app in [IsThereAnyDeal](https://isthereanydeal.com/apps/my/), and set the `ITAD_API_KEY` variable to your IsThereAnyDeal API key. Without it the app will run fine but the prices won't be fetched and displayed.
+    3. Optionally you can change the JWT secret key, the JWT expiration time, the database' username or password, the port number or the database initialization type (for more details see [.env.example](https://github.com/mecsbalint/IHNtP/blob/main/.env.example))
 3. **Start the Application:** Run the `docker-start.bat` batch file from the application's root folder.
 4. **Access the Application:** Open a web browser and go to `http://localhost:` + `PORT_NUMBER` to access the frontend (by default it's `http://localhost:5173`). The port number can be changed in the `.env.example` file.
 5. **Stop the application:** Run the `docker-stop.bat` batch file from the application's root folder.
@@ -68,9 +69,10 @@ Or alternatively clone the repository: ```git clone https://github.com/mecsbalin
     3. Optionally set up the `spring.jpa.hibernate.ddl-auto` in the `\ihntp-backend\src\main\resources\application.properties` file (by default it is set to `update`).
 2. **Set up, Build and Run Spring Boot Backend**
     1. Set up the `mecsbalint.app.jwtExpirationMs` and `mecsbalint.app.jwtSecret` variables in the `\ihntp-backend\src\main\resources\application.properties` file.
-    2. Open a terminal and navigate to the `\ihntp-backend` folder
-    3. Run the `mvnw clean package` command (build the backend application with Maven).
-    4. Run the `mvnw spring-boot:run` command (run the backend application).
+    2. Optionally you can create an account and registrate your app in [IsThereAnyDeal](https://isthereanydeal.com/apps/my/), and set the `mecsbalint.app.itadApiKey` variable to your IsThereAnyDeal API key. Without it the app will run fine but the prices won't be fetched and displayed.
+    3. Open a terminal and navigate to the `\ihntp-backend` folder
+    4. Run the `mvnw clean package` command (build the backend application with Maven).
+    5. Run the `mvnw spring-boot:run` command (run the backend application).
 3. **Install dependencies and Run the React Frontend**
     1. Open a terminal and navigate to the `\ihntp-frontend` folder
     2. Run the `npm install` command (install dependencies)
@@ -85,7 +87,7 @@ Or alternatively clone the repository: ```git clone https://github.com/mecsbalin
 - [x] Dockerization
 - [x] Edit game and add new game pages
 - [x] Switch to TypeScript
-- [ ] Integrate price information from IsThereAnyDeals API
+- [x] Integrate price information from IsThereAnyDeals API
 - [ ] Responsive UI design
 - [ ] End-to-end tests with Selenium
 - [ ] Avatar image selection
