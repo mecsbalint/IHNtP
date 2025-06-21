@@ -1,6 +1,7 @@
 package com.mecsbalint.backend.service;
 
 import com.mecsbalint.backend.controller.dto.*;
+import com.mecsbalint.backend.controller.dto.isthereanydealapi.*;
 import com.mecsbalint.backend.exception.ElementIsAlreadyInDatabaseException;
 import com.mecsbalint.backend.exception.GameNotFoundException;
 import com.mecsbalint.backend.exception.InvalidFileException;
@@ -10,9 +11,11 @@ import com.mecsbalint.backend.repository.DeveloperRepository;
 import com.mecsbalint.backend.repository.GameRepository;
 import com.mecsbalint.backend.repository.PublisherRepository;
 import com.mecsbalint.backend.repository.TagRepository;
+import com.mecsbalint.backend.utility.Fetcher;
 import jakarta.transaction.Transactional;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,14 +31,18 @@ public class GameService {
     private final PublisherRepository publisherRepository;
     private final TagRepository tagRepository;
     private final ImageStorageService imageStorageService;
+    private final Fetcher fetcher;
+    private final String itadApiKey;
 
     @Autowired
-    public GameService(GameRepository gameRepository, DeveloperRepository developerRepository, PublisherRepository publisherRepository, TagRepository tagRepository, ImageStorageService imageStorageService) {
+    public GameService(GameRepository gameRepository, DeveloperRepository developerRepository, PublisherRepository publisherRepository, TagRepository tagRepository, ImageStorageService imageStorageService, Fetcher fetcher, @Value("${mecsbalint.app.itadApiKey}")String itadApiKey) {
         this.gameRepository = gameRepository;
         this.developerRepository = developerRepository;
         this.publisherRepository = publisherRepository;
         this.tagRepository = tagRepository;
         this.imageStorageService = imageStorageService;
+        this.fetcher = fetcher;
+        this.itadApiKey = itadApiKey;
     }
 
     @Transactional
@@ -49,7 +56,8 @@ public class GameService {
     @Transactional
     public GameForGameProfileDto getGameForProfileById(long id) {
         Game gameEntity = gameRepository.getGameById(id).orElseThrow(() -> new GameNotFoundException("id", String.valueOf(id)));
-        return new GameForGameProfileDto(gameEntity);
+        GamePricesDto gamePrices = getGamePriceDataFromItad(gameEntity).orElse(null);
+        return new GameForGameProfileDto(gameEntity, gamePrices);
     }
 
     @Transactional
@@ -168,5 +176,27 @@ public class GameService {
         if (publisherIds.isEmpty()) return false;
 
         return true;
+    }
+
+    private Optional<GamePricesDto> getGamePriceDataFromItad(Game game) {
+        String gameInfoFetchUrl = String.format("https://api.isthereanydeal.com/games/lookup/v1?key=%s&title=%s", itadApiKey, game.getName());
+        ItadGameInfoDto gameInfo = fetcher.getFetch(gameInfoFetchUrl, ItadGameInfoDto.class);
+
+        if (gameInfo.game() == null) return Optional.empty();
+
+        String itadGameId = gameInfo.game().id();
+        String priceInfoFetchUrl = String.format("https://api.isthereanydeal.com/games/prices/v3?key=%s&deals=false", itadApiKey);
+        ItadGamePriceInfoDto[] gameprices = fetcher.postFetch(priceInfoFetchUrl, ItadGamePriceInfoDto[].class, new String[]{itadGameId});
+
+        if (gameprices.length == 0) return Optional.empty();
+
+        ItadGamePriceDealDto currentBestPrice = gameprices[0].deals().stream()
+                .min(Comparator.comparingDouble(a -> a.price().amount())).get();
+        ItadPriceDto historyLowPrice = gameprices[0].historyLow().all();
+
+        GamePriceDto currentPrice = new GamePriceDto(currentBestPrice.price().currency(), currentBestPrice.price().amount(), currentBestPrice.url());
+        String priceHistoryUrl = String.format("https://isthereanydeal.com/game/id:%s/history/", itadGameId);
+        GamePriceDto historyLow = new GamePriceDto(historyLowPrice.currency(), historyLowPrice.amount(), priceHistoryUrl);
+        return Optional.of(new GamePricesDto(currentPrice, historyLow));
     }
 }

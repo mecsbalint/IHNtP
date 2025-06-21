@@ -16,12 +16,24 @@ export type GameForList = GameWithId & {
     tags: TagWithId[]
 };
 
+type GamePrice = {
+    currency: string,
+    amount: number,
+    shopUrl: string
+}
+
+type GamePrices = {
+    current: GamePrice,
+    allTime: GamePrice
+}
+
 export type GameForGameProfile = GameWithId & {
     descriptionLong: string,
     screenshots: string[],
     developers: DeveloperWithId[],
     publishers: PublisherWithId[],
-    tags: TagWithId[]
+    tags: TagWithId[],
+    gamePrices: null | GamePrices
 };
 
 export type GameForGameProfileWithStatuses = GameForGameProfile & {

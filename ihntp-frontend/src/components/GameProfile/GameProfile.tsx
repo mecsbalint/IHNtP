@@ -38,6 +38,27 @@ function GameProfile({game, isLoggedIn, onClickListButton} : GameProfileProps) {
                     )
                 }
             </div>
+            {game.gamePrices &&
+            <div className="stats shadow m-2">
+                    <div className="stat">
+                        <div className="stat-title">
+                            Current Best
+                        </div>
+                        <Link to={game.gamePrices.current.shopUrl}>
+                            {game.gamePrices.current.amount} {game.gamePrices.current.currency}
+                        </Link>
+                    </div>
+                    <div className="stat">
+                        <div className="stat-title">
+                            Historical Low
+                        </div>
+                        <Link to={game.gamePrices.allTime.shopUrl}>
+                            {game.gamePrices.allTime.amount} {game.gamePrices.allTime.currency}
+                        </Link>
+                    </div>
+            </div>
+    
+            }
             <div className="card-body">
                 <div className="flex justify-between w-full">
                     <span className="card-title inline">{game.name}</span>
