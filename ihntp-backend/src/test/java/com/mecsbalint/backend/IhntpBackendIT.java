@@ -22,7 +22,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.multipart.MultipartFile;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -161,7 +160,7 @@ public class IhntpBackendIT {
 
     @Test
     public void addGame_happyCaseWithNewFiles_responseStatusOk() throws Exception {
-        var userRegistrationDto = new UserRegistrationDto("Kuh", "kuh@email.de", "abcde");
+        var userRegistrationDto = new UserRegistrationDto("Kuh", "kuh@email.ch", "abcde");
         var userEmailPasswordDto = new UserEmailPasswordDto("kuh@email.de", "abcde");
 
         signupUser(userRegistrationDto);
@@ -169,11 +168,11 @@ public class IhntpBackendIT {
         String jwtToken = getJwtFromResponseBody(responseBody);
 
         Developer newDeveloper = new Developer();
-        newDeveloper.setName("new developer");
+        newDeveloper.setName("add game developer");
         Publisher newPublisher = new Publisher();
-        newPublisher.setName("new publisher");
+        newPublisher.setName("add game publisher");
         Tag newTag = new Tag();
-        newTag.setName("new tag");
+        newTag.setName("add game tag");
         long newDeveloperId = developerRepository.save(newDeveloper).getId();
         long newPublisherId = publisherRepository.save(newPublisher).getId();
         long newTagId = tagRepository.save(newTag).getId();
@@ -192,11 +191,41 @@ public class IhntpBackendIT {
     }
 
     @Test
-    public void editGame_happyCaseWithNewFiles_responseStatusOk() {
-        var userRegistrationDto = new UserRegistrationDto("Kuh", "kuh@email.de", "abcde");
+    public void editGame_happyCaseWithNewFiles_responseStatusOk() throws Exception {
+        var userRegistrationDto = new UserRegistrationDto("Kuh", "kuh@email.at", "abcde");
         var userEmailPasswordDto = new UserEmailPasswordDto("kuh@email.de", "abcde");
 
-//        .with(request -> {request.setMethod("POST"); return request;})
+        signupUser(userRegistrationDto);
+        String responseBody = loginUser(userEmailPasswordDto);
+        String jwtToken = getJwtFromResponseBody(responseBody);
+
+        Game game = new Game();
+        game.setName("Game to edit");
+        game.setTags(new HashSet<>());
+        long gameId = gameRepository.save(game).getId();
+
+        Developer newDeveloper = new Developer();
+        newDeveloper.setName("edit game developer");
+        Publisher newPublisher = new Publisher();
+        newPublisher.setName("edit game publisher");
+        Tag newTag = new Tag();
+        newTag.setName("edit game tag");
+        long newDeveloperId = developerRepository.save(newDeveloper).getId();
+        long newPublisherId = publisherRepository.save(newPublisher).getId();
+        long newTagId = tagRepository.save(newTag).getId();
+
+        GameToEdit gameToEdit = new GameToEdit("Game to Edit new name", LocalDate.of(2020, 1, 15), "short description", "long description", null, Set.of(), Set.of(newDeveloperId), Set.of(newPublisherId), Set.of(newTagId));
+        MockMultipartFile gameToEditJsonFile = new MockMultipartFile("game", "", "application/json", objectMapper.writeValueAsBytes(gameToEdit));
+
+        mvc.perform(multipart("/api/games/edit/" + gameId)
+                        .file(gameToEditJsonFile)
+                        .file(getMultipartImageFileMock("headerImg"))
+                        .file(getMultipartImageFileMock("screenshots"))
+                        .file(getMultipartImageFileMock("screenshots"))
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .with(request -> {request.setMethod("PUT"); return request;})
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk());
     }
 
     private void signupUser(UserRegistrationDto userRegistrationDto) throws Exception {
