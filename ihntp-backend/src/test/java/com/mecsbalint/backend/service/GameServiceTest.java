@@ -3,12 +3,14 @@ package com.mecsbalint.backend.service;
 import com.mecsbalint.backend.controller.dto.GameForListDto;
 import com.mecsbalint.backend.controller.dto.GameToAdd;
 import com.mecsbalint.backend.controller.dto.GameToEdit;
+import com.mecsbalint.backend.controller.dto.isthereanydealapi.ItadGameInfoDto;
 import com.mecsbalint.backend.exception.*;
 import com.mecsbalint.backend.model.Game;
 import com.mecsbalint.backend.repository.DeveloperRepository;
 import com.mecsbalint.backend.repository.GameRepository;
 import com.mecsbalint.backend.repository.PublisherRepository;
 import com.mecsbalint.backend.repository.TagRepository;
+import com.mecsbalint.backend.utility.Fetcher;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,11 +46,14 @@ class GameServiceTest {
     @Mock
     private ImageStorageService imageStorageServiceMock;
 
+    @Mock
+    private Fetcher fetcherMock;
+
     private GameService gameService;
 
     @BeforeEach
     public void setUp() {
-        gameService = new GameService(gameRepositoryMock, developerRepositoryMock, publisherRepositoryMock, tagRepositoryMock, imageStorageServiceMock);
+        gameService = new GameService(gameRepositoryMock, developerRepositoryMock, publisherRepositoryMock, tagRepositoryMock, imageStorageServiceMock, fetcherMock, "itadApiKey");
     }
 
     @Test
@@ -76,6 +81,7 @@ class GameServiceTest {
     @Test
     public void getGameForProfileById_existingId_ReturnGameDto() {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
+        when(fetcherMock.getFetch(any(), any())).thenReturn(new ItadGameInfoDto(null));
 
         String expectedGameName = "Game One";
         String actualGameName = gameService.getGameForProfileById(1L).name();

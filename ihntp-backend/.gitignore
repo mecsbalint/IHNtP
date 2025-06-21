@@ -35,3 +35,4 @@ build/
 ../.idea/
 
 src/main/resources/static
+src/test/resources/static
