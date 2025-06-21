@@ -161,7 +161,7 @@ public class IhntpBackendIT {
     @Test
     public void addGame_happyCaseWithNewFiles_responseStatusOk() throws Exception {
         var userRegistrationDto = new UserRegistrationDto("Kuh", "kuh@email.ch", "abcde");
-        var userEmailPasswordDto = new UserEmailPasswordDto("kuh@email.de", "abcde");
+        var userEmailPasswordDto = new UserEmailPasswordDto("kuh@email.ch", "abcde");
 
         signupUser(userRegistrationDto);
         String responseBody = loginUser(userEmailPasswordDto);
@@ -193,7 +193,7 @@ public class IhntpBackendIT {
     @Test
     public void editGame_happyCaseWithNewFiles_responseStatusOk() throws Exception {
         var userRegistrationDto = new UserRegistrationDto("Kuh", "kuh@email.at", "abcde");
-        var userEmailPasswordDto = new UserEmailPasswordDto("kuh@email.de", "abcde");
+        var userEmailPasswordDto = new UserEmailPasswordDto("kuh@email.at", "abcde");
 
         signupUser(userRegistrationDto);
         String responseBody = loginUser(userEmailPasswordDto);
