@@ -1,6 +1,5 @@
 package com.mecsbalint.backend.service;
 
-import com.mecsbalint.backend.exception.InvalidFileException;
 import org.apache.commons.imaging.Imaging;
 import org.apache.commons.imaging.ImagingException;
 import org.apache.commons.io.FilenameUtils;
@@ -57,7 +56,7 @@ public class ImageStorageService {
         try {
             File targetFile = new File(Paths.get(uploadDir).toAbsolutePath() + "\\" + relativePath);
             targetFile.getParentFile().mkdirs();
-            image.transferTo(new File(Paths.get(uploadDir).toAbsolutePath() + "\\" + relativePath));
+            image.transferTo(targetFile);
         } catch (IOException e) {
             throw new UncheckedIOException(String.format("The system can't save this file: %s", relativePath), e);
         }
