@@ -1,9 +1,7 @@
 package com.mecsbalint.backend.service;
 
-import com.mecsbalint.backend.controller.dto.GameForListDto;
-import com.mecsbalint.backend.controller.dto.GameToAdd;
-import com.mecsbalint.backend.controller.dto.GameToEdit;
-import com.mecsbalint.backend.controller.dto.isthereanydealapi.ItadGameInfoDto;
+import com.mecsbalint.backend.controller.dto.*;
+import com.mecsbalint.backend.controller.dto.isthereanydealapi.*;
 import com.mecsbalint.backend.exception.*;
 import com.mecsbalint.backend.model.Game;
 import com.mecsbalint.backend.repository.DeveloperRepository;
@@ -87,6 +85,43 @@ class GameServiceTest {
         String actualGameName = gameService.getGameForProfileById(1L).name();
 
         assertEquals(expectedGameName, actualGameName);
+    }
+
+    @Test
+    public void getGameForProfileById_cannotFetchTheGameItadId_gamePricesIsNull() {
+        when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
+        when(fetcherMock.getFetch(any(), any())).thenReturn(new ItadGameInfoDto(null));
+
+        GamePricesDto actualGamePrices = gameService.getGameForProfileById(1L).gamePrices();
+
+        assertNull(actualGamePrices);
+    }
+
+    @Test
+    public void getGameForProfileById_cannotFetchPrices_gamePricesIsNull() {
+        when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
+        when(fetcherMock.getFetch(any(), any())).thenReturn(new ItadGameInfoDto(new ItadGameInfoGameDto("")));
+        when(fetcherMock.postFetch(any(), any(), any())).thenReturn(new ItadGamePriceInfoDto[]{});
+
+        GamePricesDto actualGamePrices = gameService.getGameForProfileById(1L).gamePrices();
+
+        assertNull(actualGamePrices);
+    }
+
+    @Test
+    public void getGameForProfileById_successfulFetches_gamePricesIsGamePricesDto() {
+        when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
+        when(fetcherMock.getFetch(any(), any())).thenReturn(new ItadGameInfoDto(new ItadGameInfoGameDto("")));
+        ItadPriceDto itadPriceDto = new ItadPriceDto(10, "EUR");
+        ItadPriceHistoryLowDto itadPriceHistoryLowDto = new ItadPriceHistoryLowDto(itadPriceDto);
+        List<ItadGamePriceDealDto> deals = List.of(new ItadGamePriceDealDto(itadPriceDto, "url"));
+        ItadGamePriceInfoDto itadGamePriceInfoDto = new ItadGamePriceInfoDto(itadPriceHistoryLowDto, deals);
+        when(fetcherMock.postFetch(any(), any(), any())).thenReturn(new ItadGamePriceInfoDto[]{itadGamePriceInfoDto});
+
+        double expectedCurrentPrice = 10;
+        double actualCurrentPrice = gameService.getGameForProfileById(1L).gamePrices().current().amount();
+
+        assertEquals(expectedCurrentPrice, actualCurrentPrice);
     }
 
     @Test
