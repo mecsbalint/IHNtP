@@ -14,6 +14,7 @@ import com.mecsbalint.backend.repository.TagRepository;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -56,7 +57,8 @@ public class IhntpBackendIT {
 
     private final PublisherRepository publisherRepository;
 
-    private Path testDir;
+    @Value("${mecsbalint.app.file-upload-dir}")
+    private String testDir;
 
     @Autowired
     private MockMvc mvc;
@@ -71,13 +73,12 @@ public class IhntpBackendIT {
 
     @BeforeEach
     public void setupTestDirectory() throws IOException {
-        testDir = Files.createTempDirectory("test-upload-directory");
-        System.setProperty("mecsbalint.app.file-upload-dir", testDir.toString());
+        new File(testDir).mkdirs();
     }
 
     @AfterEach
     public void cleanUpTestDirectory() throws IOException {
-        Files.walk(testDir).sorted((a, b) -> b.compareTo(a)).map(Path::toFile).forEach(File::delete);
+        Files.walk(Path.of(testDir)).sorted((a, b) -> b.compareTo(a)).map(Path::toFile).forEach(File::delete);
     }
 
     @Test
