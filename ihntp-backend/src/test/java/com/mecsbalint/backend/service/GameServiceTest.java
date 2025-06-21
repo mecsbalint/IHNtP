@@ -111,7 +111,10 @@ class GameServiceTest {
     @Test
     public void getGameForProfileById_successfulFetches_gamePricesIsGamePricesDto() {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
-        when(fetcherMock.getFetch(any(), any())).thenReturn(new ItadGameInfoDto(new ItadGameInfoGameDto("")));
+
+        ItadGameInfoDto itadGameInfoDto = new ItadGameInfoDto(new ItadGameInfoGameDto(""));
+        when(fetcherMock.getFetch(any(), any())).thenReturn(itadGameInfoDto);
+
         ItadPriceDto itadPriceDto = new ItadPriceDto(10, "EUR");
         ItadPriceHistoryLowDto itadPriceHistoryLowDto = new ItadPriceHistoryLowDto(itadPriceDto);
         List<ItadGamePriceDealDto> deals = List.of(new ItadGamePriceDealDto(itadPriceDto, "url"));
