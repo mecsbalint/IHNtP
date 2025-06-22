@@ -4,11 +4,10 @@ type ApiRequestParams = {
   url: string,
   method?: "GET" | "POST" | "DELETE" | "PUT" | "PATCH",
   body?: string | FormData,
-  headers?: {[key: string]: string},
-  onUnauthorizedResponse?: (() => void)
+  headers?: {[key: string]: string}
 };
 
-type ApiResponse<T = any> = {
+export type ApiResponse<T = any> = {
   status: number,
   body: T | null
 };
@@ -17,8 +16,7 @@ export async function apiRequest<T>({
   url, 
   method = "GET", 
   body,
-  headers = {},
-  onUnauthorizedResponse
+  headers = {}
 } : ApiRequestParams) : Promise<ApiResponse<T>> {
 
   let jwt : string | null;
@@ -29,14 +27,13 @@ export async function apiRequest<T>({
   const response = await fetch(url, {
     method,
     headers: {
-      Authorization: !onUnauthorizedResponse ? "" : "Bearer " + jwt,
+      Authorization: !jwt ? "" : "Bearer " + jwt,
       ...headers,
     },
     ...(method !== "GET" && body ? {body} : {})
   });
 
   if (response.status === 401) {
-    onUnauthorizedResponse && onUnauthorizedResponse();
     return {status: response.status, body: null};
   }
 

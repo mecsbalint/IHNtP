@@ -2,7 +2,7 @@ import { Developer, DeveloperWithId } from "../types/Developer";
 import { GameForEdit, GameForGameProfile, GameForList, GameFormSubmit, GameToEdit, GameToAdd } from "../types/Game";
 import { Publisher, PublisherWithId } from "../types/Publisher";
 import { Tag, TagWithId } from "../types/Tag";
-import { apiRequest } from "./api";
+import { ApiResponse, apiRequest } from "./api";
 import { addNewDevelopers } from "./developerService";
 import { addNewPublishers } from "./publisherService";
 import { addNewTags } from "./tagService";
@@ -19,36 +19,38 @@ export async function getGameForProfile(id : number) : Promise<GameForGameProfil
     return responseObj.status === 200 && responseObj.body !== null ? responseObj.body : null;
 }
 
-export async function getGameForEdit(id : number, handleUnauthorizedResponse : () => void) : Promise<GameForEdit | null> {
-    const responseObj = await apiRequest<GameForEdit>({url: `/api/games/edit/${id}`, onUnauthorizedResponse: handleUnauthorizedResponse});
+export async function getGameForEdit(id : number) : Promise<ApiResponse<GameForEdit>> {
+    const responseObj = await apiRequest<GameForEdit>({url: `/api/games/edit/${id}`});
 
-    return responseObj.status === 200 && responseObj.body !== null ? responseObj.body : null;
+    if (responseObj.status !== 200) responseObj.body = null;
+
+    return responseObj;;
 }
 
-export async function addNewGame(newGameObj : GameFormSubmit, handleUnauthorizedResponse : () => void) {
+export async function addNewGame(newGameObj : GameFormSubmit) : Promise<ApiResponse<number>> {
     const headerImg = typeof newGameObj.headerImg === "string" ? null : newGameObj.headerImg;
     const screenshots = newGameObj.screenshots.filter((screenshot) : screenshot is File => typeof screenshot !== "string");
 
-    const gameToAdd : GameToAdd = await processEntityLists(newGameObj, handleUnauthorizedResponse);
+    const gameToAdd : GameToAdd = await processEntityLists(newGameObj);
 
     const requestBody = createMultipartFormData<GameToAdd>(gameToAdd, headerImg, screenshots);
 
-    const responseObj = await apiRequest({url: "/api/games/add", method: "POST", body: requestBody, onUnauthorizedResponse: handleUnauthorizedResponse});
+    const responseObj = await apiRequest<number>({url: "/api/games/add", method: "POST", body: requestBody});
 
-    return responseObj.status === 200 ? responseObj.body : null;
+    return responseObj;
 }
 
-export async function editGame(editGameObj : GameFormSubmit, id : number, handleUnauthorizedResponse : () => void) {
+export async function editGame(editGameObj : GameFormSubmit, id : number) : Promise<number> {
     const headerImg = typeof editGameObj.headerImg === "string" ? null : editGameObj.headerImg;
     const screenshots = editGameObj.screenshots.filter((screenshot) : screenshot is File => typeof screenshot !== "string");
 
-    const gameToEdit = await processEntityLists(editGameObj, handleUnauthorizedResponse);
+    const gameToEdit = await processEntityLists(editGameObj);
 
     const requestBody = createMultipartFormData<GameToEdit>(gameToEdit, headerImg, screenshots);
 
-    const responseObj = await apiRequest({url: `/api/games/edit/${id}`, method: "PUT", body: requestBody, onUnauthorizedResponse: handleUnauthorizedResponse});
+    const responseObj = await apiRequest({url: `/api/games/edit/${id}`, method: "PUT", body: requestBody});
 
-    return responseObj.status === 200;
+    return responseObj.status;
 }
 
 function createMultipartFormData<T extends GameToAdd | GameToEdit>(gameObj : T, headerImg : File | null, screenshots : File[]) : FormData {
@@ -61,10 +63,10 @@ function createMultipartFormData<T extends GameToAdd | GameToEdit>(gameObj : T, 
     return formData;
 }
 
-async function processEntityLists(gameObj : GameFormSubmit, handleUnauthorizedResponse : () => void) : Promise<GameToEdit> {
-    const developerIds = await processEntities<[Developer, DeveloperWithId]>({entities: gameObj.developers, postFunction: addNewDevelopers, handleUnauthorizedResponse});
-    const publisherIds = await processEntities<[Publisher, PublisherWithId]>({entities: gameObj.publishers, postFunction: addNewPublishers, handleUnauthorizedResponse});
-    const tagIds = await processEntities<[Tag, TagWithId]>({entities: gameObj.tags, postFunction: addNewTags, handleUnauthorizedResponse});
+async function processEntityLists(gameObj : GameFormSubmit) : Promise<GameToEdit> {
+    const developerIds = await processEntities<[Developer, DeveloperWithId]>({entities: gameObj.developers, postFunction: addNewDevelopers});
+    const publisherIds = await processEntities<[Publisher, PublisherWithId]>({entities: gameObj.publishers, postFunction: addNewPublishers});
+    const tagIds = await processEntities<[Tag, TagWithId]>({entities: gameObj.tags, postFunction: addNewTags});
 
     return {
         ...gameObj,
@@ -78,15 +80,14 @@ async function processEntityLists(gameObj : GameFormSubmit, handleUnauthorizedRe
 
 type ProcessEntitiesParams<Entity, EntityWithId> = {
         entities: Array<Entity | EntityWithId>,
-        postFunction: (entitiesToAdd: Entity[], handleUnauthorizedResponse: () => void) => Promise<number[]>,
-        handleUnauthorizedResponse : () => void
+        postFunction: (entitiesToAdd: Entity[]) => Promise<number[]>
     };
 
-async function processEntities<ParamTypes extends [Developer, DeveloperWithId] | [Publisher, PublisherWithId] | [Tag, TagWithId]>({entities, postFunction, handleUnauthorizedResponse} : ProcessEntitiesParams<ParamTypes[0], ParamTypes[1]>) : Promise<number[]> {
+async function processEntities<ParamTypes extends [Developer, DeveloperWithId] | [Publisher, PublisherWithId] | [Tag, TagWithId]>({entities, postFunction} : ProcessEntitiesParams<ParamTypes[0], ParamTypes[1]>) : Promise<number[]> {
     const entitiesToPost = entities.filter((entity): entity is ParamTypes[0] => !('id' in entity));
     const existingDeveloperIds = entities.filter((entity): entity is ParamTypes[1] => 'id' in entity).map(entity => entity.id);
     
-    const createdIds = await postFunction(entitiesToPost, handleUnauthorizedResponse);
+    const createdIds = await postFunction(entitiesToPost);
     
     return [...createdIds, ...existingDeveloperIds];
 }

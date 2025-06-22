@@ -10,7 +10,10 @@ function WishlistPage() {
     const handleUnauthorizedResponse = useUnauthorizedHandler();
 
     useEffect(() => {
-        getUserGameList("wishlist", handleUnauthorizedResponse).then(wishlist => setGames(wishlist));
+        getUserGameList("wishlist").then(response => {
+            response.status === 401 && handleUnauthorizedResponse();
+            setGames(response.body!);
+        });
     }, []);
 
     return (

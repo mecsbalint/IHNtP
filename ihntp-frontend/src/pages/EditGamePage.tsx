@@ -18,13 +18,18 @@ function EditGamePage() {
     }, [isLoggedIn, navigate]);
 
     useEffect(() => {
-        getGameForEdit(id, handleUnauthorizedResponse).then(game => setGame(game));
+        getGameForEdit(id).then(response => {
+            response.status === 401 && handleUnauthorizedResponse();
+            setGame(response.body);
+        });
     }, [id]);
 
     async function onSubmit(editGameObj : GameFormSubmit) {
-        const isSuccess = await editGame(editGameObj, id, handleUnauthorizedResponse);
+        const response = await editGame(editGameObj, id);
 
-        isSuccess && navigate(`/game/${id}`);
+        response === 401 && handleUnauthorizedResponse();
+
+        response === 200 && navigate(`/game/${id}`);
     }
 
     return (
