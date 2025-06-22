@@ -12,7 +12,7 @@ type AuthContextType = AuthState & {
 
 type AuthState = {
     user: User | null,
-    isLoggedIn: boolean | null
+    isLoggedIn: boolean | null | "null"
 } 
 
 export const AuthContext = createContext<AuthContextType | null>(null);

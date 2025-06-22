@@ -12,7 +12,7 @@ function AddGamePage() {
     const {isLoggedIn} = useAuthContext();
 
     useEffect(() => {
-        isLoggedIn !== null && !isLoggedIn && navigate("/login");
+        isLoggedIn !== "null" || !isLoggedIn && navigate("/login");
     }, [isLoggedIn, navigate]);
 
     async function onSubmit(newGameObj : GameFormSubmit) {
