@@ -7,8 +7,8 @@ export async function getAllTags() : Promise<TagWithId[]> {
     return responseObj.status === 200 && responseObj.body !== null ? responseObj.body : [];
 }
 
-export async function addNewTags(tagsToAdd : Tag[], handleUnauthorizedResponse : () => void) : Promise<number[]> {
-    const responseObj = await apiRequest<number[]>({url: "/api/tags/add", method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(tagsToAdd), onUnauthorizedResponse: handleUnauthorizedResponse});
+export async function addNewTags(tagsToAdd : Tag[]) : Promise<number[]> {
+    const responseObj = await apiRequest<number[]>({url: "/api/tags/add", method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(tagsToAdd)});
 
     return responseObj.status === 200 && responseObj.body !== null ? responseObj.body : [];
 }

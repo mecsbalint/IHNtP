@@ -10,7 +10,10 @@ function BacklogPage() {
     const handleUnauthorizedResponse = useUnauthorizedHandler();
 
     useEffect(() => {
-        getUserGameList("backlog", handleUnauthorizedResponse).then(backlog => setGames(backlog));
+        getUserGameList("backlog").then(response => {
+            response.status === 401 && handleUnauthorizedResponse();
+            setGames(response.body!);
+        });
     }, []);
 
     return (

@@ -16,9 +16,11 @@ function AddGamePage() {
     }, [isLoggedIn, navigate]);
 
     async function onSubmit(newGameObj : GameFormSubmit) {
-        const newGameId = await addNewGame(newGameObj, handleUnauthorizedResponse);
+        const response = await addNewGame(newGameObj);
 
-        newGameId && navigate(`/game/${newGameId}`);
+        response.status === 401 && handleUnauthorizedResponse();
+
+        response && navigate(`/game/${response}`);
     }
 
     return (

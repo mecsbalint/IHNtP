@@ -7,8 +7,8 @@ export async function getAllPublishers() : Promise<PublisherWithId[]> {
     return responseObj.status === 200 && responseObj.body !== null ? responseObj.body : [];
 }
 
-export async function addNewPublishers(publishersToAdd : Publisher[], handleUnauthorizedResponse : () => void) : Promise<number[]> {
-    const responseObj = await apiRequest<number[]>({url: "/api/publishers/add", method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(publishersToAdd), onUnauthorizedResponse: handleUnauthorizedResponse});
+export async function addNewPublishers(publishersToAdd : Publisher[]) : Promise<number[]> {
+    const responseObj = await apiRequest<number[]>({url: "/api/publishers/add", method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(publishersToAdd)});
 
     return responseObj.status === 200 && responseObj.body !== null ? responseObj.body : [];
 }

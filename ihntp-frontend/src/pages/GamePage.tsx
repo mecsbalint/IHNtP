@@ -23,7 +23,10 @@ function GamePage() {
             .then(game => {
                 if (game) {
                     if (user) {
-                        return getGameStatuses(id, handleUnauthorizedResponse).then(statuses => ({...game, ...statuses}));
+                        return getGameStatuses(id).then(response => {
+                            response.status === 401 && handleUnauthorizedResponse();
+                            return {...game, ...response.body!};
+                        });
                     } else return {...game, inWishlist: null, inBacklog: null};
                 }
             })
@@ -31,9 +34,11 @@ function GamePage() {
     }, [id]);
 
     async function onClickListButton(method: "PUT" | "DELETE", listType: "wishlist" | "backlog") {
-        const responseStatus = await updateUserList(method, listType, id, handleUnauthorizedResponse);
+        const responseStatus = await updateUserList(method, listType, id);
 
-        if (responseStatus === 200) {
+        if (responseStatus === 401) {
+            handleUnauthorizedResponse();
+        } else if (responseStatus === 200) {
             listType === "wishlist" && setGame(prevGame => ({
                 ...prevGame!,
                 inWishlist: method === "PUT"
