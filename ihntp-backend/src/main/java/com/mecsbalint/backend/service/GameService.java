@@ -17,6 +17,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -180,19 +181,19 @@ public class GameService {
 
     private Optional<GamePricesDto> getGamePriceDataFromItad(Game game) {
         String gameInfoFetchUrl = String.format("https://api.isthereanydeal.com/games/lookup/v1?key=%s&title=%s", itadApiKey, game.getName());
-        ItadGameInfoDto gameInfo = fetcher.getFetch(gameInfoFetchUrl, ItadGameInfoDto.class);
+        ItadGameInfoDto gameInfo = fetcher.fetch(gameInfoFetchUrl, ItadGameInfoDto.class);
 
         if (gameInfo.game() == null) return Optional.empty();
 
         String itadGameId = gameInfo.game().id();
         String priceInfoFetchUrl = String.format("https://api.isthereanydeal.com/games/prices/v3?key=%s&deals=false", itadApiKey);
-        ItadGamePriceInfoDto[] gameprices = fetcher.postFetch(priceInfoFetchUrl, ItadGamePriceInfoDto[].class, new String[]{itadGameId});
+        ItadGamePriceInfoDto[] gamePrices = fetcher.fetch(priceInfoFetchUrl, ItadGamePriceInfoDto[].class, HttpMethod.POST, "application/json", new String[]{itadGameId});
 
-        if (gameprices.length == 0) return Optional.empty();
+        if (gamePrices.length == 0) return Optional.empty();
 
-        ItadGamePriceDealDto currentBestPrice = gameprices[0].deals().stream()
+        ItadGamePriceDealDto currentBestPrice = gamePrices[0].deals().stream()
                 .min(Comparator.comparingDouble(a -> a.price().amount())).get();
-        ItadPriceDto historyLowPrice = gameprices[0].historyLow().all();
+        ItadPriceDto historyLowPrice = gamePrices[0].historyLow().all();
 
         GamePriceDto currentPrice = new GamePriceDto(currentBestPrice.price().currency(), currentBestPrice.price().amount(), currentBestPrice.url());
         String priceHistoryUrl = String.format("https://isthereanydeal.com/game/id:%s/history/", itadGameId);
