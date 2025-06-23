@@ -79,7 +79,7 @@ class GameServiceTest {
     @Test
     public void getGameForProfileById_existingId_ReturnGameDto() {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
-        when(fetcherMock.getFetch(any(), any())).thenReturn(new ItadGameInfoDto(null));
+        when(fetcherMock.fetch(any(), any())).thenReturn(new ItadGameInfoDto(null));
 
         String expectedGameName = "Game One";
         String actualGameName = gameService.getGameForProfileById(1L).name();
@@ -90,7 +90,7 @@ class GameServiceTest {
     @Test
     public void getGameForProfileById_cannotFetchTheGameItadId_gamePricesIsNull() {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
-        when(fetcherMock.getFetch(any(), any())).thenReturn(new ItadGameInfoDto(null));
+        when(fetcherMock.fetch(any(), any())).thenReturn(new ItadGameInfoDto(null));
 
         GamePricesDto actualGamePrices = gameService.getGameForProfileById(1L).gamePrices();
 
@@ -100,8 +100,8 @@ class GameServiceTest {
     @Test
     public void getGameForProfileById_cannotFetchPrices_gamePricesIsNull() {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
-        when(fetcherMock.getFetch(any(), any())).thenReturn(new ItadGameInfoDto(new ItadGameInfoGameDto("")));
-        when(fetcherMock.postFetch(any(), any(), any())).thenReturn(new ItadGamePriceInfoDto[]{});
+        when(fetcherMock.fetch(any(), any())).thenReturn(new ItadGameInfoDto(new ItadGameInfoGameDto("")));
+        when(fetcherMock.fetch(any(), any(), any(), any(), any())).thenReturn(new ItadGamePriceInfoDto[]{});
 
         GamePricesDto actualGamePrices = gameService.getGameForProfileById(1L).gamePrices();
 
@@ -113,13 +113,13 @@ class GameServiceTest {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
 
         ItadGameInfoDto itadGameInfoDto = new ItadGameInfoDto(new ItadGameInfoGameDto(""));
-        when(fetcherMock.getFetch(any(), any())).thenReturn(itadGameInfoDto);
+        when(fetcherMock.fetch(any(), any())).thenReturn(itadGameInfoDto);
 
         ItadPriceDto itadPriceDto = new ItadPriceDto(10, "EUR");
         ItadPriceHistoryLowDto itadPriceHistoryLowDto = new ItadPriceHistoryLowDto(itadPriceDto);
         List<ItadGamePriceDealDto> deals = List.of(new ItadGamePriceDealDto(itadPriceDto, "url"));
         ItadGamePriceInfoDto itadGamePriceInfoDto = new ItadGamePriceInfoDto(itadPriceHistoryLowDto, deals);
-        when(fetcherMock.postFetch(any(), any(), any())).thenReturn(new ItadGamePriceInfoDto[]{itadGamePriceInfoDto});
+        when(fetcherMock.fetch(any(), any(), any(), any(), any())).thenReturn(new ItadGamePriceInfoDto[]{itadGamePriceInfoDto});
 
         double expectedCurrentPrice = 10;
         double actualCurrentPrice = gameService.getGameForProfileById(1L).gamePrices().current().amount();
