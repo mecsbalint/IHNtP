@@ -37,24 +37,4 @@ public class Fetcher {
                     .block();
         }
     }
-
-//    public <T> T getFetch(String url, Class<T> returnClass) {
-//        return webClient
-//                .get()
-//                .uri(url)
-//                .retrieve()
-//                .bodyToMono(returnClass)
-//                .block();
-//    }
-//
-//    public <ResponseBodyType, RequestBodyType> ResponseBodyType postFetch(String url, Class<ResponseBodyType> returnClass, RequestBodyType requestBody) {
-//        return webClient
-//                .post()
-//                .uri(url)
-//                .header("Content-Type", "application/json")
-//                .body(BodyInserters.fromValue(requestBody))
-//                .retrieve()
-//                .bodyToMono(returnClass)
-//                .block();
-//    }
 }
