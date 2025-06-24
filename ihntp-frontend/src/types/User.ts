@@ -11,5 +11,6 @@ export type UserLogin = {
 }
 
 export type UserRegistration = UserLogin & {
-    name: string
+    name: string,
+    countryCode: string
 }

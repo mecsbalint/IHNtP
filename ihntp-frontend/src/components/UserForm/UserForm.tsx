@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { UserRegistration } from "../../types/User";
+import iso3311a2 from "iso-3166-1-alpha-2";
 
 type UserFormProps = {
   submitText: string,
@@ -8,12 +9,14 @@ type UserFormProps = {
   emailErrorMsg?: string,
   passwordErrorMsg?: string,
   isLoading?: boolean | null
+  countries?: string[]
 }
 
-function UserForm({submitText, onSubmit, nameErrorMsg = "", emailErrorMsg = "", passwordErrorMsg = "", isLoading = null} : UserFormProps) {
+function UserForm({submitText, onSubmit, nameErrorMsg = "", emailErrorMsg = "", passwordErrorMsg = "", isLoading = null, countries = []} : UserFormProps) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
+  const [countryCode, setCountryCode] = useState("")
   const [emailErrorState, setEmailErrorState] = useState(false);
   const [passwordErrorState, setPasswordErrorState] = useState(false);
 
@@ -28,7 +31,7 @@ function UserForm({submitText, onSubmit, nameErrorMsg = "", emailErrorMsg = "", 
   }, [email, password]);
   
   return (
-    <form onSubmit={(e) => onSubmit(e, {email: email, name: name, password: password})}>
+    <form onSubmit={(e) => onSubmit(e, {email: email, name: name, password: password, countryCode: countryCode})}>
         <div className={`my-5 ${submitText === "Log in" ? "hidden" : ""}`}>
         <label className="fieldset-label">Username</label>
         <input
@@ -72,7 +75,17 @@ function UserForm({submitText, onSubmit, nameErrorMsg = "", emailErrorMsg = "", 
         <p className="text-error">{passwordErrorState ? passwordErrorMsg : ""}</p>
       </div>
 
-      <button type="submit" className="btn btn-neutral mt-4" disabled={!!isLoading}>
+      <div className={`my-5 ${submitText === "Log in" ? "hidden" : ""}`}>
+        <label className="fieldset-label">Country</label>
+        <label className="select pl-0">
+          <select className="select ml-0!" onChange={e => setCountryCode(e.target.selectedOptions[0].value)}>
+            <option selected={true} disabled={true}>Choose a country</option>
+            {countries.map(country => (<option value={iso3311a2.getCode(country) ?? "n/a"}>{country}</option>))}
+          </select>
+        </label>
+      </div>
+
+      <button type="submit" className="btn btn-neutral mt-4" disabled={!!isLoading || (submitText === "Sign up" && countryCode.length === 0)}>
         {submitText}
       </button>
     </form>
