@@ -2,10 +2,7 @@ package com.mecsbalint.backend.service;
 
 import com.mecsbalint.backend.controller.dto.*;
 import com.mecsbalint.backend.controller.dto.isthereanydealapi.*;
-import com.mecsbalint.backend.exception.ElementIsAlreadyInDatabaseException;
-import com.mecsbalint.backend.exception.GameNotFoundException;
-import com.mecsbalint.backend.exception.InvalidFileException;
-import com.mecsbalint.backend.exception.MissingDataException;
+import com.mecsbalint.backend.exception.*;
 import com.mecsbalint.backend.model.Game;
 import com.mecsbalint.backend.model.UserEntity;
 import com.mecsbalint.backend.repository.DeveloperRepository;
@@ -59,10 +56,18 @@ public class GameService {
 
     @Transactional
     public GameForGameProfileDto getGameForProfileById(long id, String userEmail) {
-        UserEntity user = userService.getUserByEmail(userEmail);
+        String userCountryCode;
+
+        try {
+            userCountryCode = userService.getUserByEmail(userEmail).getCountryCode();
+        } catch (UserNotFoundException e) {
+            userCountryCode = null;
+        }
 
         Game gameEntity = gameRepository.getGameById(id).orElseThrow(() -> new GameNotFoundException("id", String.valueOf(id)));
-        GamePricesDto gamePrices = getGamePriceDataFromItad(gameEntity, user.getCountryCode()).orElse(null);
+
+        GamePricesDto gamePrices = getGamePriceDataFromItad(gameEntity, userCountryCode).orElse(null);
+
         return new GameForGameProfileDto(gameEntity, gamePrices);
     }
 
@@ -190,6 +195,7 @@ public class GameService {
 
         if (gameInfo.game() == null) return Optional.empty();
 
+        if (userCountry == null) userCountry = "US";
         String itadGameId = gameInfo.game().id();
         String priceInfoFetchUrl = String.format("https://api.isthereanydeal.com/games/prices/v3?key=%s&deals=false&country=%s", itadApiKey, userCountry);
         ItadGamePriceInfoDto[] gamePrices = fetcher.fetch(priceInfoFetchUrl, ItadGamePriceInfoDto[].class, HttpMethod.POST, "application/json", new String[]{itadGameId});

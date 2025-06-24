@@ -36,7 +36,7 @@ public class GameController {
     public GameForGameProfileDto getGameForProfileById(@PathVariable long id) {
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        return gameService.getGameForProfileById(id, currentUserEmail);
+            return gameService.getGameForProfileById(id, currentUserEmail);
     }
 
     @GetMapping("/edit/{id}")

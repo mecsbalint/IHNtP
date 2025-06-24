@@ -47,6 +47,7 @@ public class UserService {
         UserEntity user = new UserEntity();
         user.setName(userRegistration.name());
         user.setEmail(userRegistration.email());
+        user.setCountryCode(userRegistration.countryCode());
         user.setPassword(passwordEncoder.encode(userRegistration.password()));
         user.setRoles(Set.of(UserRole.ROLE_USER));
 
