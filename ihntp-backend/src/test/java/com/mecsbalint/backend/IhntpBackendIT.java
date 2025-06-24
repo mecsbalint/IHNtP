@@ -83,7 +83,7 @@ public class IhntpBackendIT {
 
     @Test
     public void registration_usernameIsNotOccupied_responseStatus200() throws Exception {
-        var userRegistrationDto = new UserRegistrationDto("Cow", "cow@email.com", "12345");
+        var userRegistrationDto = new UserRegistrationDto("Cow", "cow@email.com", "12345", "HU");
 
         mvc.perform(post("/api/registration")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -93,7 +93,7 @@ public class IhntpBackendIT {
 
     @Test
     public void login_emailAndPasswordExist_responseStatus201() throws Exception {
-        var userRegistrationDto = new UserRegistrationDto("Kitten", "kitten@email.com", "password");
+        var userRegistrationDto = new UserRegistrationDto("Kitten", "kitten@email.com", "password", "HU");
         var userEmailPasswordDto = new UserEmailPasswordDto("kitten@email.com", "password");
 
         signupUser(userRegistrationDto);
@@ -129,7 +129,7 @@ public class IhntpBackendIT {
 
     @Test
     public void getUserWishlist_userLoggedIn_responseStatus200() throws Exception {
-        var userRegistrationDto = new UserRegistrationDto("Boci", "boci@email.com", "abcde");
+        var userRegistrationDto = new UserRegistrationDto("Boci", "boci@email.com", "abcde", "DE");
         var userEmailPasswordDto = new UserEmailPasswordDto("boci@email.com", "abcde");
 
         signupUser(userRegistrationDto);
@@ -145,7 +145,7 @@ public class IhntpBackendIT {
 
     @Test
     public void getUserBacklog_userLoggedIn_responseStatus200() throws Exception {
-        var userRegistrationDto = new UserRegistrationDto("Kuh", "kuh@email.de", "abcde");
+        var userRegistrationDto = new UserRegistrationDto("Kuh", "kuh@email.de", "abcde", "DE");
         var userEmailPasswordDto = new UserEmailPasswordDto("kuh@email.de", "abcde");
 
         signupUser(userRegistrationDto);
@@ -161,7 +161,7 @@ public class IhntpBackendIT {
 
     @Test
     public void addGame_happyCaseWithNewFiles_responseStatusOk() throws Exception {
-        var userRegistrationDto = new UserRegistrationDto("Kuh", "kuh@email.ch", "abcde");
+        var userRegistrationDto = new UserRegistrationDto("Kuh", "kuh@email.ch", "abcde", "DE");
         var userEmailPasswordDto = new UserEmailPasswordDto("kuh@email.ch", "abcde");
 
         signupUser(userRegistrationDto);
@@ -193,7 +193,7 @@ public class IhntpBackendIT {
 
     @Test
     public void editGame_happyCaseWithNewFiles_responseStatusOk() throws Exception {
-        var userRegistrationDto = new UserRegistrationDto("Kuh", "kuh@email.at", "abcde");
+        var userRegistrationDto = new UserRegistrationDto("Kuh", "kuh@email.at", "abcde", "DE");
         var userEmailPasswordDto = new UserEmailPasswordDto("kuh@email.at", "abcde");
 
         signupUser(userRegistrationDto);

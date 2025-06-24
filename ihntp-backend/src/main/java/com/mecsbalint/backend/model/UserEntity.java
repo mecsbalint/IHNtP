@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Locale;
 import java.util.Set;
 
 @Entity
@@ -21,6 +22,8 @@ public class UserEntity {
     private String email;
 
     private String password;
+
+    private String countryCode;
 
     @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)

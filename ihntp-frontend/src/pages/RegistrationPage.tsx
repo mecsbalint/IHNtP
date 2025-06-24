@@ -1,14 +1,16 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import UserForm from "../components/UserForm/UserForm";
 import { useRegistration } from "../hooks/useRegistration";
 import { useAuthContext } from "../hooks/useAuthContext";
 import { UserRegistration } from "../types/User";
+import iso3311a2 from "iso-3166-1-alpha-2";
 
 function RegistrationPage() {
     const navigate = useNavigate();
     const {error, isLoading, registrate} = useRegistration();
     const {isLoggedIn} = useAuthContext();
+    const [countries, setCountries] = useState(iso3311a2.getCountries());
 
     useEffect(() => {
          isLoggedIn && navigate("/");
@@ -29,7 +31,8 @@ function RegistrationPage() {
                         submitText={"Sign up"}
                         onSubmit={onSubmit}
                         emailErrorMsg={error}
-                        isLoading={isLoading}            
+                        isLoading={isLoading}
+                        countries={countries}           
                     />  
                 </div>
                 <Link className="text text-secondary my-1" to="/login">Do you have already an account?</Link>

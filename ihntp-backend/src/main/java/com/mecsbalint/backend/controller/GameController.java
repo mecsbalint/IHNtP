@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,7 +34,9 @@ public class GameController {
 
     @GetMapping("/profile/{id}")
     public GameForGameProfileDto getGameForProfileById(@PathVariable long id) {
-        return gameService.getGameForProfileById(id);
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+
+            return gameService.getGameForProfileById(id, currentUserEmail);
     }
 
     @GetMapping("/edit/{id}")
