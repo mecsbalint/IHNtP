@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,6 +37,10 @@ public class UserService {
 
     public boolean saveUser(UserRegistrationDto userRegistration) {
         if (userRepository.findByEmail(userRegistration.email()).isPresent()) {
+            return false;
+        }
+
+        if (!List.of(Locale.getISOCountries()).contains(userRegistration.countryCode())) {
             return false;
         }
 

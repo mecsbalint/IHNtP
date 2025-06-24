@@ -4,6 +4,7 @@ import com.mecsbalint.backend.controller.dto.*;
 import com.mecsbalint.backend.controller.dto.isthereanydealapi.*;
 import com.mecsbalint.backend.exception.*;
 import com.mecsbalint.backend.model.Game;
+import com.mecsbalint.backend.model.UserEntity;
 import com.mecsbalint.backend.repository.DeveloperRepository;
 import com.mecsbalint.backend.repository.GameRepository;
 import com.mecsbalint.backend.repository.PublisherRepository;
@@ -45,13 +46,16 @@ class GameServiceTest {
     private ImageStorageService imageStorageServiceMock;
 
     @Mock
+    private UserService userServiceMock;
+
+    @Mock
     private Fetcher fetcherMock;
 
     private GameService gameService;
 
     @BeforeEach
     public void setUp() {
-        gameService = new GameService(gameRepositoryMock, developerRepositoryMock, publisherRepositoryMock, tagRepositoryMock, imageStorageServiceMock, fetcherMock, "itadApiKey");
+        gameService = new GameService(gameRepositoryMock, developerRepositoryMock, publisherRepositoryMock, tagRepositoryMock, imageStorageServiceMock, userServiceMock, fetcherMock, "itadApiKey");
     }
 
     @Test
@@ -80,9 +84,10 @@ class GameServiceTest {
     public void getGameForProfileById_existingId_ReturnGameDto() {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
         when(fetcherMock.fetch(any(), any())).thenReturn(new ItadGameInfoDto(null));
+        when(userServiceMock.getUserByEmail(any())).thenReturn(new UserEntity());
 
         String expectedGameName = "Game One";
-        String actualGameName = gameService.getGameForProfileById(1L).name();
+        String actualGameName = gameService.getGameForProfileById(1L, null).name();
 
         assertEquals(expectedGameName, actualGameName);
     }
@@ -91,8 +96,9 @@ class GameServiceTest {
     public void getGameForProfileById_cannotFetchTheGameItadId_gamePricesIsNull() {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
         when(fetcherMock.fetch(any(), any())).thenReturn(new ItadGameInfoDto(null));
+        when(userServiceMock.getUserByEmail(any())).thenReturn(new UserEntity());
 
-        GamePricesDto actualGamePrices = gameService.getGameForProfileById(1L).gamePrices();
+        GamePricesDto actualGamePrices = gameService.getGameForProfileById(1L, null).gamePrices();
 
         assertNull(actualGamePrices);
     }
@@ -102,8 +108,9 @@ class GameServiceTest {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
         when(fetcherMock.fetch(any(), any())).thenReturn(new ItadGameInfoDto(new ItadGameInfoGameDto("")));
         when(fetcherMock.fetch(any(), any(), any(), any(), any())).thenReturn(new ItadGamePriceInfoDto[]{});
+        when(userServiceMock.getUserByEmail(any())).thenReturn(new UserEntity());
 
-        GamePricesDto actualGamePrices = gameService.getGameForProfileById(1L).gamePrices();
+        GamePricesDto actualGamePrices = gameService.getGameForProfileById(1L, null).gamePrices();
 
         assertNull(actualGamePrices);
     }
@@ -111,6 +118,7 @@ class GameServiceTest {
     @Test
     public void getGameForProfileById_successfulFetches_gamePricesIsGamePricesDto() {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
+        when(userServiceMock.getUserByEmail(any())).thenReturn(new UserEntity());
 
         ItadGameInfoDto itadGameInfoDto = new ItadGameInfoDto(new ItadGameInfoGameDto(""));
         when(fetcherMock.fetch(any(), any())).thenReturn(itadGameInfoDto);
@@ -122,7 +130,7 @@ class GameServiceTest {
         when(fetcherMock.fetch(any(), any(), any(), any(), any())).thenReturn(new ItadGamePriceInfoDto[]{itadGamePriceInfoDto});
 
         double expectedCurrentPrice = 10;
-        double actualCurrentPrice = gameService.getGameForProfileById(1L).gamePrices().current().amount();
+        double actualCurrentPrice = gameService.getGameForProfileById(1L, null).gamePrices().current().amount();
 
         assertEquals(expectedCurrentPrice, actualCurrentPrice);
     }
@@ -131,7 +139,7 @@ class GameServiceTest {
     public void getGameForProfileById_notExistingId_throwGameNotFoundException() {
         when(gameRepositoryMock.getGameById(any())).thenThrow(new GameNotFoundException("", ""));
 
-        assertThrows(GameNotFoundException.class, () -> gameService.getGameForProfileById(1L));
+        assertThrows(GameNotFoundException.class, () -> gameService.getGameForProfileById(1L, null));
     }
 
     @Test

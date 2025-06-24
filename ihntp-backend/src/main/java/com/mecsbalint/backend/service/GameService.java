@@ -7,6 +7,7 @@ import com.mecsbalint.backend.exception.GameNotFoundException;
 import com.mecsbalint.backend.exception.InvalidFileException;
 import com.mecsbalint.backend.exception.MissingDataException;
 import com.mecsbalint.backend.model.Game;
+import com.mecsbalint.backend.model.UserEntity;
 import com.mecsbalint.backend.repository.DeveloperRepository;
 import com.mecsbalint.backend.repository.GameRepository;
 import com.mecsbalint.backend.repository.PublisherRepository;
@@ -32,16 +33,18 @@ public class GameService {
     private final PublisherRepository publisherRepository;
     private final TagRepository tagRepository;
     private final ImageStorageService imageStorageService;
+    private final UserService userService;
     private final Fetcher fetcher;
     private final String itadApiKey;
 
     @Autowired
-    public GameService(GameRepository gameRepository, DeveloperRepository developerRepository, PublisherRepository publisherRepository, TagRepository tagRepository, ImageStorageService imageStorageService, Fetcher fetcher, @Value("${mecsbalint.app.itadApiKey}")String itadApiKey) {
+    public GameService(GameRepository gameRepository, DeveloperRepository developerRepository, PublisherRepository publisherRepository, TagRepository tagRepository, ImageStorageService imageStorageService, UserService userService, Fetcher fetcher, @Value("${mecsbalint.app.itadApiKey}")String itadApiKey) {
         this.gameRepository = gameRepository;
         this.developerRepository = developerRepository;
         this.publisherRepository = publisherRepository;
         this.tagRepository = tagRepository;
         this.imageStorageService = imageStorageService;
+        this.userService = userService;
         this.fetcher = fetcher;
         this.itadApiKey = itadApiKey;
     }
@@ -55,9 +58,11 @@ public class GameService {
     }
 
     @Transactional
-    public GameForGameProfileDto getGameForProfileById(long id) {
+    public GameForGameProfileDto getGameForProfileById(long id, String userEmail) {
+        UserEntity user = userService.getUserByEmail(userEmail);
+
         Game gameEntity = gameRepository.getGameById(id).orElseThrow(() -> new GameNotFoundException("id", String.valueOf(id)));
-        GamePricesDto gamePrices = getGamePriceDataFromItad(gameEntity).orElse(null);
+        GamePricesDto gamePrices = getGamePriceDataFromItad(gameEntity, user.getCountryCode()).orElse(null);
         return new GameForGameProfileDto(gameEntity, gamePrices);
     }
 
@@ -179,14 +184,14 @@ public class GameService {
         return true;
     }
 
-    private Optional<GamePricesDto> getGamePriceDataFromItad(Game game) {
+    private Optional<GamePricesDto> getGamePriceDataFromItad(Game game, String userCountry) {
         String gameInfoFetchUrl = String.format("https://api.isthereanydeal.com/games/lookup/v1?key=%s&title=%s", itadApiKey, game.getName());
         ItadGameInfoDto gameInfo = fetcher.fetch(gameInfoFetchUrl, ItadGameInfoDto.class);
 
         if (gameInfo.game() == null) return Optional.empty();
 
         String itadGameId = gameInfo.game().id();
-        String priceInfoFetchUrl = String.format("https://api.isthereanydeal.com/games/prices/v3?key=%s&deals=false", itadApiKey);
+        String priceInfoFetchUrl = String.format("https://api.isthereanydeal.com/games/prices/v3?key=%s&deals=false&country=%s", itadApiKey, userCountry);
         ItadGamePriceInfoDto[] gamePrices = fetcher.fetch(priceInfoFetchUrl, ItadGamePriceInfoDto[].class, HttpMethod.POST, "application/json", new String[]{itadGameId});
 
         if (gamePrices.length == 0) return Optional.empty();
