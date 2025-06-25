@@ -4,7 +4,7 @@ import { getAllTags } from "../../services/tagService";
 import { getAllPublishers } from "../../services/publisherService";
 import { getAllDevelopers } from "../../services/developerService";
 import AddGameAttributeModal from "../AddGameAttributeModal.jsx/AddGameAttributeModal";
-import AddScreenshotModal from "../AddScreenshotModal/AddScreenshotModal";
+import AddImageModal from "../AddImageModal/AddImageModal";
 import deleteIcon from "../../assets/delete_icon.png";
 import uploadIcon from "../../assets/upload_icon.png";
 import { Tag, TagWithId } from "../../types/Tag";
@@ -313,7 +313,8 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
                 
                 <fieldset className="fieldset h-fit">
                     <legend className="fieldset-legend">Header image</legend>
-                    <div className={`flex ${isHeaderImgAdded ? "hidden" : ""}`}>
+                    <div className={`grid gap-2 ${isHeaderImgAdded ? "hidden" : ""}`}>
+                        <button type="button" className="btn btn-primary w-full" onClick={()=>(document.getElementById('headerImgModal') as HTMLDialogElement).showModal()}>Add Link</button>
                         <label className="w-full h-30 border-1 border-dashed rounded flex items-center justify-center cursor-pointer">
                                 <img className="w-10" src={uploadIcon}></img>
                                 Upload File
@@ -366,7 +367,8 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
             <AddGameAttributeModal modalId="tagModal" modalName="Tag" listSetter={setTags} list={tags} allList={allTags}/>
             <AddGameAttributeModal modalId="developerModal" modalName="Developer" listSetter={setDevelopers} list={developers} allList={allDevelopers}/>
             <AddGameAttributeModal modalId="publisherModal" modalName="Publisher" listSetter={setPublishers} list={publishers} allList={allPublishers}/>
-            <AddScreenshotModal modalId="screenshotModal" list={screenshots} listSetter={setScreenshots}/>
+            <AddImageModal modalId="screenshotModal" modalName="Screenshot" list={screenshots} setter={setScreenshots}/>
+            <AddImageModal modalId="headerImgModal" modalName="Header Image" list={null} setter={setHeaderImgUrl} />
         </>
 
     )
