@@ -94,8 +94,8 @@ public class GameService {
         setHeaderImg(game, null, headerImg);
 
         game.setScreenshots(new HashSet<>());
-        game.getScreenshots().addAll(saveScreenshots(game, screenshots));
         game.getScreenshots().addAll(downloadScreenshots(game, Set.of()));
+        game.getScreenshots().addAll(saveScreenshots(game, screenshots));
 
         return gameRepository.save(game).getId();
     }
@@ -120,7 +120,7 @@ public class GameService {
     private void deleteUnnecessaryFiles(Game gameOg, Game gameNew) {
         List<String> imagesToDelete = new ArrayList<>();
 
-        if (gameOg.getHeaderImg() != null && gameNew.getHeaderImg() != gameOg.getHeaderImg()) imagesToDelete.add(gameOg.getHeaderImg());
+        if (gameOg.getHeaderImg() != null && gameNew.getHeaderImg() != gameOg.getHeaderImg() && !gameOg.getHeaderImg().contains("http")) imagesToDelete.add(gameOg.getHeaderImg());
 
         List<String> screenshotsToDelete = gameOg.getScreenshots().stream()
                 .filter(screenshot -> !gameNew.getScreenshots().contains(screenshot) && !screenshot.contains("http"))

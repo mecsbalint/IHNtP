@@ -178,7 +178,7 @@ public class IhntpBackendIT {
         long newPublisherId = publisherRepository.save(newPublisher).getId();
         long newTagId = tagRepository.save(newTag).getId();
 
-        GameToAdd gameToAdd = new GameToAdd("new game", LocalDate.of(2020, 1, 15), "short description", "long description", Set.of(newDeveloperId), Set.of(newPublisherId), Set.of(newTagId));
+        GameToAdd gameToAdd = new GameToAdd("new game", LocalDate.of(2020, 1, 15), "short description", "long description", null, Set.of(), Set.of(newDeveloperId), Set.of(newPublisherId), Set.of(newTagId));
         MockMultipartFile gameToAddJsonFile = new MockMultipartFile("game", "", "application/json", objectMapper.writeValueAsBytes(gameToAdd));
 
         mvc.perform(multipart("/api/games/add")

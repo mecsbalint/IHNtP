@@ -291,6 +291,8 @@ class GameServiceTest {
                 game.getReleaseDate(),
                 game.getDescriptionShort(),
                 game.getDescriptionLong(),
+                game.getHeaderImg(),
+                game.getScreenshots(),
                 Set.of(1L),
                 Set.of(1L),
                 Set.of(1L)
