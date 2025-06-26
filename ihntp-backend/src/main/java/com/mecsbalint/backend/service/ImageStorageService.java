@@ -14,10 +14,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class ImageStorageService {
@@ -26,15 +23,26 @@ public class ImageStorageService {
 
     private final UUID uuid;
 
+    private final Fetcher fetcher;
 
-    public ImageStorageService(@Value("${mecsbalint.app.file-upload-dir}") String uploadDir, UUID uuid) {
+    public ImageStorageService(@Value("${mecsbalint.app.file-upload-dir}") String uploadDir, UUID uuid, Fetcher fetcher) {
         this.uploadDir = uploadDir;
         this.uuid = uuid;
+        this.fetcher = fetcher;
+    }
+
+    public String downloadAndSaveImage(String link, String savePath) {
+        String contentType = fetcher.fetchContentType(link);
+        String extension = getExtensionFromContentType(contentType);
+
+        byte[] imageBytes = fetcher.fetch(link, byte[].class);
+
+        return saveImage(imageBytes, "image." + extension, savePath);
     }
 
     public void deleteFiles(List<String> filePaths) {
-        for (String imagePath: filePaths) {
-            Path fileToDeletePath = Paths.get(uploadDir + "\\" + imagePath);
+        for (String filePath: filePaths) {
+            Path fileToDeletePath = Paths.get(uploadDir + "\\" + filePath);
             try {
                 Files.deleteIfExists(fileToDeletePath);
             } catch (IOException e) {
@@ -54,31 +62,79 @@ public class ImageStorageService {
     }
 
     public String saveImage(MultipartFile image, String folderName) {
-        String extension = FilenameUtils.getExtension(image.getOriginalFilename());
-        String generatedFilename = uuid.randomUUID() + "." + extension;
-        String relativePath = folderName + "\\" + generatedFilename;
-
-        try {
-            File targetFile = new File(Paths.get(uploadDir).toAbsolutePath() + "\\" + relativePath);
-            targetFile.getParentFile().mkdirs();
-            image.transferTo(targetFile);
-        } catch (IOException e) {
-            throw new UncheckedIOException(String.format("The system can't save this file: %s", relativePath), e);
-        }
-
-        return relativePath;
+        return saveImage(createBytesFromMultipartFile(image), image.getOriginalFilename(), folderName);
     }
 
-    public boolean validateImages(List<MultipartFile> files) {
-        for (MultipartFile file: files) {
+    public String saveImage(byte[] imageBytes, String ogFilename, String folderName) {
+        String extension = FilenameUtils.getExtension(ogFilename);
+        String generatedFilename = uuid.randomUUID() + "." + extension;
+
+        Path relativePath = Paths.get(folderName, generatedFilename);
+        Path targetPath = Paths.get(uploadDir).toAbsolutePath().resolve(relativePath);
+
+        try {
+            Files.createDirectories(targetPath.getParent());
+            Files.write(targetPath, imageBytes);
+        } catch (IOException e) {
+            throw new UncheckedIOException(
+                    String.format("The system can't save this file: %s", relativePath), e);
+        }
+
+        return relativePath.toString().replace(File.separatorChar, '/');
+    }
+
+    public boolean validateMultipartFileImages(MultipartFile file) {
+        return validateMultipartFileImages(List.of(file));
+    }
+
+    public boolean validateMultipartFileImages(List<MultipartFile> files) {
+        List<byte[]> fileBytes = createBytesFromMultipartFiles(files);
+
+        return validateByteImages(fileBytes);
+    }
+
+    public boolean validateByteImages(List<byte[]> files) {
+        for (byte[] file: files) {
             try {
-                Imaging.getImageInfo(file.getBytes());
+                Imaging.getImageInfo(file);
             } catch (ImagingException e) {
                 return false;
             } catch (IOException e) {
-                throw new UncheckedIOException(String.format("The system can't read the file (original filename: %s)", file.getOriginalFilename()), e);
+                throw new UncheckedIOException("The system can't read one of the files", e);
             }
         }
         return true;
+    }
+
+    private byte[] createBytesFromMultipartFile(MultipartFile file) {
+        try {
+            return file.getBytes();
+        } catch (IOException e) {
+            throw new UncheckedIOException(String.format("The system can't read the file (original filename: %s)", file.getOriginalFilename()), e);
+        }
+    }
+
+    private List<byte[]> createBytesFromMultipartFiles(List<MultipartFile> files) {
+        List<byte[]> fileBytes = new ArrayList<>();
+
+        for (MultipartFile file : files) {
+            fileBytes.add(createBytesFromMultipartFile(file));
+        }
+
+        return fileBytes;
+    }
+
+    private String getExtensionFromContentType(String contentType) {
+        if (contentType == null) return "bin";
+
+        return switch (contentType) {
+            case "image/jpeg", "image/jpg" -> "jpg";
+            case "image/png"               -> "png";
+            case "image/gif"               -> "gif";
+            case "image/webp"              -> "webp";
+            case "image/bmp"               -> "bmp";
+            case "image/svg+xml"           -> "svg";
+            default                        -> "bin";
+        };
     }
 }

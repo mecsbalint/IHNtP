@@ -27,20 +27,23 @@ class ImageStorageServiceTest {
     @Mock
     private UUID uuidMock;
 
+    @Mock
+    private Fetcher fetcherMock;
+
     private ImageStorageService imageStorageService;
 
     @BeforeEach
     public void setup() {
-        imageStorageService = new ImageStorageService("uploadDirectory", uuidMock);
+        imageStorageService = new ImageStorageService("uploadDirectory", uuidMock, fetcherMock);
     }
 
     @Test
-    public void validateImages_allImagesValid_returnTrue() {
+    public void validateMultipartFileImages_allImagesValid_returnTrue() {
         try (MockedStatic<Imaging> mockedImaging = mockStatic(Imaging.class)){
             mockedImaging.when(() -> Imaging.getImageInfo((byte[]) any())).thenReturn(null);
 
             boolean expectedResult = true;
-            boolean actualResult = imageStorageService.validateImages(List.of(getMultipartFileMock()));
+            boolean actualResult = imageStorageService.validateMultipartFileImages(List.of(getMultipartFileMock()));
 
             assertEquals(expectedResult, actualResult);
 
@@ -48,23 +51,23 @@ class ImageStorageServiceTest {
     }
 
     @Test
-    public void validateImages_atLeastOneInvalidImage_returnFalse() {
+    public void validateMultipartFileImages_atLeastOneInvalidImage_returnFalse() {
         try (MockedStatic<Imaging> mockedImaging = mockStatic(Imaging.class)){
             mockedImaging.when(() -> Imaging.getImageInfo((byte[]) any())).thenThrow(ImagingException.class);
 
             boolean expectedResult = false;
-            boolean actualResult = imageStorageService.validateImages(List.of(getMultipartFileMock()));
+            boolean actualResult = imageStorageService.validateMultipartFileImages(List.of(getMultipartFileMock()));
 
             assertEquals(expectedResult, actualResult);
         }
     }
 
     @Test
-    public void validateImages_fileCannotRead_throwUncheckedIOException() {
+    public void validateMultipartFileImages_fileCannotRead_throwUncheckedIOException() {
         try (MockedStatic<Imaging> mockedImaging = mockStatic(Imaging.class)){
             mockedImaging.when(() -> Imaging.getImageInfo((byte[]) any())).thenThrow(IOException.class);
 
-            assertThrows(UncheckedIOException.class, () -> imageStorageService.validateImages(List.of(getMultipartFileMock())));
+            assertThrows(UncheckedIOException.class, () -> imageStorageService.validateMultipartFileImages(List.of(getMultipartFileMock())));
         }
     }
 
