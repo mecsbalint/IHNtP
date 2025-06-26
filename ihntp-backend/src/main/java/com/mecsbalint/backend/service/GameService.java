@@ -4,7 +4,6 @@ import com.mecsbalint.backend.controller.dto.*;
 import com.mecsbalint.backend.controller.dto.isthereanydealapi.*;
 import com.mecsbalint.backend.exception.*;
 import com.mecsbalint.backend.model.Game;
-import com.mecsbalint.backend.model.UserEntity;
 import com.mecsbalint.backend.repository.DeveloperRepository;
 import com.mecsbalint.backend.repository.GameRepository;
 import com.mecsbalint.backend.repository.PublisherRepository;
@@ -92,8 +91,11 @@ public class GameService {
             }
         }
 
+        setHeaderImg(game, null, headerImg);
+
         game.setScreenshots(new HashSet<>());
-        saveAndSetImages(game, screenshots, headerImg);
+        game.getScreenshots().addAll(saveScreenshots(game, screenshots));
+        game.getScreenshots().addAll(downloadScreenshots(game, Set.of()));
 
         return gameRepository.save(game).getId();
     }
@@ -103,26 +105,22 @@ public class GameService {
 
         Game gameOg = gameRepository.findGameById(gameId).orElseThrow(() -> new GameNotFoundException("id", gameId.toString()));
 
-        Game game = createGameFromGameToEdit(gameToEdit);
-        game.setId(gameId);
+        Game gameNew = createGameFromGameToEdit(gameToEdit);
+        gameNew.setId(gameId);
 
-        deleteUnnecessaryFiles(gameOg, game);
+        deleteUnnecessaryFiles(gameOg, gameNew);
 
-        game.setHeaderImg(game.getHeaderImg());
-        game.setScreenshots(game.getScreenshots().stream()
-                .filter(screenshot -> gameOg.getScreenshots().contains(screenshot))
-                .collect(Collectors.toSet())
-        );
+        setHeaderImg(gameNew, gameOg.getHeaderImg(), headerImg);
 
-        saveAndSetImages(game, screenshots, headerImg);
+        setScreenshots(gameNew, gameOg, screenshots);
 
-        gameRepository.save(game);
+        gameRepository.save(gameNew);
     }
 
     private void deleteUnnecessaryFiles(Game gameOg, Game gameNew) {
         List<String> imagesToDelete = new ArrayList<>();
 
-        if (gameOg.getHeaderImg() != null && gameNew.getHeaderImg() == null) imagesToDelete.add(gameOg.getHeaderImg());
+        if (gameOg.getHeaderImg() != null && gameNew.getHeaderImg() != gameOg.getHeaderImg()) imagesToDelete.add(gameOg.getHeaderImg());
 
         List<String> screenshotsToDelete = gameOg.getScreenshots().stream()
                 .filter(screenshot -> !gameNew.getScreenshots().contains(screenshot) && !screenshot.contains("http"))
@@ -132,18 +130,63 @@ public class GameService {
         imageStorageService.deleteFiles(imagesToDelete);
     }
 
-    private void saveAndSetImages(Game game, List<MultipartFile> screenshots, MultipartFile headerImg) {
+    private void setHeaderImg(Game gameNew, String headerImgOg, MultipartFile headerImgFile) {
+        String headerImgNew = gameNew.getHeaderImg();
+        if (headerImgFile != null) {
+            if (!imageStorageService.validateImages(List.of(headerImgFile))) throw new InvalidFileException("JPEG/PNG/BMP/GIF/TIFF/PSD/WBMP/ICO");
+            String headerImgPath = imageStorageService.saveImage(headerImgFile, gameNew.getId() + "\\header_img");
+            gameNew.setHeaderImg(headerImgPath);
+        } else if(headerImgNew != headerImgOg) {
+            if (headerImgNew == null) {
+                gameNew.setHeaderImg(null);
+            } else {
+                gameNew.setHeaderImg(downloadHeaderImg(headerImgNew, gameNew.getId()));
+            }
+        }
+    }
+
+    private void setScreenshots(Game gameNew, Game gameOg, List<MultipartFile> screenshots) {
+        Set<String> screenshotsRemaining = gameNew.getScreenshots().stream()
+                .filter(screenshot -> gameOg.getScreenshots().contains(screenshot))
+                .collect(Collectors.toSet());
+
+        Set<String> screenshotsFromFiles = saveScreenshots(gameNew, screenshots);
+
+        Set<String> screenshotsFromLinks = downloadScreenshots(gameNew, gameOg.getScreenshots());
+
+        gameNew.setScreenshots(screenshotsRemaining);
+        gameNew.getScreenshots().addAll(screenshotsFromFiles);
+        gameNew.getScreenshots().addAll(screenshotsFromLinks);
+    }
+
+    private String downloadHeaderImg(String link, long gameId) {
+        MultipartFile file = fetcher.fetch(link, MultipartFile.class);
+
+        if (!imageStorageService.validateImages(List.of(file))) throw new InvalidFileException("JPEG/PNG/BMP/GIF/TIFF/PSD/WBMP/ICO");
+
+        return imageStorageService.saveImage(file, gameId + "\\header_img");
+    }
+
+    private Set<String> downloadScreenshots(Game gameNew, Set<String> screenshotsOg) {
+        Set<String> screenshotLinks = gameNew.getScreenshots().stream()
+                .filter(screenshot -> !screenshotsOg.contains(screenshot))
+                .collect(Collectors.toSet());
+
+        List<MultipartFile> multipartFiles = new ArrayList<>();
+        for (String link : screenshotLinks) {
+            multipartFiles.add(fetcher.fetch(link, MultipartFile.class));
+        }
+        if (!imageStorageService.validateImages(multipartFiles)) throw new InvalidFileException("JPEG/PNG/BMP/GIF/TIFF/PSD/WBMP/ICO");
+
+        return imageStorageService.saveImages(multipartFiles, gameNew.getId() + "\\screenshots");
+    }
+
+    private Set<String> saveScreenshots(Game game, List<MultipartFile> screenshots) {
         if (screenshots != null) {
             if (!imageStorageService.validateImages(screenshots)) throw new InvalidFileException("JPEG/PNG/BMP/GIF/TIFF/PSD/WBMP/ICO");
-            Set<String> screenshotPaths = imageStorageService.saveImages(screenshots, game.getId() + "\\screenshots");
-            game.getScreenshots().addAll(screenshotPaths);
+            return imageStorageService.saveImages(screenshots, game.getId() + "\\screenshots");
         }
-
-        if (headerImg != null) {
-            if (!imageStorageService.validateImages(List.of(headerImg))) throw new InvalidFileException("JPEG/PNG/BMP/GIF/TIFF/PSD/WBMP/ICO");
-            String headerImgPath = imageStorageService.saveImage(headerImg, game.getId() + "\\header_img");
-            game.setHeaderImg(headerImgPath);
-        }
+        return Set.of();
     }
 
     private Game createGameFromGameToAdd(GameToAdd gameToAdd) {

@@ -1,5 +1,6 @@
 package com.mecsbalint.backend.service;
 
+import com.mecsbalint.backend.utility.Fetcher;
 import org.apache.commons.imaging.Imaging;
 import org.apache.commons.imaging.ImagingException;
 import org.apache.commons.io.FilenameUtils;
@@ -23,8 +24,12 @@ public class ImageStorageService {
 
     private final String uploadDir;
 
-    public ImageStorageService(@Value("${mecsbalint.app.file-upload-dir}") String uploadDir) {
+    private final UUID uuid;
+
+
+    public ImageStorageService(@Value("${mecsbalint.app.file-upload-dir}") String uploadDir, UUID uuid) {
         this.uploadDir = uploadDir;
+        this.uuid = uuid;
     }
 
     public void deleteFiles(List<String> filePaths) {
@@ -50,7 +55,7 @@ public class ImageStorageService {
 
     public String saveImage(MultipartFile image, String folderName) {
         String extension = FilenameUtils.getExtension(image.getOriginalFilename());
-        String generatedFilename = UUID.randomUUID() + "." + extension;
+        String generatedFilename = uuid.randomUUID() + "." + extension;
         String relativePath = folderName + "\\" + generatedFilename;
 
         try {
