@@ -66,13 +66,12 @@ export type GameToAdd = Game & {
     descriptionLong: string,
     developerIds: number[],
     publisherIds: number[],
-    tagIds: number[]
+    tagIds: number[],
+    headerImg: string | null,
+    screenshots: string[],
 };
 
-export type GameToEdit = GameToAdd & {
-    headerImg: string,
-    screenshots: string[],
-}
+export type GameToEdit = GameToAdd;
 
 export type GameStatuses = {
     inWishlist: boolean | null,
