@@ -1,8 +1,6 @@
 package com.mecsbalint.backend.service;
 
 import com.mecsbalint.backend.utility.Fetcher;
-import org.apache.commons.imaging.Imaging;
-import org.apache.commons.imaging.ImagingException;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -34,6 +32,8 @@ public class ImageStorageService {
     public String downloadAndSaveImage(String link, String savePath) {
         String contentType = fetcher.fetchContentType(link);
         String extension = getExtensionFromContentType(contentType);
+
+        if (extension.equals("bin")) return null;
 
         byte[] imageBytes = fetcher.fetch(link, byte[].class);
 
@@ -83,27 +83,18 @@ public class ImageStorageService {
         return relativePath.toString().replace(File.separatorChar, '/');
     }
 
-    public boolean validateMultipartFileImages(MultipartFile file) {
-        return validateMultipartFileImages(List.of(file));
-    }
-
     public boolean validateMultipartFileImages(List<MultipartFile> files) {
-        List<byte[]> fileBytes = createBytesFromMultipartFiles(files);
-
-        return validateByteImages(fileBytes);
-    }
-
-    public boolean validateByteImages(List<byte[]> files) {
-        for (byte[] file: files) {
-            try {
-                Imaging.getImageInfo(file);
-            } catch (ImagingException e) {
-                return false;
-            } catch (IOException e) {
-                throw new UncheckedIOException("The system can't read one of the files", e);
-            }
+        for (MultipartFile file : files) {
+            if (!validateMultipartFileImages(file)) return false;
         }
         return true;
+    }
+
+    public boolean validateMultipartFileImages(MultipartFile file) {
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        List<String> validExtensions = List.of("jpg", "jpeg", "png", "gif", "webp", "bmp", "svg");
+
+        return validExtensions.contains(extension);
     }
 
     private byte[] createBytesFromMultipartFile(MultipartFile file) {

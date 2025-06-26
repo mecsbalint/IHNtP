@@ -13,7 +13,6 @@ import jakarta.transaction.Transactional;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -137,18 +136,18 @@ public class GameService {
 
     private String downloadAndSaveImage(String link, String savePath) {
         String imagePath = imageStorageService.downloadAndSaveImage(link, savePath);
-        if (imagePath == null) throw new InvalidFileException("JPEG/PNG/BMP/GIF/TIFF/PSD/WBMP/ICO");
+        if (imagePath == null) throw new InvalidFileException("jpg/png/gif/webp/bmp/svg");
         return imagePath;
     }
 
     private String saveHeaderImg(MultipartFile headerImg, Long gameId) {
-        if (!imageStorageService.validateMultipartFileImages(headerImg)) throw new InvalidFileException("JPEG/PNG/BMP/GIF/TIFF/PSD/WBMP/ICO");
+        if (!imageStorageService.validateMultipartFileImages(headerImg)) throw new InvalidFileException("jpg/png/gif/webp/bmp/svg");
         return imageStorageService.saveImage(headerImg, gameId + "\\header_img");
     }
 
     private Set<String> saveScreenshots(List<MultipartFile> screenshotFiles, String savePath) {
         if (screenshotFiles != null) {
-            if (!imageStorageService.validateMultipartFileImages(screenshotFiles)) throw new InvalidFileException("JPEG/PNG/BMP/GIF/TIFF/PSD/WBMP/ICO");
+            if (!imageStorageService.validateMultipartFileImages(screenshotFiles)) throw new InvalidFileException("jpg/png/gif/webp/bmp/svg");
             return imageStorageService.saveImages(screenshotFiles, savePath);
         }
         return new HashSet<>();
