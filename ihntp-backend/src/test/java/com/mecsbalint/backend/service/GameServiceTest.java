@@ -137,6 +137,7 @@ class GameServiceTest {
 
     @Test
     public void getGameForProfileById_notExistingId_throwGameNotFoundException() {
+        when(userServiceMock.getUserByEmail(any())).thenThrow(new UserNotFoundException(""));
         when(gameRepositoryMock.getGameById(any())).thenThrow(new GameNotFoundException("", ""));
 
         assertThrows(GameNotFoundException.class, () -> gameService.getGameForProfileById(1L, null));
@@ -164,104 +165,59 @@ class GameServiceTest {
 
     }
 
-//    @Test
-//    public void addGame_happyCaseWithBothScreenshotsAndHeaderImg_callValidateImagesTwoTimesAndSaveImagesAndSaveImage() {
-//        when(gameRepositoryMock.saveAndFlush(any())).thenReturn(getGame());
-//        when(gameRepositoryMock.save(any())).thenReturn(getGame());
-//        when(imageStorageServiceMock.validateImages(any())).thenReturn(true);
-//        when(imageStorageServiceMock.saveImage(any(), any())).thenReturn("");
-//        when(imageStorageServiceMock.saveImages(any(), any())).thenReturn(Set.of());
-//
-//        gameService.addGame(getGameToAdd(getGame()), List.of(getMultipartFileMock()), getMultipartFileMock());
-//
-//        verify(imageStorageServiceMock, times(2)).validateImages(any());
-//        verify(imageStorageServiceMock).saveImage(any(), any());
-//        verify(imageStorageServiceMock).saveImages(any(), any());
-//    }
-//
-//    @Test
-//    public void addGame_gameNotHaveRequiredData_throwMissingDataException() {
-//        Game incompleteGame = getGame();
-//        incompleteGame.setName("");
-//        incompleteGame.setReleaseDate(null);
-//
-//        assertThrows(MissingDataException.class, () -> gameService.addGame(getGameToAdd(incompleteGame), null ,null));
-//    }
-//
-//    @Test
-//    public void addGame_gameIsAlreadyExist_throwsElementIsAlreadyInDatabaseException() {
-//        ConstraintViolationException constraintViolationException = new ConstraintViolationException("Constraint violation", null, "SomeConstraint");
-//        DataIntegrityViolationException dataIntegrityViolationException = new DataIntegrityViolationException("", constraintViolationException);
-//        when(gameRepositoryMock.saveAndFlush(any())).thenThrow(dataIntegrityViolationException);
-//
-//        assertThrows(ElementIsAlreadyInDatabaseException.class, () -> gameService.addGame(getGameToAdd(getGame()), null, null));
-//    }
-//
-//    @Test
-//    public void addGame_atLeastOneFileIsNotInSupportedImageFormat_throwsInvalidFileException() {
-//        when(gameRepositoryMock.saveAndFlush(any())).thenReturn(getGame());
-//        when(imageStorageServiceMock.validateImages(any())).thenReturn(false);
-//
-//        assertThrows(InvalidFileException.class, () -> gameService.addGame(getGameToAdd(getGame()), null, getMultipartFileMock()));
-//    }
-//
-//    @Test
-//    public void editGame_happyCaseWithNoFiles_callSave() {
-//        when(gameRepositoryMock.findGameById(any())).thenReturn(Optional.of(getGame()));
-//
-//        gameService.editGame(1L, getGameToEdit(getGame()), null, null);
-//
-//        verify(gameRepositoryMock).save(any());
-//    }
-//
-//    @Test
-//    public void editGame_happyCaseWithNewScreenshotsAndHeaderImg_callValidateImagesTwoTimesAndSaveImagesAndSaveImage() {
-//        when(gameRepositoryMock.findGameById(any())).thenReturn(Optional.of(getGame()));
-//        when(imageStorageServiceMock.validateImages(any())).thenReturn(true);
-//        when(imageStorageServiceMock.saveImage(any(), any())).thenReturn("");
-//        when(imageStorageServiceMock.saveImages(any(), any())).thenReturn(Set.of());
-//
-//        gameService.editGame(1L, getGameToEdit(getGame()), List.of(getMultipartFileMock()), getMultipartFileMock());
-//
-//        verify(imageStorageServiceMock, times(2)).validateImages(any());
-//        verify(imageStorageServiceMock).saveImage(any(), any());
-//        verify(imageStorageServiceMock).saveImages(any(), any());
-//    }
-//
-//    @Test
-//    public void editGame_happyCaseWithFilesBecomeUnnecessary_callDeleteFiles() {
-//        when(gameRepositoryMock.findGameById(any())).thenReturn(Optional.of(getGame()));
-//        Game newGame = getGame();
-//        newGame.setHeaderImg(null);
-//
-//        gameService.editGame(1L, getGameToEdit(newGame), null, null);
-//
-//        verify(imageStorageServiceMock).deleteFiles(any());
-//    }
-//
-//    @Test
-//    public void editGame_gameNotHaveRequiredData_throwMissingDataException() {
-//        Game incompleteGame = getGame();
-//        incompleteGame.setName("");
-//        incompleteGame.setReleaseDate(null);
-//
-//        assertThrows(MissingDataException.class, () -> gameService.editGame(1L, getGameToEdit(incompleteGame), null, null));
-//    }
-//
-//    @Test
-//    public void editGame_gameNotExist_throwsGameNotFoundException() {
-//        when(gameRepositoryMock.findGameById(any())).thenReturn(Optional.empty());
-//
-//        assertThrows(GameNotFoundException.class, () -> gameService.editGame(1L, getGameToEdit(getGame()), null, null));
-//    }
-//
-//    @Test
-//    public void editGame_atLeastOneFileIsNotInSupportedImageFormat_throwsInvalidFileException() {
-//        when(gameRepositoryMock.findGameById(any())).thenReturn(Optional.of(getGame()));
-//        when(imageStorageServiceMock.validateImages(any())).thenReturn(false);
-//
-//        assertThrows(InvalidFileException.class, () -> gameService.editGame(1L, getGameToEdit(getGame()), null, getMultipartFileMock()));
-//    }
+    @Test
+    public void addGame_gameNotHaveRequiredData_throwMissingDataException() {
+        Game incompleteGame = getGame();
+        incompleteGame.setName("");
+        incompleteGame.setReleaseDate(null);
+
+        assertThrows(MissingDataException.class, () -> gameService.addGame(getGameToAdd(incompleteGame), null ,null));
+    }
+
+    @Test
+    public void addGame_gameIsAlreadyExist_throwsElementIsAlreadyInDatabaseException() {
+        ConstraintViolationException constraintViolationException = new ConstraintViolationException("Constraint violation", null, "SomeConstraint");
+        DataIntegrityViolationException dataIntegrityViolationException = new DataIntegrityViolationException("", constraintViolationException);
+        when(gameRepositoryMock.saveAndFlush(any())).thenThrow(dataIntegrityViolationException);
+
+        assertThrows(ElementIsAlreadyInDatabaseException.class, () -> gameService.addGame(getGameToAdd(getGame()), null, null));
+    }
+
+    @Test
+    public void editGame_happyCaseWithNoFiles_callSave() {
+        when(gameRepositoryMock.findGameById(any())).thenReturn(Optional.of(getGame()));
+
+        gameService.editGame(1L, getGameToEdit(getGame()), null, null);
+
+        verify(gameRepositoryMock).save(any());
+    }
+
+    @Test
+    public void editGame_happyCaseWithFilesBecomeUnnecessary_callDeleteFiles() {
+        when(gameRepositoryMock.findGameById(any())).thenReturn(Optional.of(getGame()));
+        Game newGame = getGame();
+        newGame.setHeaderImg(null);
+
+        gameService.editGame(1L, getGameToEdit(newGame), null, null);
+
+        verify(imageStorageServiceMock).deleteFiles(any());
+    }
+
+    @Test
+    public void editGame_gameNotHaveRequiredData_throwMissingDataException() {
+        Game incompleteGame = getGame();
+        incompleteGame.setName("");
+        incompleteGame.setReleaseDate(null);
+
+        assertThrows(MissingDataException.class, () -> gameService.editGame(1L, getGameToEdit(incompleteGame), null, null));
+    }
+
+    @Test
+    public void editGame_gameNotExist_throwsGameNotFoundException() {
+        when(gameRepositoryMock.findGameById(any())).thenReturn(Optional.empty());
+
+        assertThrows(GameNotFoundException.class, () -> gameService.editGame(1L, getGameToEdit(getGame()), null, null));
+    }
 
     private Game getGame() {
         Game game = new Game();
