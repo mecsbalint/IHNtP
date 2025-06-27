@@ -2,6 +2,7 @@ package com.mecsbalint.backend.service;
 
 import com.mecsbalint.backend.utility.Fetcher;
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,10 +24,22 @@ public class ImageStorageService {
 
     private final Fetcher fetcher;
 
-    public ImageStorageService(@Value("${mecsbalint.app.file-upload-dir}") String uploadDir, UUID uuid, Fetcher fetcher) {
+    private final Logger logger;
+
+    public ImageStorageService(@Value("${mecsbalint.app.file-upload-dir}") String uploadDir, UUID uuid, Fetcher fetcher, Logger logger) {
         this.uploadDir = uploadDir;
         this.uuid = uuid;
         this.fetcher = fetcher;
+        this.logger = logger;
+    }
+
+    public Set<String> downloadAndSaveImages(Set<String> links, String savePath) {
+        Set<String> savedPaths = new HashSet<>();
+        for (String link : links) {
+            savedPaths.add(downloadAndSaveImage(link, savePath));
+        }
+
+        return savedPaths;
     }
 
     public String downloadAndSaveImage(String link, String savePath) {
@@ -38,6 +51,24 @@ public class ImageStorageService {
         byte[] imageBytes = fetcher.fetch(link, byte[].class);
 
         return saveImage(imageBytes, "image." + extension, savePath);
+    }
+
+    public boolean deleteFolderContent(String folderName, Set<String> exceptions) {
+
+    }
+
+    public boolean deleteFolder(String folderName) {
+        Path folderPath = Paths.get(uploadDir, folderName);
+        try {
+            Files.walk(folderPath)
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+            return true;
+        } catch (IOException e) {
+            logger.error(String.format("Failed to delete folder: %S", folderPath), e);
+            return false;
+        }
     }
 
     public void deleteFiles(Set<String> filePaths) {

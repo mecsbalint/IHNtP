@@ -76,59 +76,87 @@ public class GameService {
         return new GameForEditGameDto(gameEntity);
     }
 
+    @Transactional
     public Long addGame(GameToAdd gameToAdd, List<MultipartFile> screenshotFiles, MultipartFile headerImgFile) {
-        if (!checkForRequiredData(gameToAdd)) throw new MissingDataException(gameToAdd.toString(), "Game");
-
-        Game game = createGameFromGameToAdd(gameToAdd);
-        String headerImgToAdd = game.getHeaderImg();
-        game.setHeaderImg(null);
-        Set<String> screenshotsToAdd = game.getScreenshots();
-        game.setScreenshots(new HashSet<>());
-
+        Long gameId = null;
         try {
-            game = gameRepository.saveAndFlush(game);
-        } catch (DataIntegrityViolationException exception) {
-            if (exception.getCause() instanceof ConstraintViolationException) {
-                throw new ElementIsAlreadyInDatabaseException(game.toString(), "Game");
-            } else {
-                throw exception;
+
+            if (!checkForRequiredData(gameToAdd)) throw new MissingDataException(gameToAdd.toString(), "Game");
+
+            Game game = createGameFromGameToAdd(gameToAdd);
+            String headerImgToAdd = game.getHeaderImg();
+            game.setHeaderImg(null);
+            Set<String> screenshotsToAdd = game.getScreenshots();
+            game.setScreenshots(new HashSet<>());
+
+            try {
+                game = gameRepository.saveAndFlush(game);
+                gameId = game.getId();
+            } catch (DataIntegrityViolationException exception) {
+                if (exception.getCause() instanceof ConstraintViolationException) {
+                    throw new ElementIsAlreadyInDatabaseException(game.toString(), "Game");
+                } else {
+                    throw exception;
+                }
             }
+
+            game.setHeaderImg(handleHeaderImg(game.getId(), headerImgToAdd, null, headerImgFile));
+
+            Set<String> downloadedScreenshotPaths = downloadAndSaveImages(screenshotsToAdd, game.getId() + "\\screenshots");
+            game.getScreenshots().addAll(downloadedScreenshotPaths);
+
+            Set<String> savedScreenshotPaths = saveScreenshots(screenshotFiles, game.getId() + "\\screenshots");
+            game.getScreenshots().addAll(savedScreenshotPaths);
+
+            return gameRepository.save(game).getId();
+        } catch (Exception e) {
+            if (gameId != null)imageStorageService.deleteFolder(gameId.toString());
+            throw e;
         }
-
-        game.setHeaderImg(handleHeaderImg(game.getId(), headerImgToAdd, null, headerImgFile));
-
-        Set<String> downloadedScreenshotPaths = downloadAndSaveImages(screenshotsToAdd, game.getId() + "\\screenshots");
-        game.getScreenshots().addAll(downloadedScreenshotPaths);
-        Set<String> savedScreenshotPaths = saveScreenshots(screenshotFiles, game.getId() + "\\screenshots");
-        game.getScreenshots().addAll(savedScreenshotPaths);
-
-        return gameRepository.save(game).getId();
     }
 
-    public void editGame(Long gameId, GameToEdit gameToEdit, List<MultipartFile> screenshotFile, MultipartFile headerImgFile) {
-        if (!checkForRequiredData(gameToEdit)) throw new MissingDataException(gameToEdit.toString(), "Game");
+    @Transactional
+    public void editGame(Long gameId, GameToEdit gameToEdit, List<MultipartFile> screenshotFiles, MultipartFile headerImgFile) {
+        Set<String> screenshotsToKeep = null;
 
-        Game gameOg = gameRepository.findGameById(gameId).orElseThrow(() -> new GameNotFoundException("id", gameId.toString()));
-        Game game = createGameFromGameToEdit(gameToEdit);
-        game.setId(gameId);
+        try {
+            if (!checkForRequiredData(gameToEdit)) throw new MissingDataException(gameToEdit.toString(), "Game");
 
-        game.setHeaderImg(handleHeaderImg(gameId, game.getHeaderImg(), gameOg.getHeaderImg(), headerImgFile));
+            Game gameOg = gameRepository.findGameById(gameId).orElseThrow(() -> new GameNotFoundException("id", gameId.toString()));
+            Game game = createGameFromGameToEdit(gameToEdit);
+            game.setId(gameId);
 
-        Set<String> screenshotsToDelete = gameOg.getScreenshots().stream()
-                .filter(screenshot -> game.getScreenshots().contains(screenshot) && !screenshot.contains("http"))
+            game.setHeaderImg(handleHeaderImg(gameId, game.getHeaderImg(), gameOg.getHeaderImg(), headerImgFile));
+
+            Set<String> screenshotsToDelete = gameOg.getScreenshots().stream()
+                    .filter(screenshot -> game.getScreenshots().contains(screenshot) && !screenshot.contains("http"))
+                    .collect(Collectors.toSet());
+            screenshotsToKeep = game.getScreenshots().stream()
+                    .filter(screenshot -> gameOg.getScreenshots().contains(screenshot))
+                    .collect(Collectors.toSet());
+            Set<String> screenshotsToDownload = game.getScreenshots().stream()
+                    .filter(screenshot -> !gameOg.getScreenshots().contains(screenshot))
+                    .collect(Collectors.toSet());
+
+            game.setScreenshots(new HashSet<>());
+            Set<String> gameScreenshots = game.getScreenshots();
+
+            imageStorageService.deleteFiles(screenshotsToDelete);
+            gameScreenshots.addAll(getDownloadedImagePaths(screenshotsToDownload, gameId));
+            gameScreenshots.addAll(screenshotsToKeep);
+            gameScreenshots.addAll(saveScreenshots(screenshotFiles, gameId + "\\header_img"));
+
+            gameRepository.save(game);
+        } catch (Exception e) {
+            if (screenshotsToKeep != null) imageStorageService.deleteFolderContent(gameId.toString(), screenshotsToKeep);
+            throw e;
+        }
+    }
+
+    private Set<String> getDownloadedImagePaths(Set<String> links, Long gameId) {
+        return imageStorageService.downloadAndSaveImages(links, gameId + "\\header_img").stream()
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-        Set<String> screenshotsToKeep = game.getScreenshots().stream()
-                .filter(screenshot -> gameOg.getScreenshots().contains(screenshot))
-                .collect(Collectors.toSet());
-        Set<String> screenshotsToDownload = game.getScreenshots().stream()
-                .filter(screenshot -> !gameOg.getScreenshots().contains(screenshot))
-                .collect(Collectors.toSet());
-
-        game.setScreenshots(new HashSet<>());
-
-        imageStorageService.deleteFiles(screenshotsToDelete);
-
-
     }
 
     private String handleHeaderImg(Long gameId, String headerImgNew, String headerImgOg, MultipartFile headerImgFile) {

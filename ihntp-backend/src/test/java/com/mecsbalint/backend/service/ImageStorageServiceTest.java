@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,11 +31,14 @@ class ImageStorageServiceTest {
     @Mock
     private Fetcher fetcherMock;
 
+    @Mock
+    private Logger loggerMock;
+
     private ImageStorageService imageStorageService;
 
     @BeforeEach
     public void setup() {
-        imageStorageService = new ImageStorageService("uploadDirectory", uuidMock, fetcherMock);
+        imageStorageService = new ImageStorageService("uploadDirectory", uuidMock, fetcherMock, loggerMock);
     }
 
     @Test
