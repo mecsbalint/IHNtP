@@ -80,7 +80,6 @@ public class GameService {
     public Long addGame(GameToAdd gameToAdd, List<MultipartFile> screenshotFiles, MultipartFile headerImgFile) {
         Long gameId = null;
         try {
-
             if (!checkForRequiredData(gameToAdd)) throw new MissingDataException(gameToAdd.toString(), "Game");
 
             Game game = createGameFromGameToAdd(gameToAdd);
@@ -105,7 +104,7 @@ public class GameService {
             Set<String> downloadedScreenshotPaths = downloadAndSaveImages(screenshotsToAdd, game.getId() + "\\screenshots");
             game.getScreenshots().addAll(downloadedScreenshotPaths);
 
-            Set<String> savedScreenshotPaths = saveScreenshots(screenshotFiles, game.getId() + "\\screenshots");
+            Set<String> savedScreenshotPaths = getSavedScreenshots(screenshotFiles, gameId + "\\screenshots");
             game.getScreenshots().addAll(savedScreenshotPaths);
 
             return gameRepository.save(game).getId();
@@ -129,7 +128,7 @@ public class GameService {
             game.setHeaderImg(handleHeaderImg(gameId, game.getHeaderImg(), gameOg.getHeaderImg(), headerImgFile));
 
             Set<String> screenshotsToDelete = gameOg.getScreenshots().stream()
-                    .filter(screenshot -> game.getScreenshots().contains(screenshot) && !screenshot.contains("http"))
+                    .filter(screenshot -> !game.getScreenshots().contains(screenshot) && !screenshot.contains("http"))
                     .collect(Collectors.toSet());
             screenshotsToKeep = game.getScreenshots().stream()
                     .filter(screenshot -> gameOg.getScreenshots().contains(screenshot))
@@ -144,7 +143,7 @@ public class GameService {
             imageStorageService.deleteFiles(screenshotsToDelete);
             gameScreenshots.addAll(getDownloadedImagePaths(screenshotsToDownload, gameId));
             gameScreenshots.addAll(screenshotsToKeep);
-            gameScreenshots.addAll(saveScreenshots(screenshotFiles, gameId + "\\header_img"));
+            gameScreenshots.addAll(getSavedScreenshots(screenshotFiles, gameId + "\\screenshots"));
 
             gameRepository.save(game);
         } catch (Exception e) {
@@ -161,14 +160,14 @@ public class GameService {
 
     private String handleHeaderImg(Long gameId, String headerImgNew, String headerImgOg, MultipartFile headerImgFile) {
         if (headerImgFile != null) {
-            if (headerImgOg != null) imageStorageService.deleteFiles(Set.of(headerImgOg));
+            if (headerImgOg != null && !headerImgOg.contains("http")) imageStorageService.deleteFiles(Set.of(headerImgOg));
             return saveHeaderImg(headerImgFile, gameId);
         } else if (headerImgNew == null) {
             return null;
         } else if (headerImgNew.equals(headerImgOg)) {
             return headerImgOg;
         } else {
-            if (headerImgOg != null) imageStorageService.deleteFiles(Set.of(headerImgOg));
+            if (headerImgOg != null && !headerImgOg.contains("http")) imageStorageService.deleteFiles(Set.of(headerImgOg));
             return downloadAndSaveImage(headerImgNew, gameId + "\\header_img");
         }
     }
@@ -194,7 +193,7 @@ public class GameService {
         return imageStorageService.saveImage(headerImg, gameId + "\\header_img");
     }
 
-    private Set<String> saveScreenshots(List<MultipartFile> screenshotFiles, String savePath) {
+    private Set<String> getSavedScreenshots(List<MultipartFile> screenshotFiles, String savePath) {
         if (screenshotFiles != null) {
             if (!imageStorageService.validateMultipartFileImages(screenshotFiles)) throw new InvalidFileException("jpg/png/gif/webp/bmp/svg");
             return imageStorageService.saveImages(screenshotFiles, savePath);

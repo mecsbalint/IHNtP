@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ImageStorageService {
@@ -54,14 +55,14 @@ public class ImageStorageService {
     }
 
     public boolean deleteFolderContent(String folderName, Set<String> exceptions) {
-
-    }
-
-    public boolean deleteFolder(String folderName) {
+        Set<Path> exceptionPaths = exceptions.stream()
+                .map(exception -> Paths.get(uploadDir, exception).normalize())
+                .collect(Collectors.toSet());
         Path folderPath = Paths.get(uploadDir, folderName);
         try {
             Files.walk(folderPath)
                     .sorted(Comparator.reverseOrder())
+                    .filter(path -> !exceptionPaths.contains(path.normalize()))
                     .map(Path::toFile)
                     .forEach(File::delete);
             return true;
@@ -71,9 +72,13 @@ public class ImageStorageService {
         }
     }
 
+    public boolean deleteFolder(String folderName) {
+        return deleteFolderContent(folderName, Set.of());
+    }
+
     public void deleteFiles(Set<String> filePaths) {
         for (String filePath: filePaths) {
-            Path fileToDeletePath = Paths.get(uploadDir + "\\" + filePath);
+            Path fileToDeletePath = Paths.get(uploadDir, filePath);
             try {
                 Files.deleteIfExists(fileToDeletePath);
             } catch (IOException e) {
