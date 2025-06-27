@@ -2,7 +2,7 @@ import { User } from "../types/User";
 
 type ApiRequestParams = {
   url: string,
-  method?: "GET" | "POST" | "DELETE" | "PUT" | "PATCH",
+  method?: "GET" | "POST" | "DELETE" | "PUT" | "PATCH" | "HEAD",
   body?: string | FormData,
   headers?: {[key: string]: string}
 };

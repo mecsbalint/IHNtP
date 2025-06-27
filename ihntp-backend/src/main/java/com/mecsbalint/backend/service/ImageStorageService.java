@@ -1,8 +1,8 @@
 package com.mecsbalint.backend.service;
 
-import org.apache.commons.imaging.Imaging;
-import org.apache.commons.imaging.ImagingException;
+import com.mecsbalint.backend.utility.Fetcher;
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,23 +13,72 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ImageStorageService {
 
     private final String uploadDir;
 
-    public ImageStorageService(@Value("${mecsbalint.app.file-upload-dir}") String uploadDir) {
+    private final UUID uuid;
+
+    private final Fetcher fetcher;
+
+    private final Logger logger;
+
+    public ImageStorageService(@Value("${mecsbalint.app.file-upload-dir}") String uploadDir, UUID uuid, Fetcher fetcher, Logger logger) {
         this.uploadDir = uploadDir;
+        this.uuid = uuid;
+        this.fetcher = fetcher;
+        this.logger = logger;
     }
 
-    public void deleteFiles(List<String> filePaths) {
-        for (String imagePath: filePaths) {
-            Path fileToDeletePath = Paths.get(uploadDir + "\\" + imagePath);
+    public Set<String> downloadAndSaveImages(Set<String> links, String savePath) {
+        Set<String> savedPaths = new HashSet<>();
+        for (String link : links) {
+            savedPaths.add(downloadAndSaveImage(link, savePath));
+        }
+
+        return savedPaths;
+    }
+
+    public String downloadAndSaveImage(String link, String savePath) {
+        String contentType = fetcher.fetchContentType(link);
+        String extension = getExtensionFromContentType(contentType);
+
+        if (extension.equals("bin")) return null;
+
+        byte[] imageBytes = fetcher.fetch(link, byte[].class);
+
+        return saveImage(imageBytes, "image." + extension, savePath);
+    }
+
+    public boolean deleteFolderContent(String folderName, Set<String> exceptions) {
+        Set<Path> exceptionPaths = exceptions.stream()
+                .map(exception -> Paths.get(uploadDir, exception).normalize())
+                .collect(Collectors.toSet());
+        Path folderPath = Paths.get(uploadDir, folderName);
+        try {
+            Files.walk(folderPath)
+                    .sorted(Comparator.reverseOrder())
+                    .filter(path -> !exceptionPaths.contains(path.normalize()))
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+            return true;
+        } catch (IOException e) {
+            logger.error(String.format("Failed to delete folder: %S", folderPath), e);
+            return false;
+        }
+    }
+
+    public boolean deleteFolder(String folderName) {
+        return deleteFolderContent(folderName, Set.of());
+    }
+
+    public void deleteFiles(Set<String> filePaths) {
+        for (String filePath: filePaths) {
+            Path fileToDeletePath = Paths.get(uploadDir, filePath);
             try {
                 Files.deleteIfExists(fileToDeletePath);
             } catch (IOException e) {
@@ -49,31 +98,70 @@ public class ImageStorageService {
     }
 
     public String saveImage(MultipartFile image, String folderName) {
-        String extension = FilenameUtils.getExtension(image.getOriginalFilename());
-        String generatedFilename = UUID.randomUUID() + "." + extension;
-        String relativePath = folderName + "\\" + generatedFilename;
-
-        try {
-            File targetFile = new File(Paths.get(uploadDir).toAbsolutePath() + "\\" + relativePath);
-            targetFile.getParentFile().mkdirs();
-            image.transferTo(targetFile);
-        } catch (IOException e) {
-            throw new UncheckedIOException(String.format("The system can't save this file: %s", relativePath), e);
-        }
-
-        return relativePath;
+        return saveImage(createBytesFromMultipartFile(image), image.getOriginalFilename(), folderName);
     }
 
-    public boolean validateImages(List<MultipartFile> files) {
-        for (MultipartFile file: files) {
-            try {
-                Imaging.getImageInfo(file.getBytes());
-            } catch (ImagingException e) {
-                return false;
-            } catch (IOException e) {
-                throw new UncheckedIOException(String.format("The system can't read the file (original filename: %s)", file.getOriginalFilename()), e);
-            }
+    public String saveImage(byte[] imageBytes, String ogFilename, String folderName) {
+        String extension = FilenameUtils.getExtension(ogFilename);
+        String generatedFilename = uuid.randomUUID() + "." + extension;
+
+        Path relativePath = Paths.get(folderName, generatedFilename);
+        Path targetPath = Paths.get(uploadDir).toAbsolutePath().resolve(relativePath);
+
+        try {
+            Files.createDirectories(targetPath.getParent());
+            Files.write(targetPath, imageBytes);
+        } catch (IOException e) {
+            throw new UncheckedIOException(
+                    String.format("The system can't save this file: %s", relativePath), e);
+        }
+
+        return relativePath.toString().replace(File.separatorChar, '/');
+    }
+
+    public boolean validateMultipartFileImages(List<MultipartFile> files) {
+        for (MultipartFile file : files) {
+            if (!validateMultipartFileImages(file)) return false;
         }
         return true;
+    }
+
+    public boolean validateMultipartFileImages(MultipartFile file) {
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        List<String> validExtensions = List.of("jpg", "jpeg", "png", "gif", "webp", "bmp", "svg");
+
+        return validExtensions.contains(extension);
+    }
+
+    private byte[] createBytesFromMultipartFile(MultipartFile file) {
+        try {
+            return file.getBytes();
+        } catch (IOException e) {
+            throw new UncheckedIOException(String.format("The system can't read the file (original filename: %s)", file.getOriginalFilename()), e);
+        }
+    }
+
+    private List<byte[]> createBytesFromMultipartFiles(List<MultipartFile> files) {
+        List<byte[]> fileBytes = new ArrayList<>();
+
+        for (MultipartFile file : files) {
+            fileBytes.add(createBytesFromMultipartFile(file));
+        }
+
+        return fileBytes;
+    }
+
+    private String getExtensionFromContentType(String contentType) {
+        if (contentType == null) return "bin";
+
+        return switch (contentType) {
+            case "image/jpeg", "image/jpg" -> "jpg";
+            case "image/png"               -> "png";
+            case "image/gif"               -> "gif";
+            case "image/webp"              -> "webp";
+            case "image/bmp"               -> "bmp";
+            case "image/svg+xml"           -> "svg";
+            default                        -> "bin";
+        };
     }
 }

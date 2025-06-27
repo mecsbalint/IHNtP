@@ -70,7 +70,7 @@ async function processEntityLists(gameObj : GameFormSubmit) : Promise<GameToEdit
 
     return {
         ...gameObj,
-        headerImg: typeof gameObj.headerImg === "string" ? gameObj.headerImg : "",
+        headerImg: typeof gameObj.headerImg === "string" && gameObj.headerImg.length > 0 ? gameObj.headerImg : null,
         screenshots: gameObj.screenshots.filter((screenshot) : screenshot is string => typeof screenshot === "string"),
         developerIds,
         publisherIds,

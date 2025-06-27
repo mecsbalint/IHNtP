@@ -4,13 +4,14 @@ import { getAllTags } from "../../services/tagService";
 import { getAllPublishers } from "../../services/publisherService";
 import { getAllDevelopers } from "../../services/developerService";
 import AddGameAttributeModal from "../AddGameAttributeModal.jsx/AddGameAttributeModal";
+import AddImageModal from "../AddImageModal/AddImageModal";
 import deleteIcon from "../../assets/delete_icon.png";
 import uploadIcon from "../../assets/upload_icon.png";
 import { Tag, TagWithId } from "../../types/Tag";
 import { Publisher, PublisherWithId } from "../../types/Publisher";
 import { Developer, DeveloperWithId } from "../../types/Developer";
 import { GameForEdit, GameFormSubmit } from "../../types/Game";
-import { dateFormatter, formDate } from "../../utils/utils";
+import { dateFormatter, formDate, imagePathFormatter } from "../../utils/utils";
 
 type GameFormProps = {
     game: GameForEdit | null,
@@ -52,6 +53,7 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
 
     const [screenshots, setScreenshots] = useState<Array<File | string>>([]);
     const carouselRef = useRef<HTMLDivElement | null>(null);
+    const prevScreenshotNumRef = useRef(0);
     
     useEffect(() => {
         getAllTags().then(tags => {
@@ -95,12 +97,13 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
             setIsHeaderImgAdded(game.headerImg !== "");
 
             setScreenshots(game.screenshots);
+            prevScreenshotNumRef.current = game.screenshots.length;
         }
     }, [game, allTagsLoaded, allPublishersLoaded, allDevelopersLoaded]);
 
     useEffect(() => {
         const carousel = carouselRef.current;
-        if (carousel) {
+        if (screenshots.length > prevScreenshotNumRef.current && carousel?.lastElementChild) {
           const lastChild = carousel.lastElementChild;
           lastChild?.scrollIntoView({ behavior: 'auto', inline: 'start' });
         }
@@ -164,7 +167,7 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
         setIsHeaderImgAdded(false);
     }
 
-    function addElementToScreenshots(event : React.FormEvent<HTMLInputElement>) {
+    function addFileToScreenshots(event : React.FormEvent<HTMLInputElement>) {
         const target = event.target as HTMLInputElement & {
             files: FileList
         }
@@ -310,7 +313,8 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
                 
                 <fieldset className="fieldset h-fit">
                     <legend className="fieldset-legend">Header image</legend>
-                    <div className={`flex ${isHeaderImgAdded ? "hidden" : ""}`}>
+                    <div className={`grid gap-2 ${isHeaderImgAdded ? "hidden" : ""}`}>
+                        <button type="button" className="btn btn-primary w-full" onClick={()=>(document.getElementById('headerImgModal') as HTMLDialogElement).showModal()}>Add Link</button>
                         <label className="w-full h-30 border-1 border-dashed rounded flex items-center justify-center cursor-pointer">
                                 <img className="w-10" src={uploadIcon}></img>
                                 Upload File
@@ -324,13 +328,18 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
                 </fieldset>
 
                 <fieldset className="fieldset">
-                    <legend className="fieldset-legend w-full">Screenshots</legend>
-                    <div className="flex gap-2">
-                        <label className="btn btn-primary w-15">
-                            Add
-                            <input className="hidden" type="file" accept="image/*" onChange={addElementToScreenshots}/>
-                        </label>
-                        <div ref={carouselRef} className="carousel w-full h-30">
+                        <legend className="fieldset-legend w-full">Screenshots</legend>
+                        <div className="flex gap-2 w-full">
+                            <label className="btn btn-primary grow">
+                                Upload File
+                                <input className="hidden" type="file" accept="image/*" onChange={addFileToScreenshots}/>
+                            </label>
+                            <label className="grow">
+                                <button type="button" className="btn btn-primary w-full" onClick={()=>(document.getElementById('screenshotModal') as HTMLDialogElement).showModal()}>Add Link</button>
+                            </label>
+
+                        </div>
+                        <div ref={carouselRef} className="carousel w-full">
                             {screenshots.map((screenshot, index) => {
                                 const screenshotUrl = typeof screenshot === "string" ? screenshot : URL.createObjectURL(screenshot);
                                 return (
@@ -343,14 +352,13 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
                                             onClick={event => removeElementFromScreenshots((event.target as HTMLImageElement).dataset.index!)} 
                                             />
                                         <img
-                                            src={screenshotUrl}
+                                            src={imagePathFormatter(screenshotUrl)}
                                             alt={`${name} screenshot no. ${index + 1}`}
                                         />
                                     </div>
                                 )
                             })}
                         </div>
-                    </div>
                 </fieldset>
 
                 <button type="button" onClick={() => onSubmit({name, releaseDate: dateFormatter(releaseDate), tags, publishers, developers, descriptionShort, descriptionLong, headerImg: headerImg ?? headerImgUrl, screenshots})} className="btn btn-primary mt-5" disabled={!isNameAdded || !isReleaseDateAdded || tags.length === 0 || developers.length === 0 || publishers.length === 0}>{buttonText}</button>
@@ -359,6 +367,8 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
             <AddGameAttributeModal modalId="tagModal" modalName="Tag" listSetter={setTags} list={tags} allList={allTags}/>
             <AddGameAttributeModal modalId="developerModal" modalName="Developer" listSetter={setDevelopers} list={developers} allList={allDevelopers}/>
             <AddGameAttributeModal modalId="publisherModal" modalName="Publisher" listSetter={setPublishers} list={publishers} allList={allPublishers}/>
+            <AddImageModal modalId="screenshotModal" modalName="Screenshot" list={screenshots} setter={setScreenshots}/>
+            <AddImageModal modalId="headerImgModal" modalName="Header Image" list={null} setter={setHeaderImgUrl} />
         </>
 
     )

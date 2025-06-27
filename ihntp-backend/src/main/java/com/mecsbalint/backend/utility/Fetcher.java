@@ -1,12 +1,10 @@
 package com.mecsbalint.backend.utility;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import java.util.Locale;
-import java.util.Set;
 
 @Component
 public class Fetcher {
@@ -39,5 +37,18 @@ public class Fetcher {
                     .bodyToMono(returnClass)
                     .block();
         }
+    }
+
+    public String fetchContentType(String url) {
+        return webClient
+                .method(HttpMethod.HEAD)
+                .uri(url)
+                .retrieve()
+                .toBodilessEntity()
+                .mapNotNull(response -> {
+                    MediaType contentType = response.getHeaders().getContentType();
+                    return contentType == null ? null : contentType.toString();
+                })
+                .block();
     }
 }
