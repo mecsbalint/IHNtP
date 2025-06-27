@@ -40,7 +40,7 @@ public class ImageStorageService {
         return saveImage(imageBytes, "image." + extension, savePath);
     }
 
-    public void deleteFiles(List<String> filePaths) {
+    public void deleteFiles(Set<String> filePaths) {
         for (String filePath: filePaths) {
             Path fileToDeletePath = Paths.get(uploadDir + "\\" + filePath);
             try {

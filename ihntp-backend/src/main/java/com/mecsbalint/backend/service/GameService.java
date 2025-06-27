@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class GameService {
@@ -110,16 +111,36 @@ public class GameService {
         Game gameOg = gameRepository.findGameById(gameId).orElseThrow(() -> new GameNotFoundException("id", gameId.toString()));
         Game game = createGameFromGameToEdit(gameToEdit);
         game.setId(gameId);
+
+        game.setHeaderImg(handleHeaderImg(gameId, game.getHeaderImg(), gameOg.getHeaderImg(), headerImgFile));
+
+        Set<String> screenshotsToDelete = gameOg.getScreenshots().stream()
+                .filter(screenshot -> game.getScreenshots().contains(screenshot) && !screenshot.contains("http"))
+                .collect(Collectors.toSet());
+        Set<String> screenshotsToKeep = game.getScreenshots().stream()
+                .filter(screenshot -> gameOg.getScreenshots().contains(screenshot))
+                .collect(Collectors.toSet());
+        Set<String> screenshotsToDownload = game.getScreenshots().stream()
+                .filter(screenshot -> !gameOg.getScreenshots().contains(screenshot))
+                .collect(Collectors.toSet());
+
+        game.setScreenshots(new HashSet<>());
+
+        imageStorageService.deleteFiles(screenshotsToDelete);
+
+
     }
 
     private String handleHeaderImg(Long gameId, String headerImgNew, String headerImgOg, MultipartFile headerImgFile) {
         if (headerImgFile != null) {
+            if (headerImgOg != null) imageStorageService.deleteFiles(Set.of(headerImgOg));
             return saveHeaderImg(headerImgFile, gameId);
         } else if (headerImgNew == null) {
             return null;
         } else if (headerImgNew.equals(headerImgOg)) {
             return headerImgOg;
         } else {
+            if (headerImgOg != null) imageStorageService.deleteFiles(Set.of(headerImgOg));
             return downloadAndSaveImage(headerImgNew, gameId + "\\header_img");
         }
     }
