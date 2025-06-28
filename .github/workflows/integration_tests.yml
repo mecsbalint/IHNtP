@@ -1,10 +1,10 @@
 
-name: unit_tests
+name: integration_tests
 
 on:
     workflow_dispatch:
-    push:
-        branches: [ "**" ]
+    push: 
+        branches: [ "main" ]
     pull_request:
         branches: [ "main" ]
 
@@ -20,5 +20,5 @@ jobs:
             java-version: "17"
             distribution: "temurin"
             cache: maven
-        - name: Clean and build with Maven
-          run: cd ihntp-backend; mvn clean package
+        - name: Run integration tests with maven
+          run: cd ihntp-backend; mvn failsafe:integration-test
