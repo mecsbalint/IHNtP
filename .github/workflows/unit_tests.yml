@@ -21,4 +21,4 @@ jobs:
             distribution: "temurin"
             cache: maven
         - name: Clean and build with Maven
-          uses: cd ihntp-backend; mvn clean package
+          run: cd ihntp-backend; mvn clean package
