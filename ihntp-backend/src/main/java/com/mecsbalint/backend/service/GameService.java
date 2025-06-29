@@ -141,7 +141,7 @@ public class GameService {
             Set<String> gameScreenshots = game.getScreenshots();
 
             imageStorageService.deleteFiles(screenshotsToDelete);
-            gameScreenshots.addAll(getDownloadedImagePaths(screenshotsToDownload, gameId));
+            gameScreenshots.addAll(getDownloadedScreenshotsPaths(screenshotsToDownload, gameId));
             gameScreenshots.addAll(screenshotsToKeep);
             gameScreenshots.addAll(getSavedScreenshots(screenshotFiles, gameId + "\\screenshots"));
 
@@ -152,8 +152,8 @@ public class GameService {
         }
     }
 
-    private Set<String> getDownloadedImagePaths(Set<String> links, Long gameId) {
-        return imageStorageService.downloadAndSaveImages(links, gameId + "\\header_img").stream()
+    private Set<String> getDownloadedScreenshotsPaths(Set<String> links, Long gameId) {
+        return imageStorageService.downloadAndSaveImages(links, gameId + "\\screenshots").stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
