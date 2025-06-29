@@ -116,7 +116,7 @@ public class ImageStorageService {
                     String.format("The system can't save this file: %s", relativePath), e);
         }
 
-        return relativePath.toString().replace(File.separatorChar, '/');
+        return "/api/images/" + relativePath.toString().replace(File.separatorChar, '/');
     }
 
     public boolean validateMultipartFileImages(List<MultipartFile> files) {

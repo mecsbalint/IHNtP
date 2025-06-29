@@ -72,6 +72,7 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth
+                                .requestMatchers("/api/images/**").permitAll()
                                 .requestMatchers("/api/registration/**").permitAll()
                                 .requestMatchers("/api/login/**").permitAll()
                                 .requestMatchers("/api/games/edit/**").hasRole("USER")

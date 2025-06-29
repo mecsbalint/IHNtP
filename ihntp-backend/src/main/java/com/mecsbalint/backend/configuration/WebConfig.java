@@ -10,9 +10,8 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry
-                .addResourceHandler("/static/**")
+                .addResourceHandler("/api/images/**")
                 .addResourceLocations("classpath:/static/")
-                .setCacheControl(CacheControl.noCache())
-                .resourceChain(false);
+                .setCachePeriod(0);
     }
 }
