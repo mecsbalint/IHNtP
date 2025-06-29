@@ -163,6 +163,7 @@ public class GameService {
             if (headerImgOg != null && !headerImgOg.contains("http")) imageStorageService.deleteFiles(Set.of(headerImgOg));
             return saveHeaderImg(headerImgFile, gameId);
         } else if (headerImgNew == null) {
+            if (headerImgOg != null && !headerImgOg.contains("http")) imageStorageService.deleteFiles(Set.of(headerImgOg));
             return null;
         } else if (headerImgNew.equals(headerImgOg)) {
             return headerImgOg;

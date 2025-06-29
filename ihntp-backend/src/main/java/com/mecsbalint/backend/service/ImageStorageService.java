@@ -77,8 +77,11 @@ public class ImageStorageService {
     }
 
     public void deleteFiles(Set<String> filePaths) {
-        for (String filePath: filePaths) {
-            Path fileToDeletePath = Paths.get(uploadDir, filePath);
+        Set<String> internalFilePaths = filePaths.stream()
+                .map(path -> path.replace("/api/images/", ""))
+                .collect(Collectors.toSet());
+        for (String internalFilePath: internalFilePaths) {
+            Path fileToDeletePath = Paths.get(uploadDir, internalFilePath);
             try {
                 Files.deleteIfExists(fileToDeletePath);
             } catch (IOException e) {
@@ -139,16 +142,6 @@ public class ImageStorageService {
         } catch (IOException e) {
             throw new UncheckedIOException(String.format("The system can't read the file (original filename: %s)", file.getOriginalFilename()), e);
         }
-    }
-
-    private List<byte[]> createBytesFromMultipartFiles(List<MultipartFile> files) {
-        List<byte[]> fileBytes = new ArrayList<>();
-
-        for (MultipartFile file : files) {
-            fileBytes.add(createBytesFromMultipartFile(file));
-        }
-
-        return fileBytes;
     }
 
     private String getExtensionFromContentType(String contentType) {
