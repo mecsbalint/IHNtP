@@ -1,7 +1,6 @@
 package com.mecsbalint.backend.service;
 
 import com.mecsbalint.backend.controller.dto.*;
-import com.mecsbalint.backend.controller.dto.isthereanydealapi.*;
 import com.mecsbalint.backend.exception.*;
 import com.mecsbalint.backend.model.Game;
 import com.mecsbalint.backend.model.UserEntity;
@@ -9,7 +8,6 @@ import com.mecsbalint.backend.repository.DeveloperRepository;
 import com.mecsbalint.backend.repository.GameRepository;
 import com.mecsbalint.backend.repository.PublisherRepository;
 import com.mecsbalint.backend.repository.TagRepository;
-import com.mecsbalint.backend.utility.Fetcher;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +41,7 @@ class GameServiceTest {
     private TagRepository tagRepositoryMock;
 
     @Mock
-    private ImageStorageService imageStorageServiceMock;
+    private LocalImageStorageService imageStorageServiceMock;
 
     @Mock
     private UserService userServiceMock;

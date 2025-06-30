@@ -1,20 +1,16 @@
 package com.mecsbalint.backend.service;
 
 import com.mecsbalint.backend.controller.dto.*;
-import com.mecsbalint.backend.controller.dto.isthereanydealapi.*;
 import com.mecsbalint.backend.exception.*;
 import com.mecsbalint.backend.model.Game;
 import com.mecsbalint.backend.repository.DeveloperRepository;
 import com.mecsbalint.backend.repository.GameRepository;
 import com.mecsbalint.backend.repository.PublisherRepository;
 import com.mecsbalint.backend.repository.TagRepository;
-import com.mecsbalint.backend.utility.Fetcher;
 import jakarta.transaction.Transactional;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,12 +24,12 @@ public class GameService {
     private final DeveloperRepository developerRepository;
     private final PublisherRepository publisherRepository;
     private final TagRepository tagRepository;
-    private final ImageStorageService imageStorageService;
+    private final LocalImageStorageService imageStorageService;
     private final UserService userService;
     private final GamePriceService gamePriceService;
 
     @Autowired
-    public GameService(GameRepository gameRepository, DeveloperRepository developerRepository, PublisherRepository publisherRepository, TagRepository tagRepository, ImageStorageService imageStorageService, UserService userService, GamePriceService gamePriceService) {
+    public GameService(GameRepository gameRepository, DeveloperRepository developerRepository, PublisherRepository publisherRepository, TagRepository tagRepository, LocalImageStorageService imageStorageService, UserService userService, GamePriceService gamePriceService) {
         this.gameRepository = gameRepository;
         this.developerRepository = developerRepository;
         this.publisherRepository = publisherRepository;

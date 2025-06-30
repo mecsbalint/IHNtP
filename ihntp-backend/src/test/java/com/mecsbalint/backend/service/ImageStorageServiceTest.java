@@ -2,7 +2,6 @@ package com.mecsbalint.backend.service;
 
 import com.mecsbalint.backend.utility.Fetcher;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,11 +23,11 @@ class ImageStorageServiceTest {
     @Mock
     private Logger loggerMock;
 
-    private ImageStorageService imageStorageService;
+    private LocalImageStorageService imageStorageService;
 
     @BeforeEach
     public void setup() {
-        imageStorageService = new ImageStorageService("uploadDirectory", uuidMock, fetcherMock, loggerMock);
+        imageStorageService = new LocalImageStorageService("uploadDirectory", uuidMock, fetcherMock, loggerMock);
     }
 
     private MultipartFile getMultipartFileMock() {
