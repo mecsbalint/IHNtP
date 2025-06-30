@@ -1,4 +1,4 @@
-package com.mecsbalint.backend.service;
+package com.mecsbalint.backend.service.image;
 
 import com.mecsbalint.backend.utility.Fetcher;
 import org.apache.commons.io.FilenameUtils;

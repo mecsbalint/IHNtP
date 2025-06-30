@@ -2,7 +2,7 @@ package com.mecsbalint.backend.controller;
 
 import com.mecsbalint.backend.controller.dto.TagToAdd;
 import com.mecsbalint.backend.controller.dto.TagIdNameDto;
-import com.mecsbalint.backend.service.TagService;
+import com.mecsbalint.backend.service.tag.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

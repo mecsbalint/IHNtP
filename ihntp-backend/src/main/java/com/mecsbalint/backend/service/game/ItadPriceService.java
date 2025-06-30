@@ -1,4 +1,4 @@
-package com.mecsbalint.backend.service;
+package com.mecsbalint.backend.service.game;
 
 import com.mecsbalint.backend.controller.dto.GamePriceDto;
 import com.mecsbalint.backend.controller.dto.GamePricesDto;
@@ -15,7 +15,7 @@ import java.util.Comparator;
 import java.util.Optional;
 
 @Service
-public class ItadPriceService implements GamePriceService{
+public class ItadPriceService implements GamePriceService {
 
     private final Fetcher fetcher;
 

@@ -1,10 +1,9 @@
-package com.mecsbalint.backend.service;
+package com.mecsbalint.backend.service.developer;
 
 import com.mecsbalint.backend.controller.dto.DeveloperToAdd;
 import com.mecsbalint.backend.controller.dto.DeveloperIdNameDto;
 import com.mecsbalint.backend.exception.ElementIsAlreadyInDatabaseException;
 import com.mecsbalint.backend.model.Developer;
-import com.mecsbalint.backend.model.Tag;
 import com.mecsbalint.backend.repository.DeveloperRepository;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;

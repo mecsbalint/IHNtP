@@ -1,7 +1,8 @@
-package com.mecsbalint.backend.service;
+package com.mecsbalint.backend.service.game;
 
 import com.mecsbalint.backend.exception.InvalidFileException;
 import com.mecsbalint.backend.model.Game;
+import com.mecsbalint.backend.service.image.ImageStorageService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

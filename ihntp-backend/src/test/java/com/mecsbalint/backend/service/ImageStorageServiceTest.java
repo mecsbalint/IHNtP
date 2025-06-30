@@ -1,5 +1,6 @@
 package com.mecsbalint.backend.service;
 
+import com.mecsbalint.backend.service.image.LocalImageStorageService;
 import com.mecsbalint.backend.utility.Fetcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;

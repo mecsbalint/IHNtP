@@ -2,10 +2,8 @@ package com.mecsbalint.backend.controller;
 
 import com.mecsbalint.backend.controller.dto.GameForListDto;
 import com.mecsbalint.backend.controller.dto.GameStatusDto;
-import com.mecsbalint.backend.service.UserService;
+import com.mecsbalint.backend.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;

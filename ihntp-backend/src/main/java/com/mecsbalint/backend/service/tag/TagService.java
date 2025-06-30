@@ -1,4 +1,4 @@
-package com.mecsbalint.backend.service;
+package com.mecsbalint.backend.service.tag;
 
 import com.mecsbalint.backend.controller.dto.TagToAdd;
 import com.mecsbalint.backend.controller.dto.TagIdNameDto;

@@ -1,4 +1,4 @@
-package com.mecsbalint.backend.service;
+package com.mecsbalint.backend.service.image;
 
 import org.springframework.web.multipart.MultipartFile;
 
