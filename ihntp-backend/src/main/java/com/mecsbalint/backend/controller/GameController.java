@@ -27,31 +27,31 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    @GetMapping("/all")
+    @GetMapping
     public List<GameForListDto> getAllGamesSummary() {
         return gameService.getAllGamesSummary();
     }
 
-    @GetMapping("/profile/{id}")
+    @GetMapping("/{id}")
     public GameForGameProfileDto getGameForProfileById(@PathVariable long id) {
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
             return gameService.getGameForProfileById(id, currentUserEmail);
     }
 
-    @GetMapping("/edit/{id}")
+    @GetMapping("/{id}/edit")
     public GameForEditGameDto getGameForEditGameById(@PathVariable long id) {
         return gameService.getGameForEditGameById(id);
     }
 
-    @PutMapping("/edit/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Void> editGame(@PathVariable Long id, @RequestPart("game") GameToEdit gameToEdit, @RequestPart(value = "screenshots", required = false) List<MultipartFile> screenshots, @RequestPart(value = "headerImg", required = false) MultipartFile headerImg) {
         gameService.editGame(id, gameToEdit, screenshots, headerImg);
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @PostMapping("/add")
+    @PostMapping
     public Long addGame(@RequestPart("game") GameToAdd gameToAdd, @RequestPart(value = "screenshots", required = false) List<MultipartFile> screenshots, @RequestPart(value = "headerImg", required = false) MultipartFile headerImg) {
         return gameService.addGame(gameToAdd, screenshots, headerImg);
     }

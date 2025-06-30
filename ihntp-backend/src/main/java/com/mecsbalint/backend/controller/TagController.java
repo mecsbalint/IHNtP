@@ -18,12 +18,12 @@ public class TagController {
         this.tagService = tagService;
     }
 
-    @GetMapping("/all")
+    @GetMapping
     public List<TagIdNameDto> getAllTags() {
         return tagService.getAllTags();
     }
 
-    @PostMapping("/add")
+    @PostMapping
     public List<Long> addTags(@RequestBody List<TagToAdd> tagsToAdd) {
         return tagService.addTags(tagsToAdd);
     }

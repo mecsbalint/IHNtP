@@ -18,12 +18,12 @@ public class PublisherController {
         this.publisherService = publisherService;
     }
 
-    @GetMapping("/all")
+    @GetMapping
     public List<PublisherIdNameDto> getAllPublishers() {
         return publisherService.getAllPublishers();
     }
 
-    @PostMapping("/add")
+    @PostMapping
     public List<Long> addPublishers(@RequestBody List<PublisherToAdd> publishersToAdd) {
         return publisherService.addPublishers(publishersToAdd);
     }
