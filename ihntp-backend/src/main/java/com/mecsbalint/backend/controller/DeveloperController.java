@@ -18,12 +18,12 @@ public class DeveloperController {
         this.developerService = developerService;
     }
 
-    @GetMapping("/all")
+    @GetMapping
     public List<DeveloperIdNameDto> getAllDevelopers() {
         return developerService.getAllDevelopers();
     }
 
-    @PostMapping("/add")
+    @PostMapping
     public List<Long> addDevelopers(@RequestBody List<DeveloperToAdd> developersToAdd) {
         return developerService.addDevelopers(developersToAdd);
     }
