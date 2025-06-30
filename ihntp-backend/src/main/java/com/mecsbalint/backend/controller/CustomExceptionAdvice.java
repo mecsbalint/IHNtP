@@ -74,4 +74,11 @@ public class CustomExceptionAdvice {
     public String invalidFileExceptionHandler(InvalidFileException exception) {
         return exception.getMessage();
     }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(UserHasAlreadyExistException.class)
+    public String userHasAlreadyExistExceptionHandler(UserHasAlreadyExistException exception) {
+        return exception.getMessage();
+    }
 }

@@ -3,6 +3,7 @@ package com.mecsbalint.backend.controller;
 import com.mecsbalint.backend.controller.dto.JwtResponseDto;
 import com.mecsbalint.backend.controller.dto.UserEmailPasswordDto;
 import com.mecsbalint.backend.controller.dto.UserRegistrationDto;
+import com.mecsbalint.backend.exception.UserHasAlreadyExistException;
 import com.mecsbalint.backend.security.jwt.JwtUtils;
 import com.mecsbalint.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Set;
@@ -36,15 +38,13 @@ public class UserController {
     }
 
     @PostMapping("api/registration")
-    public ResponseEntity<Void> createUser(@RequestBody UserRegistrationDto userRegistration) {
-        if (userService.saveUser(userRegistration)) {
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-        }
-        return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createUser(@RequestBody UserRegistrationDto userRegistration) {
+        if (!userService.saveUser(userRegistration)) throw new UserHasAlreadyExistException(userRegistration.email());
     }
 
     @PostMapping("api/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody UserEmailPasswordDto userLogin) {
+    public JwtResponseDto authenticateUser(@RequestBody UserEmailPasswordDto userLogin) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userLogin.email(), userLogin.password()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -54,6 +54,6 @@ public class UserController {
         Set<String> roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
         String userName = userService.getUserByEmail(userLogin.email()).getName();
 
-        return ResponseEntity.ok(new JwtResponseDto(jwt, userName, roles));
+        return new JwtResponseDto(jwt, userName, roles);
     }
 }

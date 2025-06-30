@@ -45,21 +45,17 @@ public class UserGameController {
     }
 
     @PutMapping("/wishlist/{gameId}")
-    public ResponseEntity<Void> addGameToWishlist(@PathVariable long gameId) {
+    public void addGameToWishlist(@PathVariable long gameId) {
         String authUserEmail = getAuthenticatedUserEmail();
 
         userService.addGameToWishlist(gameId, authUserEmail);
-
-        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PutMapping("/backlog/{gameId}")
-    public ResponseEntity<Void> addGameToBacklog(@PathVariable long gameId) {
+    public void addGameToBacklog(@PathVariable long gameId) {
         String authUserEmail = getAuthenticatedUserEmail();
 
         userService.addGameToBacklog(gameId, authUserEmail);
-
-        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @DeleteMapping("/wishlist/{gameId}")
