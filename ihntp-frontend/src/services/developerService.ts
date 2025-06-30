@@ -10,5 +10,5 @@ export async function getAllDevelopers() : Promise<DeveloperWithId[]> {
 export async function addNewDevelopers(developersToAdd : Developer[]) : Promise<number[]> {
     const responseObj = await apiRequest<number[]>({url: "/api/developers", method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(developersToAdd)});
 
-    return responseObj.status === 200 && responseObj.body !== null ? responseObj.body : [];
+    return responseObj.status === 201 && responseObj.body !== null ? responseObj.body : [];
 }

@@ -10,5 +10,5 @@ export async function getAllPublishers() : Promise<PublisherWithId[]> {
 export async function addNewPublishers(publishersToAdd : Publisher[]) : Promise<number[]> {
     const responseObj = await apiRequest<number[]>({url: "/api/publishers", method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(publishersToAdd)});
 
-    return responseObj.status === 200 && responseObj.body !== null ? responseObj.body : [];
+    return responseObj.status === 201 && responseObj.body !== null ? responseObj.body : [];
 }

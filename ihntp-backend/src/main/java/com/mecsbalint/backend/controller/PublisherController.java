@@ -4,6 +4,7 @@ import com.mecsbalint.backend.controller.dto.PublisherToAdd;
 import com.mecsbalint.backend.controller.dto.PublisherIdNameDto;
 import com.mecsbalint.backend.service.PublisherService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class PublisherController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public List<Long> addPublishers(@RequestBody List<PublisherToAdd> publishersToAdd) {
         return publisherService.addPublishers(publishersToAdd);
     }
