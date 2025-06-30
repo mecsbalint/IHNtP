@@ -21,8 +21,6 @@ public interface ImageStorageService {
 
     String saveImage(MultipartFile image, String folderName);
 
-    String saveImage(byte[] imageBytes, String ogFilename, String folderName);
-
     boolean validateMultipartFileImages(List<MultipartFile> files);
 
     boolean validateMultipartFileImages(MultipartFile file);

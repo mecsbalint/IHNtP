@@ -112,7 +112,22 @@ public class LocalImageStorageService implements ImageStorageService {
     }
 
     @Override
-    public String saveImage(byte[] imageBytes, String ogFilename, String folderName) {
+    public boolean validateMultipartFileImages(List<MultipartFile> files) {
+        for (MultipartFile file : files) {
+            if (!validateMultipartFileImages(file)) return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean validateMultipartFileImages(MultipartFile file) {
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        List<String> validExtensions = List.of("jpg", "jpeg", "png", "gif", "webp", "bmp", "svg");
+
+        return validExtensions.contains(extension);
+    }
+
+    private String saveImage(byte[] imageBytes, String ogFilename, String folderName) {
         String extension = FilenameUtils.getExtension(ogFilename);
         String generatedFilename = uuid.randomUUID() + "." + extension;
 
@@ -128,22 +143,6 @@ public class LocalImageStorageService implements ImageStorageService {
         }
 
         return "/api/images/" + relativePath.toString().replace(File.separatorChar, '/');
-    }
-
-    @Override
-    public boolean validateMultipartFileImages(List<MultipartFile> files) {
-        for (MultipartFile file : files) {
-            if (!validateMultipartFileImages(file)) return false;
-        }
-        return true;
-    }
-
-    @Override
-    public boolean validateMultipartFileImages(MultipartFile file) {
-        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        List<String> validExtensions = List.of("jpg", "jpeg", "png", "gif", "webp", "bmp", "svg");
-
-        return validExtensions.contains(extension);
     }
 
     private byte[] createBytesFromMultipartFile(MultipartFile file) {

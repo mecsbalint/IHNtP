@@ -41,19 +41,19 @@ class GameServiceTest {
     private TagRepository tagRepositoryMock;
 
     @Mock
-    private LocalImageStorageService imageStorageServiceMock;
-
-    @Mock
     private UserService userServiceMock;
 
     @Mock
     private GamePriceService gamePriceServiceMock;
 
+    @Mock
+    private GameImageService gameImageServiceMock;
+
     private GameService gameService;
 
     @BeforeEach
     public void setUp() {
-        gameService = new GameService(gameRepositoryMock, developerRepositoryMock, publisherRepositoryMock, tagRepositoryMock, imageStorageServiceMock, userServiceMock, gamePriceServiceMock);
+        gameService = new GameService(gameRepositoryMock, developerRepositoryMock, publisherRepositoryMock, tagRepositoryMock, userServiceMock, gamePriceServiceMock, gameImageServiceMock);
     }
 
     @Test
@@ -179,17 +179,6 @@ class GameServiceTest {
         gameService.editGame(1L, getGameToEdit(getGame()), null, null);
 
         verify(gameRepositoryMock).save(any());
-    }
-
-    @Test
-    public void editGame_happyCaseWithFilesBecomeUnnecessary_callDeleteFiles() {
-        when(gameRepositoryMock.findGameById(any())).thenReturn(Optional.of(getGame()));
-        Game newGame = getGame();
-        newGame.setHeaderImg(null);
-
-        gameService.editGame(1L, getGameToEdit(newGame), null, null);
-
-        verify(imageStorageServiceMock).deleteFiles(any());
     }
 
     @Test
