@@ -32,7 +32,7 @@ public class ItadPriceService implements GamePriceService {
             String gameInfoFetchUrl = String.format("https://api.isthereanydeal.com/games/lookup/v1?key=%s&title=%s", itadApiKey, gameName);
             ItadGameInfoDto gameInfo = fetcher.fetch(gameInfoFetchUrl, ItadGameInfoDto.class);
 
-            if (gameInfo.game() == null) return Optional.empty();
+            if (gameInfo == null || gameInfo.game() == null) return Optional.empty();
 
             if (userCountry == null) userCountry = "US";
             String itadGameId = gameInfo.game().id();
