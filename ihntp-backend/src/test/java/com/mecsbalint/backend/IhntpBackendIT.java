@@ -111,7 +111,7 @@ public class IhntpBackendIT {
         game.setTags(new HashSet<>());
         gameRepository.save(game);
 
-        String responseBody = mvc.perform(get("/api/games/all"))
+        String responseBody = mvc.perform(get("/api/games"))
                 .andReturn().getResponse().getContentAsString();
 
         List<GameForListDto> games = objectMapper.createParser(responseBody).readValueAs(new TypeReference<List<GameForListDto>>() {});
@@ -181,14 +181,14 @@ public class IhntpBackendIT {
         GameToAdd gameToAdd = new GameToAdd("new game", LocalDate.of(2020, 1, 15), "short description", "long description", null, Set.of(), Set.of(newDeveloperId), Set.of(newPublisherId), Set.of(newTagId));
         MockMultipartFile gameToAddJsonFile = new MockMultipartFile("game", "", "application/json", objectMapper.writeValueAsBytes(gameToAdd));
 
-        mvc.perform(multipart("/api/games/add")
+        mvc.perform(multipart("/api/games")
                         .file(gameToAddJsonFile)
                         .file(getMultipartImageFileMock("headerImg"))
                         .file(getMultipartImageFileMock("screenshots"))
                         .file(getMultipartImageFileMock("screenshots"))
                         .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -218,7 +218,7 @@ public class IhntpBackendIT {
         GameToEdit gameToEdit = new GameToEdit("Game to Edit new name", LocalDate.of(2020, 1, 15), "short description", "long description", null, Set.of(), Set.of(newDeveloperId), Set.of(newPublisherId), Set.of(newTagId));
         MockMultipartFile gameToEditJsonFile = new MockMultipartFile("game", "", "application/json", objectMapper.writeValueAsBytes(gameToEdit));
 
-        mvc.perform(multipart("/api/games/edit/" + gameId)
+        mvc.perform(multipart("/api/games/" + gameId)
                         .file(gameToEditJsonFile)
                         .file(getMultipartImageFileMock("headerImg"))
                         .file(getMultipartImageFileMock("screenshots"))

@@ -50,6 +50,7 @@ public class GameController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Long addGame(@RequestPart("game") GameToAdd gameToAdd, @RequestPart(value = "screenshots", required = false) List<MultipartFile> screenshots, @RequestPart(value = "headerImg", required = false) MultipartFile headerImg) {
         return gameService.addGame(gameToAdd, screenshots, headerImg);
     }

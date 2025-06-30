@@ -30,19 +30,17 @@ public class GameService {
     private final TagRepository tagRepository;
     private final ImageStorageService imageStorageService;
     private final UserService userService;
-    private final Fetcher fetcher;
-    private final String itadApiKey;
+    private final GamePriceService gamePriceService;
 
     @Autowired
-    public GameService(GameRepository gameRepository, DeveloperRepository developerRepository, PublisherRepository publisherRepository, TagRepository tagRepository, ImageStorageService imageStorageService, UserService userService, Fetcher fetcher, @Value("${mecsbalint.app.itadApiKey}")String itadApiKey) {
+    public GameService(GameRepository gameRepository, DeveloperRepository developerRepository, PublisherRepository publisherRepository, TagRepository tagRepository, ImageStorageService imageStorageService, UserService userService, GamePriceService gamePriceService) {
         this.gameRepository = gameRepository;
         this.developerRepository = developerRepository;
         this.publisherRepository = publisherRepository;
         this.tagRepository = tagRepository;
         this.imageStorageService = imageStorageService;
         this.userService = userService;
-        this.fetcher = fetcher;
-        this.itadApiKey = itadApiKey;
+        this.gamePriceService = gamePriceService;
     }
 
     @Transactional
@@ -65,7 +63,7 @@ public class GameService {
 
         Game gameEntity = gameRepository.getGameById(id).orElseThrow(() -> new GameNotFoundException("id", String.valueOf(id)));
 
-        GamePricesDto gamePrices = getGamePriceDataFromItad(gameEntity, userCountryCode).orElse(null);
+        GamePricesDto gamePrices = gamePriceService.getGamePrices(gameEntity.getName(), userCountryCode).orElse(null);
 
         return new GameForGameProfileDto(gameEntity, gamePrices);
     }
@@ -247,28 +245,5 @@ public class GameService {
         if (publisherIds.isEmpty()) return false;
 
         return true;
-    }
-
-    private Optional<GamePricesDto> getGamePriceDataFromItad(Game game, String userCountry) {
-        String gameInfoFetchUrl = String.format("https://api.isthereanydeal.com/games/lookup/v1?key=%s&title=%s", itadApiKey, game.getName());
-        ItadGameInfoDto gameInfo = fetcher.fetch(gameInfoFetchUrl, ItadGameInfoDto.class);
-
-        if (gameInfo.game() == null) return Optional.empty();
-
-        if (userCountry == null) userCountry = "US";
-        String itadGameId = gameInfo.game().id();
-        String priceInfoFetchUrl = String.format("https://api.isthereanydeal.com/games/prices/v3?key=%s&deals=false&country=%s", itadApiKey, userCountry);
-        ItadGamePriceInfoDto[] gamePrices = fetcher.fetch(priceInfoFetchUrl, ItadGamePriceInfoDto[].class, HttpMethod.POST, "application/json", new String[]{itadGameId});
-
-        if (gamePrices.length == 0) return Optional.empty();
-
-        ItadGamePriceDealDto currentBestPrice = gamePrices[0].deals().stream()
-                .min(Comparator.comparingDouble(a -> a.price().amount())).get();
-        ItadPriceDto historyLowPrice = gamePrices[0].historyLow().all();
-
-        GamePriceDto currentPrice = new GamePriceDto(currentBestPrice.price().currency(), currentBestPrice.price().amount(), currentBestPrice.url());
-        String priceHistoryUrl = String.format("https://isthereanydeal.com/game/id:%s/history/", itadGameId);
-        GamePriceDto historyLow = new GamePriceDto(historyLowPrice.currency(), historyLowPrice.amount(), priceHistoryUrl);
-        return Optional.of(new GamePricesDto(currentPrice, historyLow));
     }
 }

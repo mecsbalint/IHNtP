@@ -49,13 +49,13 @@ class GameServiceTest {
     private UserService userServiceMock;
 
     @Mock
-    private Fetcher fetcherMock;
+    private GamePriceService gamePriceServiceMock;
 
     private GameService gameService;
 
     @BeforeEach
     public void setUp() {
-        gameService = new GameService(gameRepositoryMock, developerRepositoryMock, publisherRepositoryMock, tagRepositoryMock, imageStorageServiceMock, userServiceMock, fetcherMock, "itadApiKey");
+        gameService = new GameService(gameRepositoryMock, developerRepositoryMock, publisherRepositoryMock, tagRepositoryMock, imageStorageServiceMock, userServiceMock, gamePriceServiceMock);
     }
 
     @Test
@@ -83,7 +83,6 @@ class GameServiceTest {
     @Test
     public void getGameForProfileById_existingId_ReturnGameDto() {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
-        when(fetcherMock.fetch(any(), any())).thenReturn(new ItadGameInfoDto(null));
         when(userServiceMock.getUserByEmail(any())).thenReturn(new UserEntity());
 
         String expectedGameName = "Game One";
@@ -95,7 +94,6 @@ class GameServiceTest {
     @Test
     public void getGameForProfileById_cannotFetchTheGameItadId_gamePricesIsNull() {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
-        when(fetcherMock.fetch(any(), any())).thenReturn(new ItadGameInfoDto(null));
         when(userServiceMock.getUserByEmail(any())).thenReturn(new UserEntity());
 
         GamePricesDto actualGamePrices = gameService.getGameForProfileById(1L, null).gamePrices();
@@ -106,8 +104,6 @@ class GameServiceTest {
     @Test
     public void getGameForProfileById_cannotFetchPrices_gamePricesIsNull() {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
-        when(fetcherMock.fetch(any(), any())).thenReturn(new ItadGameInfoDto(new ItadGameInfoGameDto("")));
-        when(fetcherMock.fetch(any(), any(), any(), any(), any())).thenReturn(new ItadGamePriceInfoDto[]{});
         when(userServiceMock.getUserByEmail(any())).thenReturn(new UserEntity());
 
         GamePricesDto actualGamePrices = gameService.getGameForProfileById(1L, null).gamePrices();
@@ -120,14 +116,9 @@ class GameServiceTest {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
         when(userServiceMock.getUserByEmail(any())).thenReturn(new UserEntity());
 
-        ItadGameInfoDto itadGameInfoDto = new ItadGameInfoDto(new ItadGameInfoGameDto(""));
-        when(fetcherMock.fetch(any(), any())).thenReturn(itadGameInfoDto);
-
-        ItadPriceDto itadPriceDto = new ItadPriceDto(10, "EUR");
-        ItadPriceHistoryLowDto itadPriceHistoryLowDto = new ItadPriceHistoryLowDto(itadPriceDto);
-        List<ItadGamePriceDealDto> deals = List.of(new ItadGamePriceDealDto(itadPriceDto, "url"));
-        ItadGamePriceInfoDto itadGamePriceInfoDto = new ItadGamePriceInfoDto(itadPriceHistoryLowDto, deals);
-        when(fetcherMock.fetch(any(), any(), any(), any(), any())).thenReturn(new ItadGamePriceInfoDto[]{itadGamePriceInfoDto});
+        GamePriceDto currentGamePriceDto = new GamePriceDto("EUR", 10, "url");
+        GamePricesDto gamePricesDto = new GamePricesDto(currentGamePriceDto, null);
+        when(gamePriceServiceMock.getGamePrices(any(), any())).thenReturn(Optional.of(gamePricesDto));
 
         double expectedCurrentPrice = 10;
         double actualCurrentPrice = gameService.getGameForProfileById(1L, null).gamePrices().current().amount();
