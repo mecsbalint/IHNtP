@@ -2,15 +2,15 @@ package com.mecsbalint.backend.controller;
 
 import com.mecsbalint.backend.exception.*;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.io.UncheckedIOException;
-import java.io.WriteAbortedException;
 
-@org.springframework.web.bind.annotation.ControllerAdvice
-public class ControllerAdvice {
+@ControllerAdvice
+public class CustomExceptionAdvice {
 
     @ResponseBody
     @ResponseStatus(HttpStatus.NOT_FOUND)
