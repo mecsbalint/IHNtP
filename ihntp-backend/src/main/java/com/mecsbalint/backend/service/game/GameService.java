@@ -89,7 +89,6 @@ public class GameService {
         gameImageService.handleImagesForAddGame(game, screenshotFiles, headerImgFile);
 
         return gameRepository.save(game).getId();
-
     }
 
     @Transactional

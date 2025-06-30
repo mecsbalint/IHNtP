@@ -1,4 +1,4 @@
-package com.mecsbalint.backend.service;
+package com.mecsbalint.backend.service.game;
 
 import com.mecsbalint.backend.controller.dto.*;
 import com.mecsbalint.backend.exception.*;
@@ -8,9 +8,6 @@ import com.mecsbalint.backend.repository.DeveloperRepository;
 import com.mecsbalint.backend.repository.GameRepository;
 import com.mecsbalint.backend.repository.PublisherRepository;
 import com.mecsbalint.backend.repository.TagRepository;
-import com.mecsbalint.backend.service.game.GameImageService;
-import com.mecsbalint.backend.service.game.GamePriceService;
-import com.mecsbalint.backend.service.game.GameService;
 import com.mecsbalint.backend.service.user.UserService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
@@ -154,8 +151,14 @@ class GameServiceTest {
     }
 
     @Test
-    public void addGame_happyCaseWithNoFiles_callSaveAndFlushAndSaveMethods() {
+    public void addGame_gameHaveRequiredDataAndNotExistYet_callSaveAndFlushAndSaveMethods() {
+        when(gameRepositoryMock.saveAndFlush(any())).thenReturn(getGame());
+        when(gameRepositoryMock.save(any())).thenReturn(getGame());
 
+        gameService.addGame(getGameToAdd(getGame()), null, null);
+
+        verify(gameRepositoryMock).saveAndFlush(any());
+        verify(gameRepositoryMock).save(any());
     }
 
     @Test
@@ -168,7 +171,7 @@ class GameServiceTest {
     }
 
     @Test
-    public void addGame_gameIsAlreadyExist_throwsElementIsAlreadyInDatabaseException() {
+    public void addGame_gameHaveRequiredDataButAlreadyExist_throwsElementIsAlreadyInDatabaseException() {
         ConstraintViolationException constraintViolationException = new ConstraintViolationException("Constraint violation", null, "SomeConstraint");
         DataIntegrityViolationException dataIntegrityViolationException = new DataIntegrityViolationException("", constraintViolationException);
         when(gameRepositoryMock.saveAndFlush(any())).thenThrow(dataIntegrityViolationException);
@@ -177,7 +180,7 @@ class GameServiceTest {
     }
 
     @Test
-    public void editGame_happyCaseWithNoFiles_callSave() {
+    public void editGame_gameHaveRequiredDataAndGameExist_callSave() {
         when(gameRepositoryMock.findGameById(any())).thenReturn(Optional.of(getGame()));
 
         gameService.editGame(1L, getGameToEdit(getGame()), null, null);
@@ -195,7 +198,7 @@ class GameServiceTest {
     }
 
     @Test
-    public void editGame_gameNotExist_throwsGameNotFoundException() {
+    public void editGame_gameHaveRequiredDataButGameNotExist_throwsGameNotFoundException() {
         when(gameRepositoryMock.findGameById(any())).thenReturn(Optional.empty());
 
         assertThrows(GameNotFoundException.class, () -> gameService.editGame(1L, getGameToEdit(getGame()), null, null));

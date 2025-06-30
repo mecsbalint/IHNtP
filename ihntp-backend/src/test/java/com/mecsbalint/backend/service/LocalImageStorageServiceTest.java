@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
-class ImageStorageServiceTest {
+class LocalImageStorageServiceTest {
 
     @Mock
     private UUID uuidMock;
