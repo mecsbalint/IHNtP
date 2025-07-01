@@ -272,8 +272,4 @@ class GameServiceTest {
 
         return List.of(game1, game2, game3);
     }
-
-    private MultipartFile getMultipartFileMock() {
-        return new MockMultipartFile("file", "image.png", "image/png", new byte[]{1, 2, 3});
-    }
 }

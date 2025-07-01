@@ -28,7 +28,7 @@ public class GameImageService {
             Set<String> screenshotsToAdd = game.getScreenshots();
             game.setScreenshots(new HashSet<>());
 
-            Set<String> downloadedScreenshotPaths = downloadAndSaveImages(screenshotsToAdd, game.getId() + "\\screenshots");
+            Set<String> downloadedScreenshotPaths = getDownloadedScreenshotsPaths(screenshotsToAdd, game.getId());
             game.getScreenshots().addAll(downloadedScreenshotPaths);
 
             Set<String> savedScreenshotPaths = getSavedScreenshots(screenshotFiles, game.getId() + "\\screenshots");
@@ -89,20 +89,8 @@ public class GameImageService {
                 .collect(Collectors.toSet());
     }
 
-    private Set<String> downloadAndSaveImages(Set<String> links, String savePath) {
-        Set<String> paths = new HashSet<>();
-
-        for (String link : links) {
-            paths.add(downloadAndSaveImage(link, savePath));
-        }
-
-        return paths;
-    }
-
     private String downloadAndSaveImage(String link, String savePath) {
-        String imagePath = imageStorageService.downloadAndSaveImage(link, savePath);
-        if (imagePath == null) throw new InvalidFileException("jpg/png/gif/webp/bmp/svg");
-        return imagePath;
+        return imageStorageService.downloadAndSaveImage(link, savePath);
     }
 
     private String saveHeaderImg(MultipartFile headerImg, Long gameId) {
