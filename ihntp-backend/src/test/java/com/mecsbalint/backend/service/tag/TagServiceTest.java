@@ -1,11 +1,10 @@
-package com.mecsbalint.backend.service;
+package com.mecsbalint.backend.service.tag;
 
 import com.mecsbalint.backend.controller.dto.TagIdNameDto;
 import com.mecsbalint.backend.controller.dto.TagToAdd;
 import com.mecsbalint.backend.exception.ElementIsAlreadyInDatabaseException;
 import com.mecsbalint.backend.model.Tag;
 import com.mecsbalint.backend.repository.TagRepository;
-import com.mecsbalint.backend.service.tag.TagService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

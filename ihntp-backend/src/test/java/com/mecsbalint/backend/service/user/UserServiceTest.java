@@ -1,4 +1,4 @@
-package com.mecsbalint.backend.service;
+package com.mecsbalint.backend.service.user;
 
 import com.mecsbalint.backend.controller.dto.GameStatusDto;
 import com.mecsbalint.backend.exception.ElementIsAlreadyInSetException;
@@ -8,7 +8,6 @@ import com.mecsbalint.backend.model.Game;
 import com.mecsbalint.backend.model.UserEntity;
 import com.mecsbalint.backend.repository.GameRepository;
 import com.mecsbalint.backend.repository.UserRepository;
-import com.mecsbalint.backend.service.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
