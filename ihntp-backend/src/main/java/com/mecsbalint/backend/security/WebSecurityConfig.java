@@ -51,11 +51,6 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers("/static/**");
-    }
-
-    @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
@@ -72,6 +67,7 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth
+                                .requestMatchers("/api/images/**").permitAll()
                                 .requestMatchers("/api/registration/**").permitAll()
                                 .requestMatchers("/api/login/**").permitAll()
                                 .requestMatchers("/api/games/edit/**").hasRole("USER")

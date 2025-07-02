@@ -8,19 +8,19 @@ import { addNewPublishers } from "./publisherService";
 import { addNewTags } from "./tagService";
 
 export async function getAllGames() : Promise<GameForList[]> {
-    const responseObj = await apiRequest<GameForList[]>({url: "/api/games/all"});
+    const responseObj = await apiRequest<GameForList[]>({url: "/api/games"});
 
     return responseObj.status === 200 && responseObj.body !== null ? responseObj.body : [];
 }
 
 export async function getGameForProfile(id : number) : Promise<GameForGameProfile | null> {
-    const responseObj = await apiRequest<GameForGameProfile>({url: `/api/games/profile/${id}`});
+    const responseObj = await apiRequest<GameForGameProfile>({url: `/api/games/${id}`});
 
     return responseObj.status === 200 && responseObj.body !== null ? responseObj.body : null;
 }
 
 export async function getGameForEdit(id : number) : Promise<ApiResponse<GameForEdit>> {
-    const responseObj = await apiRequest<GameForEdit>({url: `/api/games/edit/${id}`});
+    const responseObj = await apiRequest<GameForEdit>({url: `/api/games/${id}/edit`});
 
     if (responseObj.status !== 200) responseObj.body = null;
 
@@ -35,7 +35,7 @@ export async function addNewGame(newGameObj : GameFormSubmit) : Promise<ApiRespo
 
     const requestBody = createMultipartFormData<GameToAdd>(gameToAdd, headerImg, screenshots);
 
-    const responseObj = await apiRequest<number>({url: "/api/games/add", method: "POST", body: requestBody});
+    const responseObj = await apiRequest<number>({url: "/api/games", method: "POST", body: requestBody});
 
     return responseObj;
 }
@@ -48,7 +48,7 @@ export async function editGame(editGameObj : GameFormSubmit, id : number) : Prom
 
     const requestBody = createMultipartFormData<GameToEdit>(gameToEdit, headerImg, screenshots);
 
-    const responseObj = await apiRequest({url: `/api/games/edit/${id}`, method: "PUT", body: requestBody});
+    const responseObj = await apiRequest({url: `/api/games/${id}`, method: "PUT", body: requestBody});
 
     return responseObj.status;
 }

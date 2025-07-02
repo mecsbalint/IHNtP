@@ -2,15 +2,15 @@ package com.mecsbalint.backend.controller;
 
 import com.mecsbalint.backend.exception.*;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.io.UncheckedIOException;
-import java.io.WriteAbortedException;
 
-@org.springframework.web.bind.annotation.ControllerAdvice
-public class ControllerAdvice {
+@ControllerAdvice
+public class CustomExceptionAdvice {
 
     @ResponseBody
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -72,6 +72,13 @@ public class ControllerAdvice {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(InvalidFileException.class)
     public String invalidFileExceptionHandler(InvalidFileException exception) {
+        return exception.getMessage();
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(UserHasAlreadyExistException.class)
+    public String userHasAlreadyExistExceptionHandler(UserHasAlreadyExistException exception) {
         return exception.getMessage();
     }
 }

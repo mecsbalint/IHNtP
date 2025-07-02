@@ -1,7 +1,6 @@
-package com.mecsbalint.backend.service;
+package com.mecsbalint.backend.service.game;
 
 import com.mecsbalint.backend.controller.dto.*;
-import com.mecsbalint.backend.controller.dto.isthereanydealapi.*;
 import com.mecsbalint.backend.exception.*;
 import com.mecsbalint.backend.model.Game;
 import com.mecsbalint.backend.model.UserEntity;
@@ -9,7 +8,7 @@ import com.mecsbalint.backend.repository.DeveloperRepository;
 import com.mecsbalint.backend.repository.GameRepository;
 import com.mecsbalint.backend.repository.PublisherRepository;
 import com.mecsbalint.backend.repository.TagRepository;
-import com.mecsbalint.backend.utility.Fetcher;
+import com.mecsbalint.backend.service.user.UserService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,19 +42,19 @@ class GameServiceTest {
     private TagRepository tagRepositoryMock;
 
     @Mock
-    private ImageStorageService imageStorageServiceMock;
-
-    @Mock
     private UserService userServiceMock;
 
     @Mock
-    private Fetcher fetcherMock;
+    private GamePriceService gamePriceServiceMock;
+
+    @Mock
+    private GameImageService gameImageServiceMock;
 
     private GameService gameService;
 
     @BeforeEach
     public void setUp() {
-        gameService = new GameService(gameRepositoryMock, developerRepositoryMock, publisherRepositoryMock, tagRepositoryMock, imageStorageServiceMock, userServiceMock, fetcherMock, "itadApiKey");
+        gameService = new GameService(gameRepositoryMock, developerRepositoryMock, publisherRepositoryMock, tagRepositoryMock, userServiceMock, gamePriceServiceMock, gameImageServiceMock);
     }
 
     @Test
@@ -83,7 +82,6 @@ class GameServiceTest {
     @Test
     public void getGameForProfileById_existingId_ReturnGameDto() {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
-        when(fetcherMock.fetch(any(), any())).thenReturn(new ItadGameInfoDto(null));
         when(userServiceMock.getUserByEmail(any())).thenReturn(new UserEntity());
 
         String expectedGameName = "Game One";
@@ -95,7 +93,6 @@ class GameServiceTest {
     @Test
     public void getGameForProfileById_cannotFetchTheGameItadId_gamePricesIsNull() {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
-        when(fetcherMock.fetch(any(), any())).thenReturn(new ItadGameInfoDto(null));
         when(userServiceMock.getUserByEmail(any())).thenReturn(new UserEntity());
 
         GamePricesDto actualGamePrices = gameService.getGameForProfileById(1L, null).gamePrices();
@@ -106,8 +103,6 @@ class GameServiceTest {
     @Test
     public void getGameForProfileById_cannotFetchPrices_gamePricesIsNull() {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
-        when(fetcherMock.fetch(any(), any())).thenReturn(new ItadGameInfoDto(new ItadGameInfoGameDto("")));
-        when(fetcherMock.fetch(any(), any(), any(), any(), any())).thenReturn(new ItadGamePriceInfoDto[]{});
         when(userServiceMock.getUserByEmail(any())).thenReturn(new UserEntity());
 
         GamePricesDto actualGamePrices = gameService.getGameForProfileById(1L, null).gamePrices();
@@ -120,14 +115,9 @@ class GameServiceTest {
         when(gameRepositoryMock.getGameById(any())).thenReturn(Optional.of(getGame()));
         when(userServiceMock.getUserByEmail(any())).thenReturn(new UserEntity());
 
-        ItadGameInfoDto itadGameInfoDto = new ItadGameInfoDto(new ItadGameInfoGameDto(""));
-        when(fetcherMock.fetch(any(), any())).thenReturn(itadGameInfoDto);
-
-        ItadPriceDto itadPriceDto = new ItadPriceDto(10, "EUR");
-        ItadPriceHistoryLowDto itadPriceHistoryLowDto = new ItadPriceHistoryLowDto(itadPriceDto);
-        List<ItadGamePriceDealDto> deals = List.of(new ItadGamePriceDealDto(itadPriceDto, "url"));
-        ItadGamePriceInfoDto itadGamePriceInfoDto = new ItadGamePriceInfoDto(itadPriceHistoryLowDto, deals);
-        when(fetcherMock.fetch(any(), any(), any(), any(), any())).thenReturn(new ItadGamePriceInfoDto[]{itadGamePriceInfoDto});
+        GamePriceDto currentGamePriceDto = new GamePriceDto("EUR", 10, "url");
+        GamePricesDto gamePricesDto = new GamePricesDto(currentGamePriceDto, null);
+        when(gamePriceServiceMock.getGamePrices(any(), any())).thenReturn(Optional.of(gamePricesDto));
 
         double expectedCurrentPrice = 10;
         double actualCurrentPrice = gameService.getGameForProfileById(1L, null).gamePrices().current().amount();
@@ -161,8 +151,14 @@ class GameServiceTest {
     }
 
     @Test
-    public void addGame_happyCaseWithNoFiles_callSaveAndFlushAndSaveMethods() {
+    public void addGame_gameHaveRequiredDataAndNotExistYet_callSaveAndFlushAndSaveMethods() {
+        when(gameRepositoryMock.saveAndFlush(any())).thenReturn(getGame());
+        when(gameRepositoryMock.save(any())).thenReturn(getGame());
 
+        gameService.addGame(getGameToAdd(getGame()), null, null);
+
+        verify(gameRepositoryMock).saveAndFlush(any());
+        verify(gameRepositoryMock).save(any());
     }
 
     @Test
@@ -175,7 +171,7 @@ class GameServiceTest {
     }
 
     @Test
-    public void addGame_gameIsAlreadyExist_throwsElementIsAlreadyInDatabaseException() {
+    public void addGame_gameHaveRequiredDataButAlreadyExist_throwsElementIsAlreadyInDatabaseException() {
         ConstraintViolationException constraintViolationException = new ConstraintViolationException("Constraint violation", null, "SomeConstraint");
         DataIntegrityViolationException dataIntegrityViolationException = new DataIntegrityViolationException("", constraintViolationException);
         when(gameRepositoryMock.saveAndFlush(any())).thenThrow(dataIntegrityViolationException);
@@ -184,23 +180,12 @@ class GameServiceTest {
     }
 
     @Test
-    public void editGame_happyCaseWithNoFiles_callSave() {
+    public void editGame_gameHaveRequiredDataAndGameExist_callSave() {
         when(gameRepositoryMock.findGameById(any())).thenReturn(Optional.of(getGame()));
 
         gameService.editGame(1L, getGameToEdit(getGame()), null, null);
 
         verify(gameRepositoryMock).save(any());
-    }
-
-    @Test
-    public void editGame_happyCaseWithFilesBecomeUnnecessary_callDeleteFiles() {
-        when(gameRepositoryMock.findGameById(any())).thenReturn(Optional.of(getGame()));
-        Game newGame = getGame();
-        newGame.setHeaderImg(null);
-
-        gameService.editGame(1L, getGameToEdit(newGame), null, null);
-
-        verify(imageStorageServiceMock).deleteFiles(any());
     }
 
     @Test
@@ -213,7 +198,7 @@ class GameServiceTest {
     }
 
     @Test
-    public void editGame_gameNotExist_throwsGameNotFoundException() {
+    public void editGame_gameHaveRequiredDataButGameNotExist_throwsGameNotFoundException() {
         when(gameRepositoryMock.findGameById(any())).thenReturn(Optional.empty());
 
         assertThrows(GameNotFoundException.class, () -> gameService.editGame(1L, getGameToEdit(getGame()), null, null));
@@ -286,9 +271,5 @@ class GameServiceTest {
         game3.setTags(new HashSet<>());
 
         return List.of(game1, game2, game3);
-    }
-
-    private MultipartFile getMultipartFileMock() {
-        return new MockMultipartFile("file", "image.png", "image/png", new byte[]{1, 2, 3});
     }
 }

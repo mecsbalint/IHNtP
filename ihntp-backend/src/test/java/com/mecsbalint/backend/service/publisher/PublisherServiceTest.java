@@ -1,4 +1,4 @@
-package com.mecsbalint.backend.service;
+package com.mecsbalint.backend.service.publisher;
 
 import com.mecsbalint.backend.controller.dto.PublisherIdNameDto;
 import com.mecsbalint.backend.controller.dto.PublisherToAdd;

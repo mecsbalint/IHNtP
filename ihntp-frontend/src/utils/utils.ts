@@ -16,5 +16,5 @@ export function dateFormatter(date: string) : string {
 export function imagePathFormatter(imagePath : string) : string {
     if (imagePath.includes("http")) return imagePath;
 
-    return window.location.origin + "/static/" + imagePath;
+    return window.location.origin + imagePath;
 }

@@ -20,7 +20,7 @@ function AddGamePage() {
 
         response.status === 401 && handleUnauthorizedResponse();
 
-        response && navigate(`/game/${response}`);
+        response.status === 201 && navigate(`/game/${response.body}`);
     }
 
     return (

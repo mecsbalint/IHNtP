@@ -34,5 +34,6 @@ build/
 
 ../.idea/
 
-src/main/resources/static
-src/test/resources/static
+images
+
+test_upload_dir

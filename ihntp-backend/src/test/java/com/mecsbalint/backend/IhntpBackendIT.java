@@ -11,6 +11,7 @@ import com.mecsbalint.backend.repository.DeveloperRepository;
 import com.mecsbalint.backend.repository.GameRepository;
 import com.mecsbalint.backend.repository.PublisherRepository;
 import com.mecsbalint.backend.repository.TagRepository;
+import com.mecsbalint.backend.utility.Fetcher;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -37,6 +39,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -57,6 +61,9 @@ public class IhntpBackendIT {
 
     private final PublisherRepository publisherRepository;
 
+    @MockitoBean
+    private final Fetcher fetcherMock;
+
     @Value("${mecsbalint.app.file-upload-dir}")
     private String testDir;
 
@@ -64,11 +71,12 @@ public class IhntpBackendIT {
     private MockMvc mvc;
 
     @Autowired
-    public IhntpBackendIT(GameRepository gameRepository, TagRepository tagRepository, DeveloperRepository developerRepository, PublisherRepository publisherRepository) {
+    public IhntpBackendIT(GameRepository gameRepository, TagRepository tagRepository, DeveloperRepository developerRepository, PublisherRepository publisherRepository, Fetcher fetcherMock) {
         this.gameRepository = gameRepository;
         this.tagRepository = tagRepository;
         this.developerRepository = developerRepository;
         this.publisherRepository = publisherRepository;
+        this.fetcherMock = fetcherMock;
     }
 
     @BeforeEach
@@ -111,7 +119,7 @@ public class IhntpBackendIT {
         game.setTags(new HashSet<>());
         gameRepository.save(game);
 
-        String responseBody = mvc.perform(get("/api/games/all"))
+        String responseBody = mvc.perform(get("/api/games"))
                 .andReturn().getResponse().getContentAsString();
 
         List<GameForListDto> games = objectMapper.createParser(responseBody).readValueAs(new TypeReference<List<GameForListDto>>() {});
@@ -178,17 +186,20 @@ public class IhntpBackendIT {
         long newPublisherId = publisherRepository.save(newPublisher).getId();
         long newTagId = tagRepository.save(newTag).getId();
 
-        GameToAdd gameToAdd = new GameToAdd("new game", LocalDate.of(2020, 1, 15), "short description", "long description", null, Set.of(), Set.of(newDeveloperId), Set.of(newPublisherId), Set.of(newTagId));
+        when(fetcherMock.fetchContentType(any())).thenReturn("image/png");
+        when(fetcherMock.fetch(any(), any())).thenReturn(new byte[]{1, 2, 3});
+
+        GameToAdd gameToAdd = new GameToAdd("new game", LocalDate.of(2020, 1, 15), "short description", "long description", null, Set.of("screenshotLink"), Set.of(newDeveloperId), Set.of(newPublisherId), Set.of(newTagId));
         MockMultipartFile gameToAddJsonFile = new MockMultipartFile("game", "", "application/json", objectMapper.writeValueAsBytes(gameToAdd));
 
-        mvc.perform(multipart("/api/games/add")
+        mvc.perform(multipart("/api/games")
                         .file(gameToAddJsonFile)
                         .file(getMultipartImageFileMock("headerImg"))
                         .file(getMultipartImageFileMock("screenshots"))
                         .file(getMultipartImageFileMock("screenshots"))
                         .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -215,10 +226,13 @@ public class IhntpBackendIT {
         long newPublisherId = publisherRepository.save(newPublisher).getId();
         long newTagId = tagRepository.save(newTag).getId();
 
-        GameToEdit gameToEdit = new GameToEdit("Game to Edit new name", LocalDate.of(2020, 1, 15), "short description", "long description", null, Set.of(), Set.of(newDeveloperId), Set.of(newPublisherId), Set.of(newTagId));
+        when(fetcherMock.fetchContentType(any())).thenReturn("image/png");
+        when(fetcherMock.fetch(any(), any())).thenReturn(new byte[]{1, 2, 3});
+
+        GameToEdit gameToEdit = new GameToEdit("Game to Edit new name", LocalDate.of(2020, 1, 15), "short description", "long description", null, Set.of("screenshotLink"), Set.of(newDeveloperId), Set.of(newPublisherId), Set.of(newTagId));
         MockMultipartFile gameToEditJsonFile = new MockMultipartFile("game", "", "application/json", objectMapper.writeValueAsBytes(gameToEdit));
 
-        mvc.perform(multipart("/api/games/edit/" + gameId)
+        mvc.perform(multipart("/api/games/" + gameId)
                         .file(gameToEditJsonFile)
                         .file(getMultipartImageFileMock("headerImg"))
                         .file(getMultipartImageFileMock("screenshots"))

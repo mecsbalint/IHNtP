@@ -1,4 +1,4 @@
-package com.mecsbalint.backend.service;
+package com.mecsbalint.backend.service.developer;
 
 import com.mecsbalint.backend.controller.dto.DeveloperIdNameDto;
 import com.mecsbalint.backend.controller.dto.DeveloperToAdd;

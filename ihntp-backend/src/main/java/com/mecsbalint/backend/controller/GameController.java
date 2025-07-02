@@ -2,19 +2,13 @@ package com.mecsbalint.backend.controller;
 
 import com.mecsbalint.backend.controller.dto.*;
 import com.mecsbalint.backend.repository.GameRepository;
-import com.mecsbalint.backend.service.GameService;
+import com.mecsbalint.backend.service.game.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -27,31 +21,30 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    @GetMapping("/all")
+    @GetMapping
     public List<GameForListDto> getAllGamesSummary() {
         return gameService.getAllGamesSummary();
     }
 
-    @GetMapping("/profile/{id}")
+    @GetMapping("/{id}")
     public GameForGameProfileDto getGameForProfileById(@PathVariable long id) {
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
             return gameService.getGameForProfileById(id, currentUserEmail);
     }
 
-    @GetMapping("/edit/{id}")
+    @GetMapping("/{id}/edit")
     public GameForEditGameDto getGameForEditGameById(@PathVariable long id) {
         return gameService.getGameForEditGameById(id);
     }
 
-    @PutMapping("/edit/{id}")
-    public ResponseEntity<Void> editGame(@PathVariable Long id, @RequestPart("game") GameToEdit gameToEdit, @RequestPart(value = "screenshots", required = false) List<MultipartFile> screenshots, @RequestPart(value = "headerImg", required = false) MultipartFile headerImg) {
+    @PutMapping("/{id}")
+    public void editGame(@PathVariable Long id, @RequestPart("game") GameToEdit gameToEdit, @RequestPart(value = "screenshots", required = false) List<MultipartFile> screenshots, @RequestPart(value = "headerImg", required = false) MultipartFile headerImg) {
         gameService.editGame(id, gameToEdit, screenshots, headerImg);
-
-        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @PostMapping("/add")
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Long addGame(@RequestPart("game") GameToAdd gameToAdd, @RequestPart(value = "screenshots", required = false) List<MultipartFile> screenshots, @RequestPart(value = "headerImg", required = false) MultipartFile headerImg) {
         return gameService.addGame(gameToAdd, screenshots, headerImg);
     }

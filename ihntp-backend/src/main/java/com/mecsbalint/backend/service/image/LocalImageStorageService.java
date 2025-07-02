@@ -1,6 +1,7 @@
-package com.mecsbalint.backend.service;
+package com.mecsbalint.backend.service.image;
 
 import com.mecsbalint.backend.utility.Fetcher;
+import com.mecsbalint.backend.utility.UUIDProvider;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,23 +18,24 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class ImageStorageService {
+public class LocalImageStorageService implements ImageStorageService {
 
     private final String uploadDir;
-
-    private final UUID uuid;
 
     private final Fetcher fetcher;
 
     private final Logger logger;
 
-    public ImageStorageService(@Value("${mecsbalint.app.file-upload-dir}") String uploadDir, UUID uuid, Fetcher fetcher, Logger logger) {
+    private final UUIDProvider uuidProvider;
+
+    public LocalImageStorageService(@Value("${mecsbalint.app.file-upload-dir}") String uploadDir, Fetcher fetcher, Logger logger, UUIDProvider uuidProvider) {
         this.uploadDir = uploadDir;
-        this.uuid = uuid;
         this.fetcher = fetcher;
         this.logger = logger;
+        this.uuidProvider = uuidProvider;
     }
 
+    @Override
     public Set<String> downloadAndSaveImages(Set<String> links, String savePath) {
         Set<String> savedPaths = new HashSet<>();
         for (String link : links) {
@@ -43,6 +45,7 @@ public class ImageStorageService {
         return savedPaths;
     }
 
+    @Override
     public String downloadAndSaveImage(String link, String savePath) {
         String contentType = fetcher.fetchContentType(link);
         String extension = getExtensionFromContentType(contentType);
@@ -54,6 +57,7 @@ public class ImageStorageService {
         return saveImage(imageBytes, "image." + extension, savePath);
     }
 
+    @Override
     public boolean deleteFolderContent(String folderName, Set<String> exceptions) {
         Set<Path> exceptionPaths = exceptions.stream()
                 .map(exception -> Paths.get(uploadDir, exception).normalize())
@@ -72,13 +76,18 @@ public class ImageStorageService {
         }
     }
 
+    @Override
     public boolean deleteFolder(String folderName) {
         return deleteFolderContent(folderName, Set.of());
     }
 
+    @Override
     public void deleteFiles(Set<String> filePaths) {
-        for (String filePath: filePaths) {
-            Path fileToDeletePath = Paths.get(uploadDir, filePath);
+        Set<String> internalFilePaths = filePaths.stream()
+                .map(path -> path.replace("/api/images/", ""))
+                .collect(Collectors.toSet());
+        for (String internalFilePath: internalFilePaths) {
+            Path fileToDeletePath = Paths.get(uploadDir, internalFilePath);
             try {
                 Files.deleteIfExists(fileToDeletePath);
             } catch (IOException e) {
@@ -87,6 +96,7 @@ public class ImageStorageService {
         }
     }
 
+    @Override
     public Set<String> saveImages(List<MultipartFile> images, String folderName) {
         Set<String> imagePaths = new HashSet<>();
 
@@ -97,13 +107,30 @@ public class ImageStorageService {
         return imagePaths;
     }
 
+    @Override
     public String saveImage(MultipartFile image, String folderName) {
         return saveImage(createBytesFromMultipartFile(image), image.getOriginalFilename(), folderName);
     }
 
-    public String saveImage(byte[] imageBytes, String ogFilename, String folderName) {
+    @Override
+    public boolean validateMultipartFileImages(List<MultipartFile> files) {
+        for (MultipartFile file : files) {
+            if (!validateMultipartFileImages(file)) return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean validateMultipartFileImages(MultipartFile file) {
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        List<String> validExtensions = List.of("jpg", "jpeg", "png", "gif", "webp", "bmp", "svg");
+
+        return validExtensions.contains(extension);
+    }
+
+    private String saveImage(byte[] imageBytes, String ogFilename, String folderName) {
         String extension = FilenameUtils.getExtension(ogFilename);
-        String generatedFilename = uuid.randomUUID() + "." + extension;
+        String generatedFilename = uuidProvider.getRandomUUID() + "." + extension;
 
         Path relativePath = Paths.get(folderName, generatedFilename);
         Path targetPath = Paths.get(uploadDir).toAbsolutePath().resolve(relativePath);
@@ -116,21 +143,7 @@ public class ImageStorageService {
                     String.format("The system can't save this file: %s", relativePath), e);
         }
 
-        return relativePath.toString().replace(File.separatorChar, '/');
-    }
-
-    public boolean validateMultipartFileImages(List<MultipartFile> files) {
-        for (MultipartFile file : files) {
-            if (!validateMultipartFileImages(file)) return false;
-        }
-        return true;
-    }
-
-    public boolean validateMultipartFileImages(MultipartFile file) {
-        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        List<String> validExtensions = List.of("jpg", "jpeg", "png", "gif", "webp", "bmp", "svg");
-
-        return validExtensions.contains(extension);
+        return "/api/images/" + relativePath.toString().replace(File.separatorChar, '/');
     }
 
     private byte[] createBytesFromMultipartFile(MultipartFile file) {
@@ -139,16 +152,6 @@ public class ImageStorageService {
         } catch (IOException e) {
             throw new UncheckedIOException(String.format("The system can't read the file (original filename: %s)", file.getOriginalFilename()), e);
         }
-    }
-
-    private List<byte[]> createBytesFromMultipartFiles(List<MultipartFile> files) {
-        List<byte[]> fileBytes = new ArrayList<>();
-
-        for (MultipartFile file : files) {
-            fileBytes.add(createBytesFromMultipartFile(file));
-        }
-
-        return fileBytes;
     }
 
     private String getExtensionFromContentType(String contentType) {

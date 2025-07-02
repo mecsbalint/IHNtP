@@ -1,10 +1,9 @@
-package com.mecsbalint.backend.service;
+package com.mecsbalint.backend.service.publisher;
 
 import com.mecsbalint.backend.controller.dto.PublisherToAdd;
 import com.mecsbalint.backend.controller.dto.PublisherIdNameDto;
 import com.mecsbalint.backend.exception.ElementIsAlreadyInDatabaseException;
 import com.mecsbalint.backend.model.Publisher;
-import com.mecsbalint.backend.model.Tag;
 import com.mecsbalint.backend.repository.PublisherRepository;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
