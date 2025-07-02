@@ -17,11 +17,6 @@ public class AppConfig {
     }
 
     @Bean
-    public UUID getUUID() {
-        return UUID.randomUUID();
-    }
-
-    @Bean
     public Logger getLogger() {
         return LoggerFactory.getLogger("IHNtP Backend");
     }

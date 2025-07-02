@@ -1,6 +1,7 @@
 package com.mecsbalint.backend.service.image;
 
 import com.mecsbalint.backend.utility.Fetcher;
+import com.mecsbalint.backend.utility.UUIDProvider;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,17 +22,17 @@ public class LocalImageStorageService implements ImageStorageService {
 
     private final String uploadDir;
 
-    private final UUID uuid;
-
     private final Fetcher fetcher;
 
     private final Logger logger;
 
-    public LocalImageStorageService(@Value("${mecsbalint.app.file-upload-dir}") String uploadDir, UUID uuid, Fetcher fetcher, Logger logger) {
+    private final UUIDProvider uuidProvider;
+
+    public LocalImageStorageService(@Value("${mecsbalint.app.file-upload-dir}") String uploadDir, Fetcher fetcher, Logger logger, UUIDProvider uuidProvider) {
         this.uploadDir = uploadDir;
-        this.uuid = uuid;
         this.fetcher = fetcher;
         this.logger = logger;
+        this.uuidProvider = uuidProvider;
     }
 
     @Override
@@ -129,7 +130,7 @@ public class LocalImageStorageService implements ImageStorageService {
 
     private String saveImage(byte[] imageBytes, String ogFilename, String folderName) {
         String extension = FilenameUtils.getExtension(ogFilename);
-        String generatedFilename = uuid.randomUUID() + "." + extension;
+        String generatedFilename = uuidProvider.getRandomUUID() + "." + extension;
 
         Path relativePath = Paths.get(folderName, generatedFilename);
         Path targetPath = Paths.get(uploadDir).toAbsolutePath().resolve(relativePath);
