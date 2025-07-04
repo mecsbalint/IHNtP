@@ -60,6 +60,7 @@ public class LocalImageStorageService implements ImageStorageService {
     @Override
     public boolean deleteFolderContent(String folderName, Set<String> exceptions) {
         Set<Path> exceptionPaths = exceptions.stream()
+                .filter(exception -> !exception.contains("http"))
                 .map(exception -> Paths.get(uploadDir, exception).normalize())
                 .collect(Collectors.toSet());
         Path folderPath = Paths.get(uploadDir, folderName);

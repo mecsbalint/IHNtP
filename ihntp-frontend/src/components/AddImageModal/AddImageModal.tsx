@@ -45,7 +45,7 @@ function AddScreenshotModal({modalId, modalName, list, setter} : AddScreenshotMo
             <div className="modal-box w-fit">
                 <div className="fieldset w-xs">
                     <legend className="fieldset-legend">{`Add ${modalName}`}</legend>
-                    <input type="text" className="input" value={link} onChange={event => handleOnChange(event)}></input>
+                    <input type="text" className="input" value={link} onChange={event => handleOnChange(event)} onKeyDown={event => event.keyCode === 13 && link.length > 0 && handleAddBtnClick()}></input>
                     <p className={`text-error ${errorMsg ? "" : "hidden"}`}>{errorMsg}</p>
                     <div className="w-full" title={!validationStatus ? "The link provided does not show an image or is unavailable." : ""}>
                         <button disabled={!validationStatus} className="btn btn-neutral mt-4 w-full" onClick={handleAddBtnClick}>Add</button>

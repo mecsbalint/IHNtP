@@ -109,6 +109,10 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
         }
       }, [screenshots]);
 
+      useEffect(() => {
+        setIsHeaderImgAdded(headerImgUrl.length !== 0);
+      }, [headerImgUrl])
+
     function addToList(
             list : Array<Tag | TagWithId> | Array<Developer | DeveloperWithId> | Array<Publisher | PublisherWithId>, 
             listSetter : React.Dispatch<React.SetStateAction<(Tag | TagWithId)[]>> | React.Dispatch<React.SetStateAction<(Developer | DeveloperWithId)[]>> | React.Dispatch<React.SetStateAction<(Publisher | PublisherWithId)[]>>, 
@@ -200,7 +204,7 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
                     <div className={`flex gap-2 ${isNameAdded ? "hidden" : ""}`}>
                         <button type="button" className="btn btn-primary w-15" onClick={() => setIsNameAdded(true)} disabled={name === ""}>Add</button>
                         <label className="input">
-                            <input type="text" onChange={event => setName(event.target.value)} value={name} onKeyDown={event => event.keyCode === 13 && name !== "" && setIsNameAdded(true)} />
+                            <input type="text" onChange={event => setName(event.target.value)} value={name} onKeyDown={event => {event.keyCode === 13 && event.preventDefault(); return event.keyCode === 13 && name !== "" && setIsNameAdded(true)}} />
                         </label>
                     </div>
                     <div className={`flex items-center gap-2 ${isNameAdded ? "" : "hidden"}`}>
