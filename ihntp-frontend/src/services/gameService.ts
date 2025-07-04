@@ -2,7 +2,7 @@ import { Developer, DeveloperWithId } from "../types/Developer";
 import { GameForEdit, GameForGameProfile, GameForList, GameFormSubmit, GameToEdit, GameToAdd } from "../types/Game";
 import { Publisher, PublisherWithId } from "../types/Publisher";
 import { Tag, TagWithId } from "../types/Tag";
-import { ApiResponse, apiRequest } from "./api";
+import { ApiResponse, apiRequest } from "./apiRequest";
 import { addNewDevelopers } from "./developerService";
 import { addNewPublishers } from "./publisherService";
 import { addNewTags } from "./tagService";

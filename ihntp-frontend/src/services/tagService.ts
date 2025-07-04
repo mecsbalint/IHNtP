@@ -1,5 +1,5 @@
 import { Tag, TagWithId } from "../types/Tag";
-import { apiRequest } from "./api";
+import { apiRequest } from "./apiRequest";
 
 export async function getAllTags() : Promise<TagWithId[]> {
     const responseObj = await apiRequest<TagWithId[]>({url: "/api/tags"});

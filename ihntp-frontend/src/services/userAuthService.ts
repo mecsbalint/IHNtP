@@ -1,5 +1,5 @@
 import { User, UserLogin, UserRegistration } from "../types/User";
-import { apiRequest } from "./api";
+import { apiRequest } from "./apiRequest";
 
 export async function loginUser(loginObj : UserLogin) : Promise<{status: number, body: User | null}> {
     const responseObj = await apiRequest<User>({url: "api/login", method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(loginObj)});
