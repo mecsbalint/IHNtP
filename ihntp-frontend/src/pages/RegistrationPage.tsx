@@ -8,7 +8,7 @@ import twoDigitCountryCodes from "iso-3166-1-alpha-2";
 
 function RegistrationPage() {
     const navigate = useNavigate();
-    const {error, isLoading, registrate} = useRegistration();
+    const {error, isLoading, signUp} = useRegistration();
     const {isLoggedIn} = useAuthContext();
     const [countries, setCountries] = useState(twoDigitCountryCodes.getCountries());
 
@@ -19,7 +19,7 @@ function RegistrationPage() {
     async function onSubmit(event : React.FormEvent<HTMLFormElement>, submitObj : UserRegistration) {
         event.preventDefault();
 
-        await registrate(submitObj);
+        await signUp(submitObj);
     }
 
     return (

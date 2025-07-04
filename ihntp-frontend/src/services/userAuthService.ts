@@ -7,7 +7,7 @@ export async function loginUser(loginObj : UserLogin) : Promise<{status: number,
     return responseObj;
 }
 
-export async function registrateUser(registrationObj : UserRegistration) : Promise<number> {
+export async function signUpUser(registrationObj : UserRegistration) : Promise<number> {
     const responseObj = await apiRequest({url: "api/registration", method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(registrationObj)});
 
     return responseObj.status;
