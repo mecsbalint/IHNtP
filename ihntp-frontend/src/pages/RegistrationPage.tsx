@@ -4,13 +4,13 @@ import UserForm from "../components/UserForm/UserForm";
 import { useRegistration } from "../hooks/useRegistration";
 import { useAuthContext } from "../hooks/useAuthContext";
 import { UserRegistration } from "../types/User";
-import iso3311a2 from "iso-3166-1-alpha-2";
+import twoDigitCountryCodes from "iso-3166-1-alpha-2";
 
 function RegistrationPage() {
     const navigate = useNavigate();
     const {error, isLoading, registrate} = useRegistration();
     const {isLoggedIn} = useAuthContext();
-    const [countries, setCountries] = useState(iso3311a2.getCountries());
+    const [countries, setCountries] = useState(twoDigitCountryCodes.getCountries());
 
     useEffect(() => {
          isLoggedIn && navigate("/");
