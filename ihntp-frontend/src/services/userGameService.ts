@@ -1,5 +1,5 @@
 import { GameForList, GameStatuses } from "../types/Game";
-import { ApiResponse, apiRequest } from "./api";
+import { ApiResponse, apiRequest } from "./apiRequest";
 
 type UserGameListType = "wishlist" | "backlog";
 

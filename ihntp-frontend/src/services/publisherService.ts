@@ -1,5 +1,5 @@
 import { Publisher, PublisherWithId } from "../types/Publisher";
-import { apiRequest } from "./api";
+import { apiRequest } from "./apiRequest";
 
 export async function getAllPublishers() : Promise<PublisherWithId[]> {
     const responseObj = await apiRequest<PublisherWithId[]>({url: "/api/publishers"});

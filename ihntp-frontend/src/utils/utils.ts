@@ -1,4 +1,4 @@
-import { apiRequest } from "../services/api";
+import { apiRequest } from "../services/apiRequest";
 
 export function formDate(dateStr : string) : string {
     const date = new Date(dateStr);

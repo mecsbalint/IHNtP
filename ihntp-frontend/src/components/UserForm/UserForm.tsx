@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { UserRegistration } from "../../types/User";
-import iso3311a2 from "iso-3166-1-alpha-2";
+import twoDigitsCountryCodes from "iso-3166-1-alpha-2";
 
 type UserFormProps = {
   submitText: string,
@@ -77,10 +77,10 @@ function UserForm({submitText, onSubmit, nameErrorMsg = "", emailErrorMsg = "", 
 
       <div className={`my-5 ${submitText === "Log in" ? "hidden" : ""}`}>
         <label className="fieldset-label">Country</label>
-        <label className="select pl-0">
-          <select className="select ml-0!" onChange={e => setCountryCode(e.target.selectedOptions[0].value)}>
+        <label className="select pl-0" style={countryCode === "" ? { color: "#9CA3AF" } : {}}>
+          <select  className="select ml-0!" onChange={e => setCountryCode(e.target.selectedOptions[0].value)}>
             <option selected={true} disabled={true}>Choose a country</option>
-            {countries.map(country => (<option value={iso3311a2.getCode(country) ?? "n/a"}>{country}</option>))}
+            {countries.map(country => (<option className="text-black" value={twoDigitsCountryCodes.getCode(country) ?? "n/a"}>{country}</option>))}
           </select>
         </label>
       </div>

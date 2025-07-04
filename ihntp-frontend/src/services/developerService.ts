@@ -1,5 +1,5 @@
 import { Developer, DeveloperWithId } from "../types/Developer";
-import { apiRequest } from "./api";
+import { apiRequest } from "./apiRequest";
 
 export async function getAllDevelopers() : Promise<DeveloperWithId[]> {
     const responseObj = await apiRequest<DeveloperWithId[]>({url: "/api/developers"});

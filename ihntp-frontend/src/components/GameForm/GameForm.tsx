@@ -109,6 +109,10 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
         }
       }, [screenshots]);
 
+      useEffect(() => {
+        setIsHeaderImgAdded(headerImgUrl.length !== 0);
+      }, [headerImgUrl])
+
     function addToList(
             list : Array<Tag | TagWithId> | Array<Developer | DeveloperWithId> | Array<Publisher | PublisherWithId>, 
             listSetter : React.Dispatch<React.SetStateAction<(Tag | TagWithId)[]>> | React.Dispatch<React.SetStateAction<(Developer | DeveloperWithId)[]>> | React.Dispatch<React.SetStateAction<(Publisher | PublisherWithId)[]>>, 
@@ -200,7 +204,7 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
                     <div className={`flex gap-2 ${isNameAdded ? "hidden" : ""}`}>
                         <button type="button" className="btn btn-primary w-15" onClick={() => setIsNameAdded(true)} disabled={name === ""}>Add</button>
                         <label className="input">
-                            <input type="text" onChange={event => setName(event.target.value)} value={name} onKeyDown={event => event.keyCode === 13 && name !== "" && setIsNameAdded(true)} />
+                            <input type="text" onChange={event => setName(event.target.value)} value={name} onKeyDown={event => {event.keyCode === 13 && event.preventDefault(); return event.keyCode === 13 && name !== "" && setIsNameAdded(true)}} />
                         </label>
                     </div>
                     <div className={`flex items-center gap-2 ${isNameAdded ? "" : "hidden"}`}>
@@ -313,12 +317,13 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
                 
                 <fieldset className="fieldset h-fit">
                     <legend className="fieldset-legend">Header image</legend>
-                    <div className={`grid gap-2 ${isHeaderImgAdded ? "hidden" : ""}`}>
-                        <button type="button" className="btn btn-primary w-full" onClick={()=>(document.getElementById('headerImgModal') as HTMLDialogElement).showModal()}>Add Link</button>
-                        <label className="w-full h-30 border-1 border-dashed rounded flex items-center justify-center cursor-pointer">
-                                <img className="w-10" src={uploadIcon}></img>
-                                Upload File
-                                <input className="hidden" type="file" accept="image/*" onChange={(event) => handleHeaderImgChange(event)}/>
+                    <div className={`flex gap-2 ${isHeaderImgAdded ? "hidden" : ""}`}>
+                        <label className="btn btn-primary grow">
+                            Upload File
+                            <input className="hidden" type="file" accept="image/*" onChange={(event) => handleHeaderImgChange(event)}/>
+                        </label>
+                        <label className="grow">
+                            <button type="button" className="btn btn-primary w-full" onClick={()=>(document.getElementById('headerImgModal') as HTMLDialogElement).showModal()}>Add Link</button>
                         </label>
                     </div>
                     <div className={`w-full h-30 flex justify-left ${isHeaderImgAdded ? "" : "hidden"}`}>
