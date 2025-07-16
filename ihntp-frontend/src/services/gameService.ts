@@ -81,7 +81,7 @@ async function processEntityLists(gameObj : GameFormSubmit) : Promise<GameToEdit
 type ProcessEntitiesParams<Entity, EntityWithId> = {
         entities: Array<Entity | EntityWithId>,
         postFunction: (entitiesToAdd: Entity[]) => Promise<number[]>
-    };
+};
 
 async function processEntities<ParamTypes extends [Developer, DeveloperWithId] | [Publisher, PublisherWithId] | [Tag, TagWithId]>({entities, postFunction} : ProcessEntitiesParams<ParamTypes[0], ParamTypes[1]>) : Promise<number[]> {
     const entitiesToPost = entities.filter((entity): entity is ParamTypes[0] => !('id' in entity));
