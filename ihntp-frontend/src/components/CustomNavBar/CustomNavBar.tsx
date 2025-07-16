@@ -12,9 +12,9 @@ function CustomNavBar() {
   }
 
   return (
-    <div className="navbar bg-blue-400 shadow-sm">
-      <div className="navbar-start gap-2">
-        <Link to={`/`} className="text-2xl font-semibold text-amber-50 p-2">
+    <div className="navbar bg-blue-400 shadow-sm rounded-b-box">
+      <div className="navbar-start gap-4">
+        <Link to={`/`} className="text-2xl font-semibold text-amber-50">
           IHNtP
         </Link>
         <input
@@ -24,14 +24,14 @@ function CustomNavBar() {
           className="input input-bordered w-24 md:w-auto"
         />
       </div>
-      <div className={`navbar-center ${isLoggedIn ? "" : "hidden"}`}>
-        <Link to={`/games/add`} className="text-xl font-semibold text-amber-50 p-2 pb-0">
+      <div className={`navbar-center ${isLoggedIn ? "" : "hidden"} gap-4`}>
+        <Link to={`/games/add`} className="text-xl font-semibold text-amber-50">
           Add Game
         </Link>
-        <Link to={`/wishlist`} className="text-xl font-semibold text-amber-50 p-2 pb-0">
+        <Link to={`/wishlist`} className="text-xl font-semibold text-amber-50">
           Wishlist
         </Link>
-        <Link to={`/backlog`} className="text-xl font-semibold text-amber-50 p-2 pb-0">
+        <Link to={`/backlog`} className="text-xl font-semibold text-amber-50">
           Backlog
         </Link>
       </div>
