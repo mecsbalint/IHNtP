@@ -2,7 +2,12 @@ package com.mecsbalint.backend;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mecsbalint.backend.controller.dto.*;
+import com.mecsbalint.backend.controller.dto.game.GameForListDto;
+import com.mecsbalint.backend.controller.dto.game.GameToAdd;
+import com.mecsbalint.backend.controller.dto.game.GameToEdit;
+import com.mecsbalint.backend.controller.dto.user.JwtResponseDto;
+import com.mecsbalint.backend.controller.dto.user.UserEmailPasswordDto;
+import com.mecsbalint.backend.controller.dto.user.UserRegistrationDto;
 import com.mecsbalint.backend.model.Developer;
 import com.mecsbalint.backend.model.Game;
 import com.mecsbalint.backend.model.Publisher;

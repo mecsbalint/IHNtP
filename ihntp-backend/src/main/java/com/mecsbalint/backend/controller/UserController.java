@@ -1,8 +1,8 @@
 package com.mecsbalint.backend.controller;
 
-import com.mecsbalint.backend.controller.dto.JwtResponseDto;
-import com.mecsbalint.backend.controller.dto.UserEmailPasswordDto;
-import com.mecsbalint.backend.controller.dto.UserRegistrationDto;
+import com.mecsbalint.backend.controller.dto.user.JwtResponseDto;
+import com.mecsbalint.backend.controller.dto.user.UserEmailPasswordDto;
+import com.mecsbalint.backend.controller.dto.user.UserRegistrationDto;
 import com.mecsbalint.backend.exception.UserHasAlreadyExistException;
 import com.mecsbalint.backend.security.jwt.JwtUtils;
 import com.mecsbalint.backend.service.user.UserService;

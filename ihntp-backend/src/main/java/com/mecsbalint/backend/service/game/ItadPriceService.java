@@ -1,7 +1,7 @@
 package com.mecsbalint.backend.service.game;
 
-import com.mecsbalint.backend.controller.dto.GamePriceDto;
-import com.mecsbalint.backend.controller.dto.GamePricesDto;
+import com.mecsbalint.backend.controller.dto.game.GamePriceDto;
+import com.mecsbalint.backend.controller.dto.game.GamePricesDto;
 import com.mecsbalint.backend.controller.dto.isthereanydealapi.ItadGameInfoDto;
 import com.mecsbalint.backend.controller.dto.isthereanydealapi.ItadGamePriceDealDto;
 import com.mecsbalint.backend.controller.dto.isthereanydealapi.ItadGamePriceInfoDto;

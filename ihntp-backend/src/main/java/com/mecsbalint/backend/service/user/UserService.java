@@ -1,8 +1,8 @@
 package com.mecsbalint.backend.service.user;
 
-import com.mecsbalint.backend.controller.dto.GameForListDto;
-import com.mecsbalint.backend.controller.dto.GameStatusDto;
-import com.mecsbalint.backend.controller.dto.UserRegistrationDto;
+import com.mecsbalint.backend.controller.dto.game.GameForListDto;
+import com.mecsbalint.backend.controller.dto.game.GameStatusDto;
+import com.mecsbalint.backend.controller.dto.user.UserRegistrationDto;
 import com.mecsbalint.backend.exception.ElementIsAlreadyInSetException;
 import com.mecsbalint.backend.exception.ElementNotFoundInSetException;
 import com.mecsbalint.backend.exception.GameNotFoundException;

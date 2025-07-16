@@ -1,4 +1,4 @@
-package com.mecsbalint.backend.controller.dto;
+package com.mecsbalint.backend.controller.dto.game;
 
 import java.time.LocalDate;
 import java.util.Set;

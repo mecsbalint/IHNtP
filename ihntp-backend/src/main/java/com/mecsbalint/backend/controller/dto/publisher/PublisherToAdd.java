@@ -1,4 +1,4 @@
-package com.mecsbalint.backend.controller.dto;
+package com.mecsbalint.backend.controller.dto.publisher;
 
 import com.mecsbalint.backend.model.Publisher;
 
