@@ -4,12 +4,14 @@ import CustomNavBar from "../../components/CustomNavBar/CustomNavBar";
 function Layout() {
 
     return (
-        <div className="bg-cover grid grid-cols-4 overflow-hidden place-items-stretch">
-            <div className="col-span-4">
+        <div className="bg-cover grid grid-cols-1 overflow-hidden place-items-stretch bg-white gap-2">
+            <div>
                 <CustomNavBar />
             </div>
-            <div className="col-start-2 col-span-2">
-                <Outlet />
+            <div className="flex justify-center bg-blue-400 rounded-box">
+                <div className="w-200">
+                    <Outlet />
+                </div>
             </div>
         </div>
     );

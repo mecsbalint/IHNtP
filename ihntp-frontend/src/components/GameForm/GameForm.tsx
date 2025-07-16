@@ -93,7 +93,7 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
             setIsDescriptionLongAdded(game.descriptionLong !== "");
 
             setHeaderImgUrl(game.headerImg);
-            setIsHeaderImgAdded(game.headerImg !== "");
+            setIsHeaderImgAdded(typeof game.headerImg === "string" && game.headerImg !== "");
 
             setScreenshots(game.screenshots);
             prevScreenshotNumRef.current = game.screenshots.length;
@@ -109,7 +109,7 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
       }, [screenshots]);
 
     useEffect(() => {
-        setIsHeaderImgAdded(headerImgUrl.length !== 0);
+        setIsHeaderImgAdded(headerImgUrl !== null && headerImgUrl.length !== 0);
     }, [headerImgUrl]);
 
     type AddToListParametersTag = {

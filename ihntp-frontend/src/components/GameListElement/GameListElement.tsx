@@ -11,7 +11,7 @@ type GameListElementProps = {
 function GameListElement({game} : GameListElementProps) {
 
     return (
-        <li className="list-row">
+        <li className="list-row ps-0">
             <Link to={`/game/${game.id}`}>
                 <div className="grid grid-cols-2 card card-side bg-base-100 shadow-sm">
                     <figure>

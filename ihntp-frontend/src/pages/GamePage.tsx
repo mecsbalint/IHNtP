@@ -52,7 +52,7 @@ function GamePage() {
     }
 
     return (
-        <div className="place-items-center bg-blue-400 rounded-b-box p-10 pt-5">
+        <div className="place-items-center bg-blue-400 rounded-b-box pb-5 pt-5">
             {game && <GameProfile 
                 game={game} 
                 isLoggedIn={isLoggedIn} 
