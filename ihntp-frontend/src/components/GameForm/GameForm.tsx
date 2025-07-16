@@ -6,7 +6,6 @@ import { getAllDevelopers } from "../../services/developerService";
 import AddGameAttributeModal from "../AddGameAttributeModal.jsx/AddGameAttributeModal";
 import AddImageModal from "../AddImageModal/AddImageModal";
 import deleteIcon from "../../assets/delete_icon.png";
-import uploadIcon from "../../assets/upload_icon.png";
 import { Tag, TagWithId } from "../../types/Tag";
 import { Publisher, PublisherWithId } from "../../types/Publisher";
 import { Developer, DeveloperWithId } from "../../types/Developer";
@@ -109,17 +108,35 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
         }
       }, [screenshots]);
 
-      useEffect(() => {
+    useEffect(() => {
         setIsHeaderImgAdded(headerImgUrl.length !== 0);
-      }, [headerImgUrl])
+    }, [headerImgUrl]);
 
-    function addToList(
-            list : Array<Tag | TagWithId> | Array<Developer | DeveloperWithId> | Array<Publisher | PublisherWithId>, 
-            listSetter : React.Dispatch<React.SetStateAction<(Tag | TagWithId)[]>> | React.Dispatch<React.SetStateAction<(Developer | DeveloperWithId)[]>> | React.Dispatch<React.SetStateAction<(Publisher | PublisherWithId)[]>>, 
-            newElement : Tag | TagWithId | Developer | DeveloperWithId | Publisher | PublisherWithId,
-            newElementSetter : React.Dispatch<React.SetStateAction<Tag | TagWithId | null>> | React.Dispatch<React.SetStateAction<Developer | DeveloperWithId | null>> | React.Dispatch<React.SetStateAction<Publisher | PublisherWithId | null>>,
-            allListSetter: React.Dispatch<React.SetStateAction<(Tag | TagWithId)[]>> | React.Dispatch<React.SetStateAction<(Developer | DeveloperWithId)[]>> | React.Dispatch<React.SetStateAction<(Publisher | PublisherWithId)[]>>
-        ) {
+    type AddToListParametersTag = {
+        list : Array<Tag | TagWithId>,
+        listSetter : React.Dispatch<React.SetStateAction<(Tag | TagWithId)[]>>,
+        newElement : Tag | TagWithId,
+        newElementSetter : React.Dispatch<React.SetStateAction<Tag | TagWithId | null>>,
+        allListSetter: React.Dispatch<React.SetStateAction<(Tag | TagWithId)[]>>
+    };
+
+    type AddToListParametersDeveloper = {
+        list : Array<Developer | DeveloperWithId>,
+        listSetter : React.Dispatch<React.SetStateAction<(Developer | DeveloperWithId)[]>>,
+        newElement : Developer | DeveloperWithId,
+        newElementSetter : React.Dispatch<React.SetStateAction<Developer | DeveloperWithId | null>>,
+        allListSetter: React.Dispatch<React.SetStateAction<(Developer | DeveloperWithId)[]>>
+    };
+
+    type AddToListParametersPublisher = {
+        list : Array<Publisher | PublisherWithId>,
+        listSetter : React.Dispatch<React.SetStateAction<(Publisher | PublisherWithId)[]>>,
+        newElement : Publisher | PublisherWithId,
+        newElementSetter : React.Dispatch<React.SetStateAction<Publisher | PublisherWithId | null>>,
+        allListSetter: React.Dispatch<React.SetStateAction<(Publisher | PublisherWithId)[]>>
+    };
+
+    function addToList({list, listSetter, newElement, newElementSetter, allListSetter} : AddToListParametersTag | AddToListParametersDeveloper | AddToListParametersPublisher) {
         const newList = [...list, newElement];
         listSetter(newList);
 
@@ -129,11 +146,25 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
         newElementSetter(null);
     }
 
-    function removeFromList(
-        elementToRemove : Tag | TagWithId | Developer | DeveloperWithId | Publisher | PublisherWithId, 
-        listSetter : React.Dispatch<React.SetStateAction<(Tag | TagWithId)[]>> | React.Dispatch<React.SetStateAction<(Developer | DeveloperWithId)[]>> | React.Dispatch<React.SetStateAction<(Publisher | PublisherWithId)[]>>,
-        allListSetter : React.Dispatch<React.SetStateAction<(Tag | TagWithId)[]>> | React.Dispatch<React.SetStateAction<(Developer | DeveloperWithId)[]>> | React.Dispatch<React.SetStateAction<(Publisher | PublisherWithId)[]>>
-    ) {
+    type RemoveFromListParametersTag = {
+        elementToRemove : Tag | TagWithId,
+        listSetter : React.Dispatch<React.SetStateAction<(Tag | TagWithId)[]>>,
+        allListSetter : React.Dispatch<React.SetStateAction<(Tag | TagWithId)[]>>
+    };
+
+    type RemoveFromListParametersDeveloper = {
+        elementToRemove : Developer | DeveloperWithId,
+        listSetter : React.Dispatch<React.SetStateAction<(Developer | DeveloperWithId)[]>>,
+        allListSetter : React.Dispatch<React.SetStateAction<(Developer | DeveloperWithId)[]>>
+    };
+
+    type RemoveFromListParametersPublisher = {
+        elementToRemove : Publisher | PublisherWithId,
+        listSetter : React.Dispatch<React.SetStateAction<(Publisher | PublisherWithId)[]>>,
+        allListSetter : React.Dispatch<React.SetStateAction<(Publisher | PublisherWithId)[]>>
+    };
+
+    function removeFromList({elementToRemove, listSetter, allListSetter} : RemoveFromListParametersTag | RemoveFromListParametersDeveloper | RemoveFromListParametersPublisher) {
         listSetter(prev => prev.filter(element => element.name !== elementToRemove.name));
 
         allListSetter(prev => {
@@ -230,7 +261,7 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
                 <fieldset className="fieldset">
                     <legend className="fieldset-legend w-full">Tags<button type="button" className="btn btn-xs btn-primary btn-soft justify-end" onClick={()=>(document.getElementById('tagModal') as HTMLDialogElement).showModal()}>Create new tag</button></legend>
                     <div className="flex gap-2">
-                        <button type="button" className="btn btn-primary w-15" disabled={!selectedTag} onClick={() => addToList(tags, setTags, selectedTag!, setSelectedTag, setAllTags)}>Add</button>
+                        <button type="button" className="btn btn-primary w-15" disabled={!selectedTag} onClick={() => addToList({list: tags, listSetter: setTags, newElement: selectedTag!, newElementSetter: setSelectedTag, allListSetter: setAllTags})}>Add</button>
                         <label className="select pl-0">
                             <select value={selectedTag?.name ?? "Choose a tag"} className="ml-0!" onChange={event => setSelectedTag(typeof event.target.selectedOptions[0].dataset.id === "undefined" ? {name: event.target.selectedOptions[0].value} : {id: event.target.selectedOptions[0].dataset.id as unknown as number, name: event.target.selectedOptions[0].value})}>
                                 <option disabled={true}>Choose a tag</option>
@@ -239,14 +270,14 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
                         </label>
                     </div>
                     <div className="max-w-80">
-                        {tags.map(tag => (<span data-id={"id" in tag ? tag.id : undefined} data-name={tag.name} key={"id" in tag ? tag.id : undefined} className="badge badge-outline badge-info mr-1 mb-1 cursor-pointer" onClick={event => removeFromList(typeof (event.target as HTMLSpanElement).dataset.id === "undefined" ? {name: (event.target as HTMLSpanElement).dataset.name!} : {id: (event.target as HTMLSpanElement).dataset.id as unknown as number, name: (event.target as HTMLSpanElement).dataset.name!}, setTags, setAllTags)}>{tag.name}</span>))}
+                        {tags.map(tag => (<span data-id={"id" in tag ? tag.id : undefined} data-name={tag.name} key={"id" in tag ? tag.id : undefined} className="badge badge-outline badge-info mr-1 mb-1 cursor-pointer" onClick={event => removeFromList({elementToRemove: typeof (event.target as HTMLSpanElement).dataset.id === "undefined" ? {name: (event.target as HTMLSpanElement).dataset.name!} : {id: (event.target as HTMLSpanElement).dataset.id as unknown as number, name: (event.target as HTMLSpanElement).dataset.name!}, listSetter: setTags, allListSetter: setAllTags})}>{tag.name}</span>))}
                     </div>
                 </fieldset>
 
                 <fieldset className="fieldset">
                     <legend className="fieldset-legend w-full">Developers<button type="button" className="btn btn-xs btn-primary btn-soft justify-end" onClick={()=>(document.getElementById('developerModal') as HTMLDialogElement).showModal()}>Create new developer</button></legend>
                     <div className="flex gap-2">
-                        <button type="button" className="btn btn-primary w-15" disabled={!selectedDeveloper} onClick={() => addToList(developers, setDevelopers, selectedDeveloper!, setSelectedDeveloper, setAllDevelopers)}>Add</button>
+                        <button type="button" className="btn btn-primary w-15" disabled={!selectedDeveloper} onClick={() => addToList({list: developers, listSetter: setDevelopers, newElement: selectedDeveloper!, newElementSetter: setSelectedDeveloper, allListSetter: setAllDevelopers})}>Add</button>
                         <label className="select pl-0">
                             <select value={selectedDeveloper?.name ?? "Choose a developer"} className="ml-0!" onChange={event => setSelectedDeveloper(typeof event.target.selectedOptions[0].dataset.id === "undefined" ? {name: event.target.selectedOptions[0].value} : {id: event.target.selectedOptions[0].dataset.id as unknown as number, name: event.target.selectedOptions[0].value})}>
                                 <option disabled={true}>Choose a developer</option>
@@ -255,14 +286,14 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
                         </label>
                     </div>
                     <div className="max-w-80">
-                        {developers.map(developer => (<span data-id={"id" in developer ? developer.id : undefined} data-name={developer.name} key={"id" in developer ? developer.id : undefined} className="badge badge-outline badge-info mr-1 mb-1 cursor-pointer" onClick={event => removeFromList(typeof (event.target as HTMLSpanElement).dataset.id === "undefined" ? {name: (event.target as HTMLSpanElement).dataset.name!} : {id: (event.target as HTMLSpanElement).dataset.id as unknown as number, name: (event.target as HTMLSpanElement).dataset.name!}, setDevelopers, setAllDevelopers)}>{developer.name}</span>))}
+                        {developers.map(developer => (<span data-id={"id" in developer ? developer.id : undefined} data-name={developer.name} key={"id" in developer ? developer.id : undefined} className="badge badge-outline badge-info mr-1 mb-1 cursor-pointer" onClick={event => removeFromList({elementToRemove: typeof (event.target as HTMLSpanElement).dataset.id === "undefined" ? {name: (event.target as HTMLSpanElement).dataset.name!} : {id: (event.target as HTMLSpanElement).dataset.id as unknown as number, name: (event.target as HTMLSpanElement).dataset.name!}, listSetter: setDevelopers, allListSetter: setAllDevelopers})}>{developer.name}</span>))}
                     </div>
                 </fieldset>
 
                 <fieldset className="fieldset">
                     <legend className="fieldset-legend w-full">Publishers<button type="button" className="btn btn-xs btn-primary btn-soft justify-end" onClick={()=>(document.getElementById('publisherModal') as HTMLDialogElement).showModal()}>Create new publisher</button></legend>
                     <div className="flex gap-2">
-                        <button type="button" className="btn btn-primary w-15" disabled={!selectedPublisher} onClick={() => addToList(publishers, setPublishers, selectedPublisher!, setSelectedPublisher, setAllPublishers)}>Add</button>
+                        <button type="button" className="btn btn-primary w-15" disabled={!selectedPublisher} onClick={() => addToList({list: publishers, listSetter: setPublishers, newElement: selectedPublisher!, newElementSetter: setSelectedPublisher, allListSetter: setAllPublishers})}>Add</button>
                         <label className="select pl-0">
                             <select value={selectedPublisher?.name ?? "Choose a publisher"} className="ml-0!" onChange={event => setSelectedPublisher(typeof event.target.selectedOptions[0].dataset.id === "undefined" ? {name: event.target.selectedOptions[0].value} : {id: event.target.selectedOptions[0].dataset.id as unknown as number, name: event.target.selectedOptions[0].value})}>
                                 <option disabled={true}>Choose a publisher</option>
@@ -271,7 +302,7 @@ function GameForm({game, onSubmit, buttonText} : GameFormProps) {
                         </label>
                     </div>
                     <div className="max-w-80">
-                        {publishers.map(publisher => (<span data-id={"id" in publisher ? publisher.id : undefined} data-name={publisher.name} key={"id" in publisher ? publisher.id : undefined} className="badge badge-outline badge-info mr-1 mb-1 cursor-pointer" onClick={event => removeFromList(typeof (event.target as HTMLSpanElement).dataset.id === "undefined" ? {name: (event.target as HTMLSpanElement).dataset.name!} : {id: (event.target as HTMLSpanElement).dataset.id as unknown as number, name: (event.target as HTMLSpanElement).dataset.name!}, setPublishers, setAllPublishers)}>{publisher.name}</span>))}
+                        {publishers.map(publisher => (<span data-id={"id" in publisher ? publisher.id : undefined} data-name={publisher.name} key={"id" in publisher ? publisher.id : undefined} className="badge badge-outline badge-info mr-1 mb-1 cursor-pointer" onClick={event => removeFromList({elementToRemove: typeof (event.target as HTMLSpanElement).dataset.id === "undefined" ? {name: (event.target as HTMLSpanElement).dataset.name!} : {id: (event.target as HTMLSpanElement).dataset.id as unknown as number, name: (event.target as HTMLSpanElement).dataset.name!}, listSetter: setPublishers, allListSetter: setAllPublishers})}>{publisher.name}</span>))}
                     </div>
                 </fieldset>
 
