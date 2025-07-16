@@ -1,7 +1,7 @@
 package com.mecsbalint.backend.controller;
 
-import com.mecsbalint.backend.controller.dto.PublisherToAdd;
-import com.mecsbalint.backend.controller.dto.PublisherIdNameDto;
+import com.mecsbalint.backend.controller.dto.publisher.PublisherToAdd;
+import com.mecsbalint.backend.controller.dto.publisher.PublisherIdNameDto;
 import com.mecsbalint.backend.service.publisher.PublisherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

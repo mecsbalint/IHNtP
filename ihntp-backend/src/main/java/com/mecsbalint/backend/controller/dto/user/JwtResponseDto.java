@@ -1,4 +1,4 @@
-package com.mecsbalint.backend.controller.dto;
+package com.mecsbalint.backend.controller.dto.user;
 
 import java.util.Set;
 

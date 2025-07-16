@@ -1,4 +1,4 @@
-package com.mecsbalint.backend.controller.dto;
+package com.mecsbalint.backend.controller.dto.tag;
 
 import com.mecsbalint.backend.model.Tag;
 

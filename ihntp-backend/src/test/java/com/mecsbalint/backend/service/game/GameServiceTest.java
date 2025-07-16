@@ -1,6 +1,6 @@
 package com.mecsbalint.backend.service.game;
 
-import com.mecsbalint.backend.controller.dto.*;
+import com.mecsbalint.backend.controller.dto.game.*;
 import com.mecsbalint.backend.exception.*;
 import com.mecsbalint.backend.model.Game;
 import com.mecsbalint.backend.model.UserEntity;
@@ -16,8 +16,6 @@ import org.mockito.Mock;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
 
 
 import java.time.LocalDate;

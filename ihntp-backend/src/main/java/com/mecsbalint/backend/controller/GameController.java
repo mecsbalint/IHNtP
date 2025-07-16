@@ -1,6 +1,6 @@
 package com.mecsbalint.backend.controller;
 
-import com.mecsbalint.backend.controller.dto.*;
+import com.mecsbalint.backend.controller.dto.game.*;
 import com.mecsbalint.backend.repository.GameRepository;
 import com.mecsbalint.backend.service.game.GameService;
 import org.springframework.beans.factory.annotation.Autowired;

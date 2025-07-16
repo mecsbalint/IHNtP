@@ -1,7 +1,7 @@
 package com.mecsbalint.backend.service.developer;
 
-import com.mecsbalint.backend.controller.dto.DeveloperIdNameDto;
-import com.mecsbalint.backend.controller.dto.DeveloperToAdd;
+import com.mecsbalint.backend.controller.dto.developer.DeveloperIdNameDto;
+import com.mecsbalint.backend.controller.dto.developer.DeveloperToAdd;
 import com.mecsbalint.backend.exception.ElementIsAlreadyInDatabaseException;
 import com.mecsbalint.backend.model.Developer;
 import com.mecsbalint.backend.repository.DeveloperRepository;

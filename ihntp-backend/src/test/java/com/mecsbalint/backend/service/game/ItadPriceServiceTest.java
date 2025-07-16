@@ -1,6 +1,6 @@
 package com.mecsbalint.backend.service.game;
 
-import com.mecsbalint.backend.controller.dto.GamePricesDto;
+import com.mecsbalint.backend.controller.dto.game.GamePricesDto;
 import com.mecsbalint.backend.controller.dto.isthereanydealapi.*;
 import com.mecsbalint.backend.utility.Fetcher;
 import org.junit.jupiter.api.BeforeEach;

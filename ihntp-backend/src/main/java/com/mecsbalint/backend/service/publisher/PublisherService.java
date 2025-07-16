@@ -1,7 +1,7 @@
 package com.mecsbalint.backend.service.publisher;
 
-import com.mecsbalint.backend.controller.dto.PublisherToAdd;
-import com.mecsbalint.backend.controller.dto.PublisherIdNameDto;
+import com.mecsbalint.backend.controller.dto.publisher.PublisherToAdd;
+import com.mecsbalint.backend.controller.dto.publisher.PublisherIdNameDto;
 import com.mecsbalint.backend.exception.ElementIsAlreadyInDatabaseException;
 import com.mecsbalint.backend.model.Publisher;
 import com.mecsbalint.backend.repository.PublisherRepository;

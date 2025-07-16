@@ -1,5 +1,6 @@
-package com.mecsbalint.backend.controller.dto;
+package com.mecsbalint.backend.controller.dto.game;
 
+import com.mecsbalint.backend.controller.dto.tag.TagIdNameDto;
 import com.mecsbalint.backend.model.Game;
 
 import java.time.LocalDate;

@@ -1,6 +1,6 @@
 package com.mecsbalint.backend.service.game;
 
-import com.mecsbalint.backend.controller.dto.*;
+import com.mecsbalint.backend.controller.dto.game.*;
 import com.mecsbalint.backend.exception.*;
 import com.mecsbalint.backend.model.Game;
 import com.mecsbalint.backend.repository.DeveloperRepository;
