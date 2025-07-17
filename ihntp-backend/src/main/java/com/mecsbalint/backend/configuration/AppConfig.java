@@ -12,8 +12,8 @@ import java.util.UUID;
 public class AppConfig {
 
     @Bean
-    public WebClient getWebClient() {
-        return WebClient.create();
+    public WebClient getWebClient(WebClient.Builder builder) {
+        return builder.build();
     }
 
     @Bean
